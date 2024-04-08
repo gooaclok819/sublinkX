@@ -21,10 +21,10 @@ type Proxy struct {
 	Tfo                bool                   `yaml:"tfo,omitempty"`
 	Udp                bool                   `yaml:"udp,omitempty"`
 	Skip_cert_verify   bool                   `yaml:"skip-cert-verify,omitempty"`
-	Tls                string                 `yaml:"tls,omitempty"`
+	Tls                bool                   `yaml:"tls,omitempty"`
 	Servername         string                 `yaml:"servername,omitempty"`
 	Flow               string                 `yaml:"flow,omitempty"`
-	AlterId            int                    `yaml:"alterId,omitempty"`
+	AlterId            int                    `yaml:"alterId"`
 	Network            string                 `yaml:"network,omitempty"`
 	Reality_opts       map[string]interface{} `yaml:"reality-opts,omitempty"`
 	Ws_opts            map[string]interface{} `yaml:"ws-opts,omitempty"`
@@ -153,6 +153,10 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 					"Host": vmess.Host,
 				},
 			}
+			tls := false
+			if vmess.Tls != "none" && vmess.Tls != "" {
+				tls = true
+			}
 			vmessproxy := Proxy{
 				Name:             vmess.Ps,
 				Type:             "vmess",
@@ -162,7 +166,7 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Uuid:             vmess.Id,
 				AlterId:          vmess.Aid,
 				Network:          vmess.Net,
-				Tls:              vmess.Tls,
+				Tls:              tls,
 				Ws_opts:          ws_opts,
 				Udp:              sqlconfig.Udp,
 				Skip_cert_verify: sqlconfig.Cert,
@@ -246,6 +250,7 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Auth_str:         hy2.Auth,
 				Sni:              hy2.Sni,
 				Obfs:             hy2.Obfs,
+				Password:         hy2.Password,
 				Obfs_password:    hy2.ObfsPassword,
 				Udp:              sqlconfig.Udp,
 				Skip_cert_verify: sqlconfig.Cert,

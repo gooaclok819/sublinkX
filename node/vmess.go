@@ -62,13 +62,17 @@ func DecodeVMESSURL(s string) (Vmess, error) {
 		return Vmess{}, fmt.Errorf("非vmess协议:%s", s)
 	}
 	param := Base64Decode(strings.Split(s, "://")[1])
-	fmt.Println(param)
+	// fmt.Println(param)
 	var vmess Vmess
 	err := json.Unmarshal([]byte(param), &vmess)
 	if err != nil {
 		fmt.Println(err)
 		return Vmess{}, fmt.Errorf("json格式化失败:%s", s)
 	}
+	if vmess.Scy == "" {
+		vmess.Scy = "auto"
+	}
+
 	if CheckEnvironment() {
 		fmt.Println("服务器地址", vmess.Add)
 		fmt.Println("端口", vmess.Port)
