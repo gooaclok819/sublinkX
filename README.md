@@ -10,7 +10,7 @@
     <a href="https://t.me/+u6gLWF0yP5NiZWQ1" target="_blank">
         <img src="https://img.shields.io/badge/TG-交流群-orange.svg"/>
     </a>
-    <div align="center"> 中文 | <a href="">English</div>
+    <div align="center"> 中文 | <a href="README.en-US.md">English</div>
 </div>
 
 ## [项目简介]
@@ -43,5 +43,4 @@ clash支持协议:ss ssr trojan vmess vless hy hy2
 ![1712594176714](webs/src/assets/2.png)
 
 [![Stargazers over time](https://starchart.cc/gooaclok819/sublinkX.svg?variant=adaptive)](https://starchart.cc/gooaclok819/sublinkX)
-
 
