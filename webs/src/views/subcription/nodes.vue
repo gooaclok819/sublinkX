@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 import { ref,onMounted,nextTick  } from 'vue'
-import {getNodes,AddNodes,DelNode} from "@/api/subcription/node"
+import {getNodes,AddNodes,DelNode,UpdateNode} from "@/api/subcription/node"
 interface Node {
   ID: number;
   Name: string;
@@ -10,9 +10,10 @@ interface Node {
 const tableData = ref<Node[]>([])
 const Nodelink = ref('')
 const Nodename = ref('')
+const NodeOldname = ref('')
 const dialogVisible = ref(false)
-const Delvisible = ref(false)
 const table = ref()
+const NodeTitle = ref('')
 async function getnodes() {
   const {data} = await getNodes();
     tableData.value = data
@@ -20,31 +21,29 @@ async function getnodes() {
 onMounted(async() => {
    getnodes()
 })
-// 格式化时间
-function formatDateTime(date: Date): string {
-  const y = date.getFullYear();
-  const m = (date.getMonth() + 1).toString().padStart(2, '0');
-  const d = date.getDate().toString().padStart(2, '0');
-  const h = date.getHours().toString().padStart(2, '0');
-  const min = date.getMinutes().toString().padStart(2, '0');
-  const s = date.getSeconds().toString().padStart(2, '0');
+const handleAddNode = ()=>{
+  NodeTitle.value= '添加节点'
+  dialogVisible.value = true
 
-  return `${y}-${m}-${d} ${h}:${min}:${s}`;
 }
-
 const addnodes = async ()=>{
-   await AddNodes({
-      link: Nodelink.value.trim(),
-      name: Nodename.value.trim(),
-    })
-    // tableData.value.push({
-    //   ID: tableData.value.length + 1,
-    //   Name: Nodename.value.trim(),
-    //   Link: Nodelink.value.trim(),
-    //   CreateDate: formatDateTime(new Date())
-    // })
+   if (NodeTitle.value== '添加节点'){
+      await AddNodes({
+        link: Nodelink.value.trim(),
+        name: Nodename.value.trim(),
+      })
+      ElMessage.success("添加成功");
+   }else{
+    await UpdateNode({
+        oldname: NodeOldname.value.trim(),
+        link: Nodelink.value.trim(),
+        name: Nodename.value.trim(),
+      })
+    ElMessage.success("更新成功");
+   }
     getnodes()
-    ElMessage.success("添加成功");
+    Nodelink.value = ''
+    Nodename.value = ''
     dialogVisible.value = false;
 }
 
@@ -60,7 +59,18 @@ const selectAll = () => {
         })
     })
 }
-
+const handleEdit = (row:any) => {
+  for (let i = 0; i < tableData.value.length; i++) {
+    if (tableData.value[i].ID === row.ID) {
+      NodeTitle.value= '编辑节点'
+      Nodename.value = tableData.value[i].Name
+      NodeOldname.value = Nodename.value
+      Nodelink.value = tableData.value[i].Link
+      dialogVisible.value = true
+      // value1.value = tableData.value[i].Nodes.map((item) => item.Name)
+    }
+  }
+}
 const toggleSelection = () => {
   table.value.clearSelection()
 }
@@ -106,15 +116,12 @@ const selectDel = () => {
        DelNode({
         id: multipleSelection.value[i].ID
       })
-        // tableData.value = tableData.value.filter((item) => item.ID !== multipleSelection.value[i].ID)
+        tableData.value = tableData.value.filter((item) => item.ID !== multipleSelection.value[i].ID)
       }
-      getnodes()
       ElMessage({
         type: 'success',
         message: '删除成功',
       })
-      
-      
     })
 
 }
@@ -144,7 +151,7 @@ const currentTableData = computed(() => {
   <div>
     <el-dialog
     v-model="dialogVisible"
-    title="添加节点"
+    :title="NodeTitle"
   >
   <el-input v-model="Nodelink" placeholder="请输入节点" />
   <el-input v-model="Nodename" placeholder="请输入备注"  />
@@ -156,7 +163,7 @@ const currentTableData = computed(() => {
     </template>
   </el-dialog>
     <el-card>
-    <el-button type="primary" @click="dialogVisible=true">添加节点</el-button>
+    <el-button type="primary" @click="handleAddNode">添加节点</el-button>
     <div style="margin-bottom: 10px"></div>
       <el-table ref="table" :data="currentTableData" style="width: 100%" @selection-change="handleSelectionChange">
     <el-table-column type="selection" fixed prop="ID" label="id"  />
@@ -165,7 +172,7 @@ const currentTableData = computed(() => {
     <el-table-column prop="CreateDate" label="创建时间" sortable  />
     <el-table-column fixed="right" label="操作" width="120">
       <template #default="scope">
-        <!-- <el-button link type="primary" size="small">编辑</el-button> -->
+        <el-button link type="primary" size="small" @click="handleEdit(scope.row)">编辑</el-button>
   <el-button link type="primary" size="small" @click="handleDel(scope.row)">删除</el-button>
 
       </template>
