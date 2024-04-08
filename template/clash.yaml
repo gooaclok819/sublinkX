@@ -1,0 +1,249 @@
+allow-lan: true
+bind-address: "*"
+dns:
+  default-nameserver:
+    - 223.5.5.5
+    - 114.114.114.114
+  enable: true
+  enhanced-mode: fake-ip
+  fake-ip-filter:
+    - "*.lan"
+    - "*.localdomain"
+    - "*.example"
+    - "*.invalid"
+    - "*.localhost"
+    - "*.test"
+    - "*.local"
+    - "*.home.arpa"
+    - time.*.com
+    - time.*.gov
+    - time.*.edu.cn
+    - time.*.apple.com
+    - time1.*.com
+    - time2.*.com
+    - time3.*.com
+    - time4.*.com
+    - time5.*.com
+    - time6.*.com
+    - time7.*.com
+    - ntp.*.com
+    - ntp1.*.com
+    - ntp2.*.com
+    - ntp3.*.com
+    - ntp4.*.com
+    - ntp5.*.com
+    - ntp6.*.com
+    - ntp7.*.com
+    - "*.time.edu.cn"
+    - "*.ntp.org.cn"
+    - +.pool.ntp.org
+    - time1.cloud.tencent.com
+    - music.163.com
+    - "*.music.163.com"
+    - "*.126.net"
+    - musicapi.taihe.com
+    - music.taihe.com
+    - songsearch.kugou.com
+    - trackercdn.kugou.com
+    - "*.kuwo.cn"
+    - api-jooxtt.sanook.com
+    - api.joox.com
+    - joox.com
+    - y.qq.com
+    - "*.y.qq.com"
+    - streamoc.music.tc.qq.com
+    - mobileoc.music.tc.qq.com
+    - isure.stream.qqmusic.qq.com
+    - dl.stream.qqmusic.qq.com
+    - aqqmusic.tc.qq.com
+    - amobile.music.tc.qq.com
+    - "*.xiami.com"
+    - "*.music.migu.cn"
+    - music.migu.cn
+    - "*.msftconnecttest.com"
+    - "*.msftncsi.com"
+    - msftconnecttest.com
+    - msftncsi.com
+    - localhost.ptlogin2.qq.com
+    - localhost.sec.qq.com
+    - +.srv.nintendo.net
+    - +.stun.playstation.net
+    - xbox.*.microsoft.com
+    - xnotify.xboxlive.com
+    - +.battlenet.com.cn
+    - +.wotgame.cn
+    - +.wggames.cn
+    - +.wowsgame.cn
+    - +.wargaming.net
+    - proxy.golang.org
+    - stun.*.*
+    - stun.*.*.*
+    - +.stun.*.*
+    - +.stun.*.*.*
+    - +.stun.*.*.*.*
+    - heartbeat.belkin.com
+    - "*.linksys.com"
+    - "*.linksyssmartwifi.com"
+    - "*.router.asus.com"
+    - mesu.apple.com
+    - swscan.apple.com
+    - swquery.apple.com
+    - swdownload.apple.com
+    - swcdn.apple.com
+    - swdist.apple.com
+    - lens.l.google.com
+    - stun.l.google.com
+    - +.nflxvideo.net
+    - "*.square-enix.com"
+    - "*.finalfantasyxiv.com"
+    - "*.ffxiv.com"
+    - "*.mcdn.bilivideo.cn"
+  fake-ip-range: 198.18.0.1/16
+  fallback-filter:
+    domain:
+      - +.google.com
+      - +.facebook.com
+      - +.youtube.com
+      - +.githubusercontent.com
+      - +.googlevideo.com
+    geoip: false
+    ipcidr:
+      - 0.0.0.0/8
+      - 10.0.0.0/8
+      - 100.64.0.0/10
+      - 127.0.0.0/8
+      - 169.254.0.0/16
+      - 172.16.0.0/12
+      - 192.0.0.0/24
+      - 192.0.2.0/24
+      - 192.88.99.0/24
+      - 192.168.0.0/16
+      - 198.18.0.0/15
+      - 198.51.100.0/24
+      - 203.0.113.0/24
+      - 224.0.0.0/4
+      - 240.0.0.0/4
+      - 255.255.255.255/32
+  ipv6: true
+  listen: 0.0.0.0:53
+  nameserver:
+    - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
+external-controller: 127.0.0.1:9090
+hosts: null
+log-level: silent
+mode: rule
+port: 7890
+
+proxy-groups:
+  - name: relay
+    proxies:
+      -
+    type: relay
+  - interval: 300
+    name: auto
+    proxies:
+      -
+    type: url-test
+    url: http://www.gstatic.com/generate_204
+  - interval: 300
+    name: fallback-auto
+    proxies:
+      -
+    type: fallback
+    url: http://www.gstatic.com/generate_204
+  - interval: 300
+    name: load-balance
+    proxies:
+      -
+    type: load-balance
+    url: http://www.gstatic.com/generate_204
+  - name: Proxy
+    proxies:
+      -
+    type: select
+  - name: UseProvider
+    proxies:
+      -
+    type: select
+    use:
+      - provider1
+proxy-providers:
+  provider1:
+    health-check:
+      enable: true
+      interval: 600
+      url: http://www.gstatic.com/generate_204
+    interval: 3600
+    path: ./provider1.yaml
+    type: http
+    url: url
+  test:
+    health-check:
+      enable: true
+      interval: 36000
+      url: http://www.gstatic.com/generate_204
+    path: /test.yaml
+    type: file
+rule-providers:
+  ad-keyword:
+    behavior: classical
+    interval: 3600
+    path: ./ruleset/common-ad-keyword.yaml
+    type: http
+    url: https://cdn.jsdelivr.net/gh/Hackl0us/SS-Rule-Snippet@master/Rulesets/Clash/Basic/common-ad-keyword.yaml
+  apple-direct:
+    behavior: classical
+    interval: 3600
+    path: ./ruleset/Apple-direct.yaml
+    type: http
+    url: https://cdn.jsdelivr.net/gh/Hackl0us/SS-Rule-Snippet@master/Rulesets/Clash/Basic/Apple-direct.yaml
+  apple-proxy:
+    behavior: classical
+    interval: 3600
+    path: ./ruleset/Apple-proxy.yaml
+    type: http
+    url: https://cdn.jsdelivr.net/gh/Hackl0us/SS-Rule-Snippet@master/Rulesets/Clash/Basic/Apple-proxy.yaml
+  cn:
+    behavior: classical
+    interval: 3600
+    path: ./ruleset/CN.yaml
+    type: http
+    url: https://cdn.jsdelivr.net/gh/Hackl0us/SS-Rule-Snippet@master/Rulesets/Clash/Basic/CN.yaml
+  foreign:
+    behavior: classical
+    interval: 3600
+    path: ./ruleset/foreign.yaml
+    type: http
+    url: https://cdn.jsdelivr.net/gh/Hackl0us/SS-Rule-Snippet@master/Rulesets/Clash/Basic/foreign.yaml
+  lan:
+    behavior: classical
+    interval: 3600
+    path: ./ruleset/LAN.yaml
+    type: http
+    url: https://cdn.jsdelivr.net/gh/Hackl0us/SS-Rule-Snippet@master/Rulesets/Clash/Basic/LAN.yaml
+  telegram:
+    behavior: classical
+    interval: 3600
+    path: ./ruleset/Telegram.yaml
+    type: http
+    url: https://cdn.jsdelivr.net/gh/Hackl0us/SS-Rule-Snippet@master/Rulesets/Clash/App/social/Telegram.yaml
+rules:
+  - RULE-SET,apple-proxy,Proxy
+  - RULE-SET,apple-direct,DIRECT
+  - RULE-SET,cn,DIRECT
+  - RULE-SET,ad-keyword,REJECT
+  - RULE-SET,foreign,Proxy
+  - RULE-SET,telegram,Proxy
+  - RULE-SET,lan,DIRECT
+  - GEOIP,CN,DIRECT
+  - MATCH,Proxy
+socks-port: 7891
+tun:
+  dns-hijack:
+    - tcp://8.8.8.8:53
+    - tcp://8.8.4.4:53
+  enable: false
+  macOS-auto-detect-interface: true
+  macOS-auto-route: true
+  stack: system
