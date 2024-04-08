@@ -5,6 +5,9 @@ export default {
     document: "项目文档",
     userset: "修改密码",
     system:"系统管理",
+    nodelist:"节点管理",
+    sublist:"订阅管理",
+    subcription:"订阅",
   },
   // 登录页面国际化
   login: {

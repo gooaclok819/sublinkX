@@ -15,8 +15,8 @@ func (iplog *SubLogs) Add() error {
 }
 
 // 查找IP
-func (iplog *SubLogs) Find() error {
-	return DB.Where("id = ? or ip = ?", iplog.ID, iplog.IP).First(iplog).Error
+func (iplog *SubLogs) Find(id int) error {
+	return DB.Where("ip = ? or subcription_id  = ?", iplog.IP, id).First(iplog).Error
 }
 
 // Update 更新IP

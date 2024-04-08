@@ -162,18 +162,3 @@ func SubDel(c *gin.Context) {
 		"msg":  "删除成功",
 	})
 }
-func SubIPlog(c *gin.Context) {
-	var iplog models.SubLogs
-	iplogs, err := iplog.List()
-	if err != nil {
-		c.JSON(500, gin.H{
-			"msg": "ip list error",
-		})
-		return
-	}
-	c.JSON(200, gin.H{
-		"code": "00000",
-		"data": iplogs,
-		"msg":  "ip get",
-	})
-}

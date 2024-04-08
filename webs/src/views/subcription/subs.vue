@@ -1,14 +1,14 @@
 <script setup lang='ts'>
-import { ref,onMounted,nextTick  } from 'vue'
+import { ref,onMounted  } from 'vue'
 import {getSubs,AddSub,DelSub,UpdateSub} from "@/api/subcription/subs"
 import {getNodes} from "@/api/subcription/node"
-import Clipboard from 'clipboard'
 interface Sub {
   ID: number;
   Name: string;
   CreateDate: string;
   Config: Config;
   Nodes: Node[];
+  SubLogs:SubLogs[];
 }
 interface Node {
   ID: number;
@@ -20,6 +20,12 @@ interface Config {
   clash: string;
   udp: string;
   cert: string;
+}
+interface SubLogs {
+  date: string;
+  name: string;
+  count: number;
+  address: string;
 }
 
 const tableData = ref<Sub[]>([])
@@ -33,28 +39,21 @@ const table = ref()
 const NodesList = ref<Node[]>([])
 const value1 = ref<string[]>([])
 const checkList = ref<string[]>([]) // 配置列表
+const iplogsdialog = ref(false)
+const IplogsList = ref<SubLogs[]>([])
+
 async function getsubs() {
   const {data} = await getSubs();
     tableData.value = data
 }
 onMounted(() => {
     getsubs()
+
 })
 onMounted(async() => {
     const {data} = await getNodes();
     NodesList.value = data
 })
-// 格式化时间
-function formatDateTime(date: Date): string {
-  const y = date.getFullYear();
-  const m = (date.getMonth() + 1).toString().padStart(2, '0');
-  const d = date.getDate().toString().padStart(2, '0');
-  const h = date.getHours().toString().padStart(2, '0');
-  const min = date.getMinutes().toString().padStart(2, '0');
-  const s = date.getSeconds().toString().padStart(2, '0');
-
-  return `${y}-${m}-${d} ${h}:${min}:${s}`;
-}
 
 
 const addSubs = async ()=>{
@@ -92,11 +91,20 @@ const handleSelectionChange = (val: Sub[]) => {
   
 }
 const selectAll = () => {
-    nextTick(() => {
-        tableData.value.forEach(row => {
+  tableData.value.forEach(row => {
             table.value.toggleRowSelection(row, true)
         })
-    })
+}
+const handleIplogs = (row: any) => {
+  iplogsdialog.value = true
+  nextTick(() => {
+    tableData.value.forEach((item) => {
+    if (item.ID === row.ID) {
+      IplogsList.value = item.SubLogs
+    }
+  })
+  
+  })
 }
 
 const toggleSelection = () => {
@@ -223,13 +231,27 @@ const copyInfo = (row: any) => {
 });
 }
 const handleOpenUrl = (index: string,row: any) => {
-  let url = `${import.meta.env.VITE_APP_API_URL}/c/${index}/${row.Name}`
+  let base64data =  window.btoa(unescape(encodeURIComponent(row.Name)));
+  let url = `${import.meta.env.VITE_APP_API_URL}/c/${index}/${base64data}`
   window.open(url)
 }
+
 </script>
 
 <template>
   <div>
+    <el-dialog v-model="iplogsdialog" title="访问记录" width="80%" draggable>
+  <template #footer>
+    <div class="dialog-footer">
+      <el-table :data="IplogsList" border style="width: 100%">
+        <el-table-column prop="IP" label="Ip" />
+        <el-table-column prop="Count" label="当日访问次数" />
+        <el-table-column prop="Addr" label="来源" />
+        <el-table-column prop="Date" label="时间" />
+      </el-table>
+    </div>
+  </template>
+</el-dialog>
     <el-dialog
     v-model="dialogVisible"
     :title="SubTitle"
@@ -280,7 +302,7 @@ const handleOpenUrl = (index: string,row: any) => {
       style="width: 100%" 
       stripe
       @selection-change="handleSelectionChange" 
-      row-key="id" 
+      row-key="ID" 
       :tree-props="{children: 'Nodes'}"
       >
     <el-table-column type="selection" fixed prop="ID" label="id"  />
@@ -302,6 +324,7 @@ const handleOpenUrl = (index: string,row: any) => {
     <el-table-column  label="操作" width="120">
       <template #default="scope">
         <div v-if="scope.row.Nodes">
+          <el-button link type="primary" size="small" @click="handleIplogs(scope.row)">记录</el-button>
           <el-button link type="primary" size="small" @click="handleEdit(scope.row)">编辑</el-button>
   <el-button link type="primary" size="small" @click="handleDel(scope.row)">删除</el-button>
         </div>

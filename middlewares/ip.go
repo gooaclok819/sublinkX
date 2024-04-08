@@ -15,8 +15,9 @@ import (
 
 func GetIp(c *gin.Context) {
 	c.Next()
-	go func() {
-		name, _ := c.Get("name")
+	func() {
+		subname, _ := c.Get("subname")
+
 		ip := c.ClientIP()
 		resp, err := http.Get(fmt.Sprintf("https://whois.pconline.com.cn/ipJson.jsp?ip=%s&json=true", ip))
 		if err != nil {
@@ -37,7 +38,9 @@ func GetIp(c *gin.Context) {
 			return
 		}
 		var sub models.Subcription
-		sub.Name = name.(string)
+		if subname, ok := subname.(string); ok {
+			sub.Name = subname
+		}
 		err = sub.Find()
 		if err != nil {
 			log.Println(err)
@@ -45,7 +48,7 @@ func GetIp(c *gin.Context) {
 		}
 		var iplog models.SubLogs
 		iplog.IP = ip
-		err = iplog.Find()
+		err = iplog.Find(sub.ID)
 		if err != nil {
 			iploga := []models.SubLogs{
 				{IP: ip,

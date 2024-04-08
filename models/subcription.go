@@ -52,10 +52,13 @@ func (sub *Subcription) List() ([]Subcription, error) {
 	}
 	for i := range subs {
 		DB.Model(&subs[i]).Association("Nodes").Find(&subs[i].Nodes)
+		DB.Model(&subs[i]).Association("SubLogs").Find(&subs[i].SubLogs)
 	}
-
-	// DB.Model(sub).Association("Nodes").Find(&subs)
 	return subs, nil
+}
+
+func (sub *Subcription) IPlogUpdate() error {
+	return DB.Model(sub).Association("SubLogs").Replace(&sub.SubLogs)
 }
 
 // 删除订阅
