@@ -13,10 +13,12 @@ const Nodename = ref('')
 const dialogVisible = ref(false)
 const Delvisible = ref(false)
 const table = ref()
-
-onMounted(async() => {
-    const {data} = await getNodes();
+async function getnodes() {
+  const {data} = await getNodes();
     tableData.value = data
+}
+onMounted(async() => {
+   getnodes()
 })
 // 格式化时间
 function formatDateTime(date: Date): string {
@@ -35,12 +37,13 @@ const addnodes = async ()=>{
       link: Nodelink.value.trim(),
       name: Nodename.value.trim(),
     })
-    tableData.value.push({
-      ID: tableData.value.length + 1,
-      Name: Nodename.value.trim(),
-      Link: Nodelink.value.trim(),
-      CreateDate: formatDateTime(new Date())
-    })
+    // tableData.value.push({
+    //   ID: tableData.value.length + 1,
+    //   Name: Nodename.value.trim(),
+    //   Link: Nodelink.value.trim(),
+    //   CreateDate: formatDateTime(new Date())
+    // })
+    getnodes()
     ElMessage.success("添加成功");
     dialogVisible.value = false;
 }
@@ -79,7 +82,8 @@ const handleDel = (row:any) => {
         type: 'success',
         message: '删除成功',
       })
-      tableData.value = tableData.value.filter((item) => item.ID !== row.ID)
+      getnodes()
+      // tableData.value = tableData.value.filter((item) => item.ID !== row.ID)
       
     })
   // console.log('click',row.ID)
@@ -102,8 +106,9 @@ const selectDel = () => {
        DelNode({
         id: multipleSelection.value[i].ID
       })
-        tableData.value = tableData.value.filter((item) => item.ID !== multipleSelection.value[i].ID)
+        // tableData.value = tableData.value.filter((item) => item.ID !== multipleSelection.value[i].ID)
       }
+      getnodes()
       ElMessage({
         type: 'success',
         message: '删除成功',
@@ -142,7 +147,7 @@ const currentTableData = computed(() => {
     title="添加节点"
   >
   <el-input v-model="Nodelink" placeholder="请输入节点" />
-  <el-input v-model="Nodename" placeholder="请输入名称"  />
+  <el-input v-model="Nodename" placeholder="请输入备注"  />
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="dialogVisible = false">关闭</el-button>
@@ -156,11 +161,11 @@ const currentTableData = computed(() => {
       <el-table ref="table" :data="currentTableData" style="width: 100%" @selection-change="handleSelectionChange">
     <el-table-column type="selection" fixed prop="ID" label="id"  />
     <el-table-column prop="Name" label="备注"  />
-    <el-table-column prop="Link" label="节点"  />
+    <el-table-column prop="Link" label="节点" :show-overflow-tooltip="true" />
     <el-table-column prop="CreateDate" label="创建时间" sortable  />
     <el-table-column fixed="right" label="操作" width="120">
       <template #default="scope">
-        <el-button link type="primary" size="small">编辑</el-button>
+        <!-- <el-button link type="primary" size="small">编辑</el-button> -->
   <el-button link type="primary" size="small" @click="handleDel(scope.row)">删除</el-button>
 
       </template>

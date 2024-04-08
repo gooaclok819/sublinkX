@@ -60,11 +60,11 @@ func GetMenus(c *gin.Context) {
 		{
 			Path:      "/subcription",
 			Component: "Layout",
-			// Redirect:  "/system/user",
-			Name: "subcription",
+			Redirect:  "/subcription/subs",
+			Name:      "subcription",
 			Meta: Meta{
 				Title:  "subcription",
-				Icon:   "system",
+				Icon:   "client",
 				Hidden: false,
 				Roles:  []string{"ADMIN"},
 			},
@@ -75,7 +75,7 @@ func GetMenus(c *gin.Context) {
 					Name:      "Subs",
 					Meta: Meta{
 						Title:     "sublist",
-						Icon:      "role",
+						Icon:      "link",
 						Hidden:    false,
 						Roles:     []string{"ADMIN"},
 						KeepAlive: true,
@@ -87,7 +87,7 @@ func GetMenus(c *gin.Context) {
 					Name:      "Nodes",
 					Meta: Meta{
 						Title:     "nodelist",
-						Icon:      "role",
+						Icon:      "publish",
 						Hidden:    false,
 						Roles:     []string{"ADMIN"},
 						KeepAlive: true,
