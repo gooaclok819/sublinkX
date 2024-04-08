@@ -13,7 +13,6 @@ func Subcription(r *gin.Engine) {
 		SubcriptionGroup.DELETE("/delete", api.SubDel)
 		SubcriptionGroup.GET("/get", api.SubGet)
 		SubcriptionGroup.POST("/update", api.SubUpdate)
-		SubcriptionGroup.POST("/iplogs", api.SubIPlog)
 	}
 
 }

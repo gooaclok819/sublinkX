@@ -33,8 +33,8 @@ func GetMenus(c *gin.Context) {
 		{
 			Path:      "/system",
 			Component: "Layout",
-			Redirect:  "/system/user",
-			Name:      "system",
+			// Redirect:  "/system/user",
+			Name: "system",
 			Meta: Meta{
 				Title:  "system",
 				Icon:   "system",
@@ -60,8 +60,8 @@ func GetMenus(c *gin.Context) {
 		{
 			Path:      "/subcription",
 			Component: "Layout",
-			Redirect:  "/system/user",
-			Name:      "subcription",
+			// Redirect:  "/system/user",
+			Name: "subcription",
 			Meta: Meta{
 				Title:  "subcription",
 				Icon:   "system",
@@ -74,7 +74,7 @@ func GetMenus(c *gin.Context) {
 					Component: "subcription/subs",
 					Name:      "Subs",
 					Meta: Meta{
-						Title:     "subs",
+						Title:     "sublist",
 						Icon:      "role",
 						Hidden:    false,
 						Roles:     []string{"ADMIN"},
@@ -86,19 +86,7 @@ func GetMenus(c *gin.Context) {
 					Component: "subcription/nodes",
 					Name:      "Nodes",
 					Meta: Meta{
-						Title:     "Nodes",
-						Icon:      "role",
-						Hidden:    false,
-						Roles:     []string{"ADMIN"},
-						KeepAlive: true,
-					},
-				},
-				{
-					Path:      "iplogs",
-					Component: "subcription/iplogs",
-					Name:      "Iplogs",
-					Meta: Meta{
-						Title:     "Iplogs",
+						Title:     "nodelist",
 						Icon:      "role",
 						Hidden:    false,
 						Roles:     []string{"ADMIN"},

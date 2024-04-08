@@ -2,13 +2,11 @@
 import { ref,onMounted } from 'vue'
 import {useUserStore} from "@/store"
 import {updateUserPassword} from "@/api/user"
-import {useRouter} from "vue-router"
 import { useI18n } from 'vue-i18n'
 // 创建 i18n 实例
 const { t } = useI18n()
 const userinfo = ref()
 const userStore = useUserStore()
-const router = useRouter()
 // 获取用户信息
 onMounted( async() => {
   userinfo.value = await userStore.getUserInfo()
@@ -39,9 +37,7 @@ function resetPassword(row: { [key: string]: any }) {
     .then(() => {
       updateUserPassword(username.value.trim(), password.value.trim()).then(() => {
       ElMessage.success(t('userset.message.xx4') + password.value);
-      userStore.logout().then(() => {
-        router.push('/login')
-      })
+      window.location.reload();
     });
     })
 }

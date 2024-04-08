@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"sublink/models"
 	"sublink/node"
 
@@ -13,6 +12,7 @@ import (
 func GetV2ray(c *gin.Context) {
 	var sub models.Subcription
 	subname := c.Param("subname")
+	subname = node.Base64Decode(subname)
 	sub.Name = subname
 	err := sub.Find()
 	if err != nil {
@@ -29,6 +29,7 @@ func GetV2ray(c *gin.Context) {
 		baselist += v.Link + "\n"
 	}
 	Content_Disposition := fmt.Sprintf("attachment; filename=%s.txt", subname)
+	c.Set("subname", subname)
 	c.Writer.Header().Set("Content-Disposition", Content_Disposition)
 	c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
 	c.Writer.WriteString(node.Base64Encode(baselist))
@@ -36,6 +37,7 @@ func GetV2ray(c *gin.Context) {
 func GetClash(c *gin.Context) {
 	var sub models.Subcription
 	subname := c.Param("subname")
+	subname = node.Base64Decode(subname)
 	sub.Name = subname
 	err := sub.Find()
 	if err != nil {
@@ -53,7 +55,6 @@ func GetClash(c *gin.Context) {
 	}
 
 	var configs node.SqlConfig
-	log.Println(sub.Config)
 	err = json.Unmarshal([]byte(sub.Config), &configs)
 	if err != nil {
 		c.Writer.WriteString("配置读取错误")
@@ -64,7 +65,7 @@ func GetClash(c *gin.Context) {
 		c.Writer.WriteString(err.Error())
 		return
 	}
-	c.Set("name", subname)
+	c.Set("subname", subname)
 	c.Writer.Header().Set("Content-Type", "text/yaml; charset=utf-8")
 	c.Writer.WriteString(string(DecodeClash))
 }
