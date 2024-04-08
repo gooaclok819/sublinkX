@@ -33,47 +33,55 @@
                   <span class="text-[16px] ml-1">{{ item.title }}</span>
                 </div>
               </template>
-              <template v-if="item.suffix" #suffix>/100</template>
             </el-statistic>
           </div>
         </el-col>
       </el-row>
     </el-card>
-    <!-- Echarts 图表 -->
-    <el-row :gutter="10" class="mt-3">
-      <el-col
-        :xs="24"
-        :sm="12"
-        :lg="8"
-        class="mb-2"
-        v-for="item in chartData"
-        :key="item"
-      >
-        <component
-          :is="chartComponent(item)"
-          :id="item"
-          height="400px"
-          width="100%"
-          class="bg-[var(--el-bg-color-overlay)]"
-        />
-      </el-col>
-    </el-row>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { EpPropMergeType } from "element-plus/es/utils/vue/props/types";
 defineOptions({
   name: "Dashboard",
   inheritAttrs: false,
 });
 
 import { useUserStore } from "@/store/modules/user";
-import { useTransition, TransitionPresets } from "@vueuse/core";
-
+import { getSubTotal,getNodeTotal } from "@/api/total";
 const userStore = useUserStore();
 const date: Date = new Date();
-
+const subTotal = ref(0);
+const nodeTotal = ref(0);
+// 右上角数量
+const statisticData = ref([
+  {
+    value: 0,
+    iconClass: "message",
+    title: "订阅",
+    key: "message",
+  },
+  {
+    value: 0,
+    iconClass: "link",
+    title: "节点",
+    key: "upcoming",
+  },
+]);
+const getsubtotal = async () => {
+  const { data } = await getSubTotal();
+  subTotal.value = data;
+  statisticData.value[0].value = data;
+};
+const getnodetotal = async () => {
+  const { data } = await getNodeTotal();
+  nodeTotal.value = data;
+  statisticData.value[1].value = data;
+};
+onMounted(() => {
+  getsubtotal();
+  getnodetotal();
+});
 const greetings = computed(() => {
   const hours = date.getHours();
   if (hours >= 6 && hours < 8) {
@@ -89,36 +97,9 @@ const greetings = computed(() => {
   }
 });
 
-const duration = 5000;
 
-// 右上角数量
-const statisticData = ref([
-  {
-    value: 99,
-    iconClass: "message",
-    title: "消息",
-    key: "message",
-  },
-  {
-    value: 50,
-    iconClass: "todolist",
-    title: "待办",
-    suffix: "/100",
-    key: "upcoming",
-  },
-  {
-    value: 10,
-    iconClass: "project",
-    title: "项目",
-    key: "project",
-  },
-]);
 
-// 图表数据
-const chartData = ref(["BarChart", "PieChart", "RadarChart"]);
-const chartComponent = (item: string) => {
-  return defineAsyncComponent(() => import(`./components/${item}.vue`));
-};
+
 </script>
 
 <style lang="scss" scoped>

@@ -28,10 +28,12 @@ const __APP_INFO__ = {
 };
 
 const pathSrc = resolve(__dirname, "src");
+const isDevelopment = process.env.NODE_ENV
 //  https://cn.vitejs.dev/config
 export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
   const env = loadEnv(mode, process.cwd());
   return {
+    base: isDevelopment == 'development' ? "/":"/static/",
     resolve: {
       alias: {
         "@": pathSrc,

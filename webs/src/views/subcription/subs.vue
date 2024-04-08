@@ -217,8 +217,8 @@ const isNameShow = (row: any): boolean =>  {
   return row.Name.length > 10;
 }
 // 复制链接
-const copyInfo = (row: any) => {
-  navigator.clipboard.writeText(row.Link).then(function() {
+const copyUrl = (url: string) => {
+  navigator.clipboard.writeText(url).then(function() {
     ElMessage({
         type: 'success',
         message: '复制成功！',
@@ -230,16 +230,39 @@ const copyInfo = (row: any) => {
       })
 });
 }
-const handleOpenUrl = (index: string,row: any) => {
-  let base64data =  window.btoa(unescape(encodeURIComponent(row.Name)));
-  let url = `${import.meta.env.VITE_APP_API_URL}/c/${index}/${base64data}`
+const copyInfo = (row: any) => {
+  copyUrl(row.Link)
+}
+const handleBase64 = (text: string) => {
+  return  window.btoa(unescape(encodeURIComponent(text)));
+}
+const ClientDiaLog = ref(false)
+const ClientList = ['v2ray','clash'] // 客户端列表
+const ClientUrls = ref<Record<string, string>>({})
+const handleClient = (name:string) => {
+  let serverAddress = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '');
+  ClientList.forEach((item:string) => {
+    ClientUrls.value[item]=`${serverAddress}/c/${item}/${handleBase64(name)}`
+  })  
+  ClientDiaLog.value = true
+}
+const handleOpenUrl = (url:string) => {
   window.open(url)
 }
-
 </script>
 
 <template>
   <div>
+    <el-dialog v-model="ClientDiaLog" title="客户端"  draggable>
+      <el-row>
+        <el-col v-for="(item,index) in ClientUrls" style="margin-bottom:10px;">
+          <el-tag type="success">{{index}}</el-tag>
+          <el-tag type="primary">{{item}}</el-tag>
+          <el-button @click="handleOpenUrl(item)">打开</el-button>
+          <el-button @click="copyUrl(item)">复制</el-button>
+        </el-col>
+        </el-row>
+    </el-dialog>
     <el-dialog v-model="iplogsdialog" title="访问记录" width="80%" draggable>
   <template #footer>
     <div class="dialog-footer">
@@ -314,8 +337,7 @@ const handleOpenUrl = (index: string,row: any) => {
     <el-table-column prop="Link" label="链接" :show-overflow-tooltip="true" >
       <template #default="{row}">
         <div v-if="row.Nodes">
-              <el-button @click="handleOpenUrl('v2ray',row)">V2ray</el-button>
-              <el-button @click="handleOpenUrl('clash',row)">Clash</el-button>
+          <el-button @click="handleClient(row.Name)">客户端</el-button>
         </div>
         </template>
       </el-table-column>

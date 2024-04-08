@@ -129,8 +129,8 @@ const loginFormRef = ref(ElForm); // 登录表单ref
 const { height } = useWindowSize();
 
 const loginData = ref<LoginData>({
-  username: "admin",
-  password: "123456",
+  username: "",
+  password: "",
 });
 
 const loginRules = computed(() => {

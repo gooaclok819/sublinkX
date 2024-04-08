@@ -2,6 +2,7 @@ package models
 
 import (
 	"log"
+	"os"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -10,8 +11,15 @@ import (
 var DB *gorm.DB
 
 func InitSqlite() {
+	// 检查目录是否创建
+	_, err := os.Stat("./db")
+	if err != nil {
+		if os.IsNotExist(err) {
+			os.Mkdir("./db", os.ModePerm)
+		}
+	}
 	// 连接数据库
-	db, err := gorm.Open(sqlite.Open("./db/test.db"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("./db/sublink.db"), &gorm.Config{})
 	if err != nil {
 		log.Println("连接数据库失败")
 	}

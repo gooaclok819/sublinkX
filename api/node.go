@@ -90,3 +90,21 @@ func NodeDel(c *gin.Context) {
 		"msg":  "删除成功",
 	})
 }
+
+// 节点统计
+func NodesTotal(c *gin.Context) {
+	var Node models.Node
+	nodes, err := Node.List()
+	count := len(nodes)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"msg": "获取不到节点统计",
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"code": "00000",
+		"data": count,
+		"msg":  "取得节点统计",
+	})
+}

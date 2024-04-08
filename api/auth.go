@@ -27,8 +27,7 @@ func GetToken(username string) (string, error) {
 
 // 获取captcha图形验证码
 func GetCaptcha(c *gin.Context) {
-	id, bs4, answer, err := utils.GetCaptcha()
-	log.Println(answer)
+	id, bs4, _, err := utils.GetCaptcha()
 	if err != nil {
 		log.Println("获取验证码失败")
 		c.JSON(400, gin.H{

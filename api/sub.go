@@ -9,6 +9,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func SubTotal(c *gin.Context) {
+	var Sub models.Subcription
+	subs, err := Sub.List()
+	count := len(subs)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"msg": "取得订阅总数失败",
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"code": "00000",
+		"data": count,
+		"msg":  "取得订阅总数",
+	})
+}
+
 // 获取订阅列表
 func SubGet(c *gin.Context) {
 	var Sub models.Subcription
