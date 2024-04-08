@@ -23,3 +23,14 @@ export function DelSub(data: any){
     params: data,
   });
 }
+
+export function UpdateSub(data: any){
+  return request({
+    url: "/api/v1/subcription/update",
+    method: "post",
+    data,
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+}

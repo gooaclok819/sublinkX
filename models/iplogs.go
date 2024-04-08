@@ -1,25 +1,32 @@
 package models
 
-type IPLogs struct {
+type SubLogs struct {
 	ID            int
 	IP            string
 	Date          string
+	Addr          string
+	Count         int
 	SubcriptionID int
 }
 
 // Add 添加IP
-func (iplog *IPLogs) Add() error {
+func (iplog *SubLogs) Add() error {
 	return DB.Create(iplog).Error
 }
 
+// 查找IP
+func (iplog *SubLogs) Find() error {
+	return DB.Where("id = ? or ip = ?", iplog.ID, iplog.IP).First(iplog).Error
+}
+
 // Update 更新IP
-func (iplog *IPLogs) Update() error {
-	return DB.Where("id = ?", iplog.ID).Updates(iplog).Error
+func (iplog *SubLogs) Update() error {
+	return DB.Where("id = ? or ip = ?", iplog.ID, iplog.IP).Updates(iplog).Error
 }
 
 // List 获取IP列表
-func (iplog *IPLogs) List() ([]IPLogs, error) {
-	var iplogs []IPLogs
+func (iplog *SubLogs) List() ([]SubLogs, error) {
+	var iplogs []SubLogs
 	err := DB.Find(&iplogs).Error
 	if err != nil {
 		return nil, err
@@ -28,6 +35,6 @@ func (iplog *IPLogs) List() ([]IPLogs, error) {
 }
 
 // Del 删除IP
-func (iplog *IPLogs) Del() error {
+func (iplog *SubLogs) Del() error {
 	return DB.Delete(iplog).Error
 }

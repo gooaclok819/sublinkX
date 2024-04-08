@@ -24,3 +24,144 @@
 2024/04/08 01:10:12 sqlite.go:37: 数据库初始化成功
 2024/04/08 01:14:11 sqlite.go:37: 数据库初始化成功
 2024/04/08 01:21:12 sqlite.go:37: 数据库初始化成功
+2024/04/08 06:28:23 sqlite.go:37: 数据库初始化成功
+2024/04/08 06:48:40 sqlite.go:37: 数据库初始化成功
+2024/04/08 06:48:47 auth.go:31: 12
+2024/04/08 07:50:25 sqlite.go:37: 数据库初始化成功
+2024/04/08 07:52:14 auth.go:31: 18
+2024/04/08 08:00:09 sqlite.go:37: 数据库初始化成功
+2024/04/08 08:00:58 sqlite.go:37: 数据库初始化成功
+2024/04/08 08:06:12 sqlite.go:37: 数据库初始化成功
+2024/04/08 08:44:30 sqlite.go:37: 数据库初始化成功
+2024/04/08 08:48:05 sqlite.go:37: 数据库初始化成功
+2024/04/08 08:49:35 sqlite.go:37: 数据库初始化成功
+2024/04/08 08:49:37 jwt.go:25: /c/v2ray
+2024/04/08 08:49:37 jwt.go:25: /favicon.ico
+2024/04/08 08:49:53 jwt.go:25: /c/v2ray/asd
+2024/04/08 08:49:54 jwt.go:25: /favicon.ico
+2024/04/08 08:50:57 sqlite.go:37: 数据库初始化成功
+2024/04/08 08:50:59 jwt.go:25: /c/v2ray/asd
+2024/04/08 08:50:59 jwt.go:25: /favicon.ico
+2024/04/08 08:52:09 sqlite.go:37: 数据库初始化成功
+2024/04/08 08:53:48 sqlite.go:37: 数据库初始化成功
+2024/04/08 08:54:35 sqlite.go:37: 数据库初始化成功
+2024/04/08 08:54:37 clients.go:15: <nil> 
+2024/04/08 08:57:07 sqlite.go:37: 数据库初始化成功
+2024/04/08 08:57:10 clients.go:15: record not found 
+2024/04/08 08:57:27 clients.go:15: <nil> 2024-04-08 08:06:53
+2024/04/08 09:09:24 sqlite.go:37: 数据库初始化成功
+2024/04/08 09:09:26 clients.go:24: [{19 ssr://NDUuODkuMjI5LjE1ODoyNjY5NTpvcmlnaW46cmM0OnBsYWluOmJHNWpiaTV2Y21jZ09EWmwvP29iZnNwYXJhbT0mcmVtYXJrcz01TC1FNTcyWDVwYXZSZyZncm91cD1URzVqYmk1dmNtYw 俄罗斯F 2024-04-07 06:31:49}]
+2024/04/08 09:10:19 sqlite.go:37: 数据库初始化成功
+2024/04/08 09:10:20 clients.go:24: [{19 ssr://NDUuODkuMjI5LjE1ODoyNjY5NTpvcmlnaW46cmM0OnBsYWluOmJHNWpiaTV2Y21jZ09EWmwvP29iZnNwYXJhbT0mcmVtYXJrcz01TC1FNTcyWDVwYXZSZyZncm91cD1URzVqYmk1dmNtYw 俄罗斯F 2024-04-07 06:31:49}]
+2024/04/08 09:10:45 clients.go:24: [{19 ssr://NDUuODkuMjI5LjE1ODoyNjY5NTpvcmlnaW46cmM0OnBsYWluOmJHNWpiaTV2Y21jZ09EWmwvP29iZnNwYXJhbT0mcmVtYXJrcz01TC1FNTcyWDVwYXZSZyZncm91cD1URzVqYmk1dmNtYw 俄罗斯F 2024-04-07 06:31:49} {20 ssr://NDUuOC4xNTguMTgyOjI2Njk1Om9yaWdpbjpyYzQ6cGxhaW46Ykc1amJpNXZjbWNnT0RabC8_b2Jmc3BhcmFtPSZyZW1hcmtzPTVMLUU1NzJYNXBhdlJ3Jmdyb3VwPVRHNWpiaTV2Y21j 俄罗斯G 2024-04-07 06:34:40}]
+2024/04/08 09:17:12 sqlite.go:37: 数据库初始化成功
+2024/04/08 09:25:33 sqlite.go:37: 数据库初始化成功
+2024/04/08 09:30:00 sqlite.go:37: 数据库初始化成功
+2024/04/08 09:43:09 sqlite.go:37: 数据库初始化成功
+2024/04/08 09:44:02 sqlite.go:37: 数据库初始化成功
+2024/04/08 09:44:55 sqlite.go:37: 数据库初始化成功
+2024/04/08 09:44:59 clients.go:61: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 09:46:23 sqlite.go:37: 数据库初始化成功
+2024/04/08 09:46:25 clients.go:61: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 09:46:25 clients.go:67: {./template/clash.yaml true true} true
+2024/04/08 09:50:30 sqlite.go:37: 数据库初始化成功
+2024/04/08 09:50:32 clients.go:57: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 09:50:32 clients.go:63: {./template/clash.yaml true true} true
+2024/04/08 09:52:40 sqlite.go:37: 数据库初始化成功
+2024/04/08 09:52:46 clients.go:57: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 09:52:54 clients.go:57: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 09:54:41 sqlite.go:37: 数据库初始化成功
+2024/04/08 09:54:46 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 09:54:49 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 09:57:16 sqlite.go:37: 数据库初始化成功
+2024/04/08 09:57:21 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 09:57:46 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 09:58:59 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 10:00:32 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 10:00:43 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 10:13:48 sqlite.go:37: 数据库初始化成功
+2024/04/08 10:14:15 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":false}
+2024/04/08 10:14:38 clients.go:56: {"clash":"./template/clash.yaml","udp":false,"cert":false}
+2024/04/08 10:14:46 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 10:27:18 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 10:28:34 clients.go:56: {"clash":"https://github.com/zuluion/Clash-Template-Config/blob/1f7c2539eb3ea37ac3b32dfb0ce0a673b3b818ef/Clash-Template-Config.yml","udp":true,"cert":true}
+2024/04/08 10:28:35 clash.go:292: error: yaml: line 206: mapping values are not allowed in this context
+2024/04/08 10:34:15 clients.go:56: {"clash":"https://suo.yt/euXTcya","udp":true,"cert":true}
+2024/04/08 10:39:54 sqlite.go:37: 数据库初始化成功
+2024/04/08 10:40:01 ip.go:11: 127.0.0.1
+2024/04/08 10:40:01 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 10:41:06 sqlite.go:37: 数据库初始化成功
+2024/04/08 10:41:10 ip.go:11: 127.0.0.1
+2024/04/08 10:41:10 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 10:42:30 sqlite.go:37: 数据库初始化成功
+2024/04/08 10:42:33 ip.go:11: ip 
+2024/04/08 10:42:33 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 10:44:15 sqlite.go:37: 数据库初始化成功
+2024/04/08 10:44:16 ip.go:13: ip 
+2024/04/08 10:44:16 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 10:45:03 sqlite.go:37: 数据库初始化成功
+2024/04/08 10:45:04 ip.go:11: ip 127.0.0.1
+2024/04/08 10:45:04 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 10:47:05 ip.go:11: ip ::1
+2024/04/08 10:47:05 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 10:50:14 sqlite.go:37: 数据库初始化成功
+2024/04/08 10:50:19 ip.go:18: 
+
+
+
+
+{"ip":"127.0.0.1","pro":"","proCode":"999999","city":"","cityCode":"0","region":"","regionCode":"0","addr":" ������ַ","regionNames":"","err":"noprovince"}
+
+
+
+
+2024/04/08 10:50:19 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 10:58:33 sqlite.go:37: 数据库初始化成功
+2024/04/08 10:58:35 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 10:58:35 clients.go:67: 我先中间件后
+2024/04/08 10:59:16 sqlite.go:37: 数据库初始化成功
+2024/04/08 10:59:19 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 10:59:19 clients.go:67: 我先中间件后
+2024/04/08 10:59:20 ip.go:19: 
+
+
+
+
+{"ip":"127.0.0.1","pro":"","proCode":"999999","city":"","cityCode":"0","region":"","regionCode":"0","addr":" ������ַ","regionNames":"","err":"noprovince"}
+
+
+
+
+2024/04/08 11:10:13 sqlite.go:37: 数据库初始化成功
+2024/04/08 11:10:34 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 11:10:35 ip.go:50: 
+
+
+
+
+{"ip":"127.0.0.1","pro":"","proCode":"999999","city":"","cityCode":"0","region":"","regionCode":"0","addr":" ������ַ","regionNames":"","err":"noprovince"}
+
+
+
+
+2024/04/08 11:19:37 sqlite.go:37: 数据库初始化成功
+2024/04/08 11:20:05 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 11:20:05 ip.go:54: 
+
+
+
+
+{"ip":"127.0.0.1","pro":"","proCode":"999999","city":"","cityCode":"0","region":"","regionCode":"0","addr":" ������ַ","regionNames":"","err":"noprovince"}
+
+
+
+
+2024/04/08 11:22:07 sqlite.go:37: 数据库初始化成功
+2024/04/08 11:22:13 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 11:36:00 sqlite.go:37: 数据库初始化成功
+2024/04/08 11:36:09 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 11:36:16 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 11:36:24 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 11:39:33 sqlite.go:37: 数据库初始化成功
+2024/04/08 11:39:40 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}
+2024/04/08 11:39:55 clients.go:56: {"clash":"./template/clash.yaml","udp":true,"cert":true}

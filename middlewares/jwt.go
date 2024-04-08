@@ -20,9 +20,9 @@ type JwtClaims struct {
 // AuthorToken 验证token中间件
 func AuthorToken(c *gin.Context) {
 	// 定义白名单
-	list := []string{"/api/v1/auth/login", "/api/v1/auth/captcha"}
+	list := []string{"/api/v1/auth/login", "/api/v1/auth/captcha", "/c/"}
 	for _, v := range list {
-		if c.Request.URL.Path == v {
+		if strings.HasPrefix(c.Request.URL.Path, v) {
 			c.Next()
 			return
 		}

@@ -73,6 +73,64 @@ func SubAdd(c *gin.Context) {
 	})
 }
 
+// 更新节点
+func SubUpdate(c *gin.Context) {
+	var sub models.Subcription
+	name := c.PostForm("name")
+	oldname := c.PostForm("oldname")
+	config := c.PostForm("config")
+	nodes := c.PostForm("nodes")
+	if name == "" || nodes == "" {
+		c.JSON(400, gin.H{
+			"msg": "订阅名称 or 节点不能为空",
+		})
+		return
+	}
+	// 查找旧节点
+	sub.Name = oldname
+	err := sub.Find()
+	if err != nil {
+		c.JSON(400, gin.H{
+			"msg": err.Error(),
+		})
+		return
+	}
+	// 更新节点
+	sub.Config = config
+	sub.Name = name
+	sub.CreateDate = time.Now().Format("2006-01-02 15:04:05")
+	sub.Nodes = []models.Node{}
+	for _, v := range strings.Split(nodes, ",") {
+		var node models.Node
+		node.Name = v
+		err := node.Find()
+		if err != nil {
+			continue
+		}
+		sub.Nodes = append(sub.Nodes, node)
+	}
+
+	err = sub.Update()
+	if err != nil {
+		c.JSON(400, gin.H{
+			"msg": "更新失败",
+		})
+		return
+	}
+
+	err = sub.UpdateNodes() //更新多对多关系
+	if err != nil {
+		c.JSON(400, gin.H{
+			"msg": err.Error(),
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"code": "00000",
+		"msg":  "更新成功",
+	})
+}
+
 // 删除节点
 func SubDel(c *gin.Context) {
 	var sub models.Subcription
@@ -102,5 +160,20 @@ func SubDel(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"code": "00000",
 		"msg":  "删除成功",
+	})
+}
+func SubIPlog(c *gin.Context) {
+	var iplog models.SubLogs
+	iplogs, err := iplog.List()
+	if err != nil {
+		c.JSON(500, gin.H{
+			"msg": "ip list error",
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"code": "00000",
+		"data": iplogs,
+		"msg":  "ip get",
 	})
 }

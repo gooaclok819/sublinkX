@@ -1,12 +1,14 @@
 <script setup lang='ts'>
 import { ref,onMounted,nextTick  } from 'vue'
-import {getSubs,AddSub,DelSub} from "@/api/subcription/subs"
+import {getSubs,AddSub,DelSub,UpdateSub} from "@/api/subcription/subs"
 import {getNodes} from "@/api/subcription/node"
-import { log } from 'console';
+import Clipboard from 'clipboard'
 interface Sub {
   ID: number;
   Name: string;
   CreateDate: string;
+  Config: Config;
+  Nodes: Node[];
 }
 interface Node {
   ID: number;
@@ -19,19 +21,24 @@ interface Config {
   udp: string;
   cert: string;
 }
+
 const tableData = ref<Sub[]>([])
-const Clash = ref('./template/clash.yaml')
+const Clash = ref('')
+const SubTitle = ref('')
 const Subname = ref('')
+const oldSubname = ref('')
 const dialogVisible = ref(false)
 const Delvisible = ref(false)
 const table = ref()
 const NodesList = ref<Node[]>([])
-const value1 = ref([])
+const value1 = ref<string[]>([])
 const checkList = ref<string[]>([]) // 配置列表
-
-onMounted(async() => {
-    const {data} = await getSubs();
+async function getsubs() {
+  const {data} = await getSubs();
     tableData.value = data
+}
+onMounted(() => {
+    getsubs()
 })
 onMounted(async() => {
     const {data} = await getNodes();
@@ -57,17 +64,25 @@ const addSubs = async ()=>{
     "cert": checkList.value.includes('cert') ? true :  false
 
   })
-   await AddSub({
+  if (SubTitle.value === '添加订阅') {
+    await AddSub({
       config: config,
       name: Subname.value.trim(),
       nodes: value1.value.join(',')
     })
-    tableData.value.push({
-      ID: tableData.value.length + 1,
-      Name: Subname.value.trim(),
-      CreateDate: formatDateTime(new Date())
-    })
+    getsubs()
     ElMessage.success("添加成功");
+  }else{
+    await UpdateSub({
+      config: config,
+      name: Subname.value.trim(),
+      nodes: value1.value.join(','),
+      oldname: oldSubname.value
+    })
+    getsubs()
+    ElMessage.success("更新成功");
+  }
+
     dialogVisible.value = false;
 }
 
@@ -88,6 +103,41 @@ const toggleSelection = () => {
   table.value.clearSelection()
 }
 
+const handleAddSub = ()=>{
+  SubTitle.value = '添加订阅'
+  Subname.value = ''
+  oldSubname.value = ''
+  checkList.value = []
+  Clash.value = './template/clash.yaml'
+  dialogVisible.value = true
+  value1.value = []
+}
+const handleEdit = (row:any) => {
+  for (let i = 0; i < tableData.value.length; i++) {
+    if (tableData.value[i].ID === row.ID) {
+      function toConfig(value: string | Config): Config {
+        if (typeof value === 'string') {
+          return JSON.parse(value) as Config;
+        } else {
+          return value as Config;
+        }
+      }
+      const config = toConfig(tableData.value[i].Config);
+      SubTitle.value = '编辑订阅'
+      Subname.value = tableData.value[i].Name
+      oldSubname.value = Subname.value
+      if (config.udp)  {
+        checkList.value.push('udp')
+      }
+      if (config.cert)  {
+        checkList.value.push('cert')
+      }
+      Clash.value = config.clash
+      dialogVisible.value = true
+      value1.value = tableData.value[i].Nodes.map((item) => item.Name)
+    }
+  }
+}
 const handleDel = (row:any) => {
   ElMessageBox.confirm(
     `你是否要删除 ${row.Name} ?`,
@@ -101,11 +151,11 @@ const handleDel = (row:any) => {
       await DelSub({
         id: row.ID
       })
+      getsubs()
       ElMessage({
         type: 'success',
         message: '删除成功',
       })
-      tableData.value = tableData.value.filter((item) => item.ID !== row.ID)
       
     })
 }
@@ -158,19 +208,36 @@ const currentTableData = computed(() => {
 const isNameShow = (row: any): boolean =>  {
   return row.Name.length > 10;
 }
-
+// 复制链接
+const copyInfo = (row: any) => {
+  navigator.clipboard.writeText(row.Link).then(function() {
+    ElMessage({
+        type: 'success',
+        message: '复制成功！',
+      })
+}, function(err) {
+  ElMessage({
+        type: 'warning',
+        message: '复制失败！',
+      })
+});
+}
+const handleOpenUrl = (index: string,row: any) => {
+  let url = `${import.meta.env.VITE_APP_API_URL}/c/${index}/${row.Name}`
+  window.open(url)
+}
 </script>
 
 <template>
   <div>
     <el-dialog
     v-model="dialogVisible"
-    title="添加订阅"
+    :title="SubTitle"
   >
   <el-input v-model="Subname" placeholder="请输入订阅名称" />
   
   <el-row >
-  <el-tag type="primary">clash模版文件</el-tag>
+  <el-tag type="primary">clash本地模版文件或url连接</el-tag>
   <el-input v-model="Clash" placeholder="clash模版文件"  />
 </el-row>
 
@@ -205,7 +272,7 @@ const isNameShow = (row: any): boolean =>  {
     </template>
   </el-dialog>
     <el-card>
-    <el-button type="primary" @click="dialogVisible=true">添加节点</el-button>
+    <el-button type="primary" @click="handleAddSub">添加订阅</el-button>
     <div style="margin-bottom: 10px"></div>
 
       <el-table ref="table" 
@@ -217,18 +284,30 @@ const isNameShow = (row: any): boolean =>  {
       :tree-props="{children: 'Nodes'}"
       >
     <el-table-column type="selection" fixed prop="ID" label="id"  />
-    <el-table-column prop="Name" label="订阅名称"  >
+    <el-table-column prop="Name" label="订阅名称 / 节点"  >
     <template #default="{row}">
       <el-tag :type="row.Nodes ? 'success' : 'primary'">{{row.Name}}</el-tag>
         </template>
     </el-table-column>
-    <el-table-column prop="Link" label="链接" :show-overflow-tooltip="true" />
+    <el-table-column prop="Link" label="链接" :show-overflow-tooltip="true" >
+      <template #default="{row}">
+        <div v-if="row.Nodes">
+              <el-button @click="handleOpenUrl('v2ray',row)">V2ray</el-button>
+              <el-button @click="handleOpenUrl('clash',row)">Clash</el-button>
+        </div>
+        </template>
+      </el-table-column>
  
     <el-table-column prop="CreateDate" label="创建时间" sortable  />
     <el-table-column  label="操作" width="120">
       <template #default="scope">
-        <el-button link type="primary" size="small">编辑</el-button>
+        <div v-if="scope.row.Nodes">
+          <el-button link type="primary" size="small" @click="handleEdit(scope.row)">编辑</el-button>
   <el-button link type="primary" size="small" @click="handleDel(scope.row)">删除</el-button>
+        </div>
+        <div v-else>
+          <el-button link type="primary" size="small" @click="copyInfo(scope.row)">复制</el-button>
+        </div>
 
       </template>
     </el-table-column>

@@ -23,6 +23,7 @@ func main() {
 	routers.Mentus(r)
 	routers.Subcription(r)
 	routers.Nodes(r)
+	routers.Clients(r)
 	// 启动服务
 	r.Run(":8080")
 }
