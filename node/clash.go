@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -61,12 +60,9 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 	var proxys []Proxy
 
 	for _, link := range urls {
-		u, err := url.Parse(link)
-		if err != nil {
-			log.Println(err)
-		}
+		Scheme := strings.Split(link, "://")[0]
 		switch {
-		case u.Scheme == "ss":
+		case Scheme == "ss":
 			ss, err := DecodeSSURL(link)
 			if err != nil {
 				log.Println(err)
@@ -87,7 +83,7 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Skip_cert_verify: sqlconfig.Cert,
 			}
 			proxys = append(proxys, ssproxy)
-		case u.Scheme == "ssr":
+		case Scheme == "ssr":
 			ssr, err := DecodeSSRURL(link)
 			if err != nil {
 				log.Println(err)
@@ -110,7 +106,7 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Skip_cert_verify: sqlconfig.Cert,
 			}
 			proxys = append(proxys, ssrproxy)
-		case u.Scheme == "trojan":
+		case Scheme == "trojan":
 			trojan, err := DecodeTrojanURL(link)
 			if err != nil {
 				log.Println(err)
@@ -141,7 +137,7 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Skip_cert_verify:   sqlconfig.Cert,
 			}
 			proxys = append(proxys, trojanproxy)
-		case u.Scheme == "vmess":
+		case Scheme == "vmess":
 			vmess, err := DecodeVMESSURL(link)
 			if err != nil {
 				log.Println(err)
@@ -172,7 +168,7 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Skip_cert_verify: sqlconfig.Cert,
 			}
 			proxys = append(proxys, vmessproxy)
-		case u.Scheme == "vless":
+		case Scheme == "vless":
 			vless, err := DecodeVLESSURL(link)
 			if err != nil {
 				log.Println(err)
@@ -208,7 +204,7 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Skip_cert_verify:   sqlconfig.Cert,
 			}
 			proxys = append(proxys, vlessproxy)
-		case u.Scheme == "hy" || u.Scheme == "hysteria":
+		case Scheme == "hy" || Scheme == "hysteria":
 			hy, err := DecodeHYURL(link)
 			if err != nil {
 				log.Println(err)
@@ -232,7 +228,7 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Skip_cert_verify: sqlconfig.Cert,
 			}
 			proxys = append(proxys, hyproxy)
-		case u.Scheme == "hy2" || u.Scheme == "hysteria2":
+		case Scheme == "hy2" || Scheme == "hysteria2":
 			hy2, err := DecodeHY2URL(link)
 			if err != nil {
 				log.Println(err)

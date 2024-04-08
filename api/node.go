@@ -9,6 +9,31 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func NodeUpdadte(c *gin.Context) {
+	var node models.Node
+	name := c.PostForm("name")
+	link := c.PostForm("link")
+	if name == "" || link == "" {
+		c.JSON(400, gin.H{
+			"msg": "节点名称 or 备注不能为空",
+		})
+		return
+	}
+	node.Name = name
+	node.Link = link
+	err := node.Update()
+	if err != nil {
+		c.JSON(400, gin.H{
+			"msg": "更新失败",
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"code": "00000",
+		"msg":  "更新成功",
+	})
+}
+
 // 获取节点列表
 func NodeGet(c *gin.Context) {
 	var Node models.Node

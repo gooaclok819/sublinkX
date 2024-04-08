@@ -14,7 +14,7 @@ func (node *Node) Add() error {
 
 // 更新节点
 func (node *Node) Update() error {
-	return DB.Where("id = ?", node.ID).Updates(node).Error
+	return DB.Where("link = ? or name = ?", node.Link, node.Name).Updates(node).Error
 }
 
 // 查找节点是否重复

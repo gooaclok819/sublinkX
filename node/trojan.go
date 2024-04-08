@@ -98,7 +98,7 @@ func DecodeTrojanURL(s string) (Trojan, error) {
 	if u.Scheme != "trojan" {
 		return Trojan{}, fmt.Errorf("非trojan协议: %s", s)
 	}
-	password := u.User.Username()
+	password := Base64Decode(u.User.Username())
 	hostname := u.Hostname()
 	port, _ := strconv.Atoi(u.Port())
 	peer := u.Query().Get("peer")

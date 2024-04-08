@@ -28,9 +28,13 @@ func IsBase64makeup(s string) string {
 	}
 	return s
 }
+
+// base64编码
 func Base64Encode(s string) string {
 	return base64.StdEncoding.EncodeToString([]byte(s))
 }
+
+// base64解码
 func Base64Decode(s string) string {
 	// 去除空格
 	s = strings.ReplaceAll(s, " ", "")

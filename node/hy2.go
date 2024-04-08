@@ -77,7 +77,7 @@ func DecodeHY2URL(s string) (HY2, error) {
 	if u.Scheme != "hy2" && u.Scheme != "hysteria2" {
 		return HY2{}, fmt.Errorf("非hy2协议: %s", s)
 	}
-	password := u.User.Username()
+	password := Base64Decode(u.User.Username())
 	server := u.Hostname()
 	port, _ := strconv.Atoi(u.Port())
 	insecure, _ := strconv.Atoi(u.Query().Get("insecure"))
