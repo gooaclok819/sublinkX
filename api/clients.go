@@ -29,10 +29,33 @@ func GetV2ray(c *gin.Context) {
 		return
 	}
 	baselist := ""
+	// for _, v := range sub.Nodes {
+	// 	baselist += v.Link + "\n"
+	// }
 	for _, v := range sub.Nodes {
-		baselist += v.Link + "\n"
+		switch {
+		// 如果包含多条节点
+		case strings.Contains(v.Link, ","):
+			links := strings.Split(v.Link, ",")
+			baselist += strings.Join(links, "\n") + "\n"
+			continue
+		//如果是订阅转换
+		case strings.Contains(v.Link, "http://") || strings.Contains(v.Link, "https://"):
+			resp, err := http.Get(v.Link)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			defer resp.Body.Close()
+			body, _ := io.ReadAll(resp.Body)
+			nodes := node.Base64Decode(string(body))
+			baselist += nodes + "\n"
+		// 默认
+		default:
+			baselist += v.Link + "\n"
+		}
 	}
-	Content_Disposition := fmt.Sprintf("attachment; filename=%s.txt", subname)
+	Content_Disposition := fmt.Sprintf("inline; filename=%s.txt", subname)
 	c.Set("subname", subname)
 	c.Writer.Header().Set("Content-Disposition", Content_Disposition)
 	c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -55,15 +78,6 @@ func GetClash(c *gin.Context) {
 	}
 	urls := []string{}
 	for _, v := range sub.Nodes {
-		// if strings.Contains(v.Link, ",") {
-		// 	links := strings.Split(v.Link, ",")
-		// 	for _, link := range links {
-		// 		urls = append(urls, link)
-		// 	}
-		// 	continue
-		// } else {
-		// 	urls = append(urls, v.Link)
-		// }
 		switch {
 		// 如果包含多条节点
 		case strings.Contains(v.Link, ","):

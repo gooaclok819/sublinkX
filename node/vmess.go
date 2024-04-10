@@ -8,21 +8,21 @@ import (
 )
 
 type Vmess struct {
-	Add  string `json:"add,omitempty"` // 服务器地址
-	Aid  string `json:"aid,omitempty"`
-	Alpn string `json:"alpn,omitempty"`
-	Fp   string `json:"fp,omitempty"`
-	Host string `json:"host,omitempty"`
-	Id   string `json:"id,omitempty"`
-	Net  string `json:"net,omitempty"`
-	Path string `json:"path,omitempty"`
-	Port string `json:"port,omitempty"`
-	Ps   string `json:"ps,omitempty"`
-	Scy  string `json:"scy,omitempty"`
-	Sni  string `json:"sni,omitempty"`
-	Tls  string `json:"tls,omitempty"`
-	Type string `json:"type,omitempty"`
-	V    string `json:"v,omitempty"`
+	Add  string      `json:"add,omitempty"` // 服务器地址
+	Aid  interface{} `json:"aid,omitempty"`
+	Alpn string      `json:"alpn,omitempty"`
+	Fp   string      `json:"fp,omitempty"`
+	Host string      `json:"host,omitempty"`
+	Id   string      `json:"id,omitempty"`
+	Net  string      `json:"net,omitempty"`
+	Path string      `json:"path,omitempty"`
+	Port interface{} `json:"port,omitempty"`
+	Ps   string      `json:"ps,omitempty"`
+	Scy  string      `json:"scy,omitempty"`
+	Sni  string      `json:"sni,omitempty"`
+	Tls  string      `json:"tls,omitempty"`
+	Type string      `json:"type,omitempty"`
+	V    string      `json:"v,omitempty"`
 }
 
 // 开发者测试
@@ -30,7 +30,7 @@ func CallVmessURL() {
 	vmess := Vmess{
 		Add:  "xx.xxx.ru",
 		Port: "2095",
-		Aid:  "0",
+		Aid:  0,
 		Scy:  "auto",
 		Net:  "ws",
 		Type: "none",
@@ -46,7 +46,7 @@ func CallVmessURL() {
 func EncodeVmessURL(v Vmess) string {
 	// 如果备注为空，则使用服务器地址+端口
 	if v.Ps == "" {
-		v.Ps = v.Add + ":" + v.Port
+		v.Ps = v.Add + ":" + v.Port.(string)
 	}
 	// 如果版本为空，则默认为2
 	if v.V == "" {
@@ -73,7 +73,6 @@ func DecodeVMESSURL(s string) (Vmess, error) {
 	if vmess.Scy == "" {
 		vmess.Scy = "auto"
 	}
-
 	if CheckEnvironment() {
 		fmt.Println("服务器地址", vmess.Add)
 		fmt.Println("端口", vmess.Port)
