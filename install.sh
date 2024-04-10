@@ -70,6 +70,14 @@ uninstall_sublink() {
     echo -e "${green}sublink 卸载完成${plain}"
 }
 
+check_status() {
+    if systemctl --quiet is-active sublink; then
+        echo -e "${green}服务已启动${plain}"
+    else
+        echo -e "${red}服务未启动${plain}"
+    fi
+}
+
 menu() {
     echo -e "1. 安装服务"
     echo -e "2. 卸载服务"
@@ -77,7 +85,8 @@ menu() {
     echo -e "4. 停止服务"
     echo -e "5. 查看服务状态"
     echo -e "6. 查看安装目录"
-    echo -e "7. 退出"
+    echo -e "7. 查看运行状态"
+    echo -e "8. 退出"
     read -p "请输入你的选择：" choice
     case "$choice" in
         1)
@@ -99,6 +108,9 @@ menu() {
         echo "/usr/local/bin/sublink"
         ;;
         7)
+        check_status
+        ;;
+        8)
         exit 0
         ;;
         *)
@@ -108,7 +120,7 @@ menu() {
 }
 
 # Create a symbolic link to this script
-ln -s $(realpath \\$0) /usr/local/bin/sublink
+ln -s $(realpath \\\$0) /usr/local/bin/sublink
 
 while true; do
     menu
