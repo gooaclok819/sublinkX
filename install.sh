@@ -45,9 +45,6 @@ sudo systemctl enable sublink
 
 echo "安装完成已经启动输入sublink可以呼出菜单"
 
-# 设置一个系统变量
-echo "alias sublink='/usr/local/bin/sublink/sublink_menu'" >> ~/.bashrc
-
 
 # 创建sublink_menu.sh脚本
 echo '#!/bin/bash
@@ -55,12 +52,17 @@ echo '#!/bin/bash
 while true; do
     # 获取服务状态
     status=$(systemctl is-active sublink)
-
-    echo "当前运行状态: $status"
+    # 判断服务状态并打印
+    if [ "$status" = "active" ]; then
+        echo "当前运行状态: 已运行"
+    else
+        echo "当前运行状态: 未运行"
+    fi
     echo "1. 启动服务"
     echo "2. 停止服务"
-    echo "3. 查看服务状态"
-    echo "4. 退出"
+    echo "3. 卸载安装"
+    echo "4. 查看服务状态"
+    echo "0. 退出"
     echo -n "请选择一个选项: "
     read option
 
@@ -70,17 +72,21 @@ while true; do
             systemctl daemon-reload
             ;;
         2)
+				    systemctl stop sublink
+				    systemctl daemon-reload
+				    ;;
+        3)
 		        systemctl stop sublink
 		        systemctl disable sublink
 		        rm /etc/systemd/system/sublink.service
 		        systemctl daemon-reload
 		        rm -r /usr/local/bin/sublink
-		        unalias sublink
-            ;;
-        3)
-            systemctl status sublink
+		        rm /usr/bin/sublink
             ;;
         4)
+            systemctl status sublink
+            ;;
+        0)
             exit 0
             ;;
         *)
@@ -89,12 +95,8 @@ while true; do
     esac
 done' > sublink_menu.sh
 
-# 设置sublink_menu.sh为可执行
-chmod +x sublink_menu.sh
+# 移动sublink_menu.sh到/usr/bin
 
-# 移动sublink_menu.sh到/usr/local/bin
+sudo mv sublink_menu.sh /usr/bin/sublink
 
-sudo mv sublink_menu.sh /usr/local/bin/sublink/sublink_menu
-
-echo "请在当前 shell 中执行以下命令来启用别名："
-echo "source ~/.bashrc"
+chmod +x /usr/bin/sublink
