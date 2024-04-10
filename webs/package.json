@@ -1,6 +1,6 @@
 {
   "name": "sublinkx-admin",
-  "version": "1.0",
+  "version": "1.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -57,6 +57,7 @@
     "path-to-regexp": "^6.2.1",
     "pinia": "^2.1.7",
     "pnpm": "^8.15.6",
+    "qrcode.vue": "^3.4.1",
     "sockjs-client": "1.6.1",
     "sortablejs": "^1.15.2",
     "stompjs": "^2.3.3",
