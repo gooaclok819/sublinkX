@@ -5,9 +5,9 @@ export default {
     document: "Document",
     userset: "ChangePassword",
     system:"system management",
-    nodelist:"Node Management",
-    sublist:"Sub Management",
-    subcription:"Subcription",
+    nodelist:"Node List",
+    sublist:"Subscription List",
+    subcription:"Subscription Management",
   },
   // 登录页面国际化
   login: {

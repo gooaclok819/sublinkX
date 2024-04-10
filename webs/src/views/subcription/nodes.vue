@@ -23,10 +23,19 @@ onMounted(async() => {
 })
 const handleAddNode = ()=>{
   NodeTitle.value= '添加节点'
+  Nodelink.value = ''
+  Nodename.value = ''
   dialogVisible.value = true
 
 }
 const addnodes = async ()=>{
+  let nodelinks = Nodelink.value.split(/[\r\n,]/);
+  
+  if (nodelinks) {
+    Nodelink.value = nodelinks.join(',');
+  }
+  
+  
    if (NodeTitle.value== '添加节点'){
       await AddNodes({
         link: Nodelink.value.trim(),
@@ -152,8 +161,15 @@ const currentTableData = computed(() => {
     <el-dialog
     v-model="dialogVisible"
     :title="NodeTitle"
+    width="80%"
   >
-  <el-input v-model="Nodelink" placeholder="请输入节点" />
+  <el-input 
+  v-model="Nodelink" 
+  placeholder="请输入节点多行使用回车或逗号分开,支持base64格式的url订阅" 
+  type="textarea" 
+  style="margin-bottom:10px" 
+  :autosize="{ minRows: 2, maxRows: 10}"
+  />
   <el-input v-model="Nodename" placeholder="请输入备注"  />
     <template #footer>
       <div class="dialog-footer">

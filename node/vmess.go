@@ -3,20 +3,20 @@ package node
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
+	"log"
 	"strings"
 )
 
 type Vmess struct {
 	Add  string `json:"add,omitempty"` // 服务器地址
-	Aid  int    `json:"aid,omitempty"`
+	Aid  string `json:"aid,omitempty"`
 	Alpn string `json:"alpn,omitempty"`
 	Fp   string `json:"fp,omitempty"`
 	Host string `json:"host,omitempty"`
 	Id   string `json:"id,omitempty"`
 	Net  string `json:"net,omitempty"`
 	Path string `json:"path,omitempty"`
-	Port int    `json:"port,omitempty"`
+	Port string `json:"port,omitempty"`
 	Ps   string `json:"ps,omitempty"`
 	Scy  string `json:"scy,omitempty"`
 	Sni  string `json:"sni,omitempty"`
@@ -29,8 +29,8 @@ type Vmess struct {
 func CallVmessURL() {
 	vmess := Vmess{
 		Add:  "xx.xxx.ru",
-		Port: 2095,
-		Aid:  0,
+		Port: "2095",
+		Aid:  "0",
 		Scy:  "auto",
 		Net:  "ws",
 		Type: "none",
@@ -46,7 +46,7 @@ func CallVmessURL() {
 func EncodeVmessURL(v Vmess) string {
 	// 如果备注为空，则使用服务器地址+端口
 	if v.Ps == "" {
-		v.Ps = v.Add + ":" + strconv.Itoa(v.Port)
+		v.Ps = v.Add + ":" + v.Port
 	}
 	// 如果版本为空，则默认为2
 	if v.V == "" {
@@ -61,13 +61,14 @@ func DecodeVMESSURL(s string) (Vmess, error) {
 	if !strings.Contains(s, "vmess://") {
 		return Vmess{}, fmt.Errorf("非vmess协议:%s", s)
 	}
-	param := Base64Decode(strings.Split(s, "://")[1])
+	param := strings.Split(s, "://")[1]
+	param = Base64Decode(strings.TrimSpace(param))
 	// fmt.Println(param)
 	var vmess Vmess
 	err := json.Unmarshal([]byte(param), &vmess)
 	if err != nil {
-		fmt.Println(err)
-		return Vmess{}, fmt.Errorf("json格式化失败:%s", s)
+		log.Println(err)
+		return Vmess{}, fmt.Errorf("json格式化失败:%s", param)
 	}
 	if vmess.Scy == "" {
 		vmess.Scy = "auto"

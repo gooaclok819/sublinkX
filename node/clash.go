@@ -2,9 +2,11 @@ package node
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -24,20 +26,23 @@ type Proxy struct {
 	Tls                bool                   `yaml:"tls,omitempty"`
 	Servername         string                 `yaml:"servername,omitempty"`
 	Flow               string                 `yaml:"flow,omitempty"`
-	AlterId            int                    `yaml:"alterId"`
+	AlterId            int                    `yaml:"alterId,omitempty"`
 	Network            string                 `yaml:"network,omitempty"`
 	Reality_opts       map[string]interface{} `yaml:"reality-opts,omitempty"`
 	Ws_opts            map[string]interface{} `yaml:"ws-opts,omitempty"`
 	Auth_str           string                 `yaml:"auth_str,omitempty"`
 	Up                 int                    `yaml:"up,omitempty"`
 	Down               int                    `yaml:"down,omitempty"`
-	Alpn               string                 `yaml:"alpn,omitempty"`
+	Alpn               []string               `yaml:"alpn,omitempty"`
 	Sni                string                 `yaml:"sni,omitempty"`
 	Obfs               string                 `yaml:"obfs,omitempty"`
 	Obfs_password      string                 `yaml:"obfs-password,omitempty"`
 	Protocol           string                 `yaml:"protocol,omitempty"`
 	Uuid               string                 `yaml:"uuid,omitempty"`
 	Peer               string                 `yaml:"peer,omitempty"`
+	Congestion_control string                 `yaml:"congestion_control,omitempty"`
+	Udp_relay_mode     string                 `yaml:"udp_relay_mode,omitempty"`
+	Disable_sni        bool                   `yaml:"disable_sni,omitempty"`
 }
 
 type ProxyGroup struct {
@@ -51,6 +56,23 @@ type SqlConfig struct {
 	Clash string `json:"clash"`
 	Udp   bool   `json:"udp"`
 	Cert  bool   `json:"cert"`
+}
+
+// 删除opts中的空值
+func DeleteOpts(opts map[string]interface{}) {
+	for k, v := range opts {
+		switch v := v.(type) {
+		case string:
+			if v == "" {
+				delete(opts, k)
+			}
+		case map[string]interface{}:
+			DeleteOpts(v)
+			if len(v) == 0 {
+				delete(opts, k)
+			}
+		}
+	}
 }
 
 // EncodeClash 用于生成 Clash 配置文件
@@ -122,6 +144,7 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 					"Host": trojan.Query.Host,
 				},
 			}
+			DeleteOpts(ws_opts)
 			trojanproxy := Proxy{
 				Name:               trojan.Name,
 				Type:               "trojan",
@@ -145,7 +168,7 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 			}
 			// 如果没有名字，就用服务器地址作为名字
 			if vmess.Ps == "" {
-				vmess.Ps = fmt.Sprintf("%s:%d", vmess.Add, vmess.Port)
+				vmess.Ps = fmt.Sprintf("%s:%s", vmess.Add, vmess.Port)
 			}
 			ws_opts := map[string]interface{}{
 				"path": vmess.Path,
@@ -153,18 +176,24 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 					"Host": vmess.Host,
 				},
 			}
+			DeleteOpts(ws_opts)
 			tls := false
 			if vmess.Tls != "none" && vmess.Tls != "" {
 				tls = true
+			}
+			port, _ := strconv.Atoi(vmess.Port)
+			aid, _ := strconv.Atoi(vmess.Aid)
+			if aid == 0 {
+				aid = 32
 			}
 			vmessproxy := Proxy{
 				Name:             vmess.Ps,
 				Type:             "vmess",
 				Server:           vmess.Add,
-				Port:             vmess.Port,
+				Port:             port,
 				Cipher:           vmess.Scy,
 				Uuid:             vmess.Id,
-				AlterId:          vmess.Aid,
+				AlterId:          aid,
 				Network:          vmess.Net,
 				Tls:              tls,
 				Ws_opts:          ws_opts,
@@ -192,6 +221,12 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				"public-key": vless.Query.Pbk,
 				"short-id":   vless.Query.Sid,
 			}
+			DeleteOpts(ws_opts)
+			DeleteOpts(reality_opts)
+			tls := false
+			if vless.Query.Security != "" {
+				tls = true
+			}
 			vlessproxy := Proxy{
 				Name:               vless.Name,
 				Type:               "vless",
@@ -206,6 +241,7 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Reality_opts:       reality_opts,
 				Udp:                sqlconfig.Udp,
 				Skip_cert_verify:   sqlconfig.Cert,
+				Tls:                tls,
 			}
 			proxys = append(proxys, vlessproxy)
 		case Scheme == "hy" || Scheme == "hysteria":
@@ -226,7 +262,7 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Auth_str:         hy.Auth,
 				Up:               hy.UpMbps,
 				Down:             hy.DownMbps,
-				Alpn:             hy.ALPN,
+				Alpn:             []string{hy.ALPN},
 				Peer:             hy.Peer,
 				Udp:              sqlconfig.Udp,
 				Skip_cert_verify: sqlconfig.Cert,
@@ -256,6 +292,36 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Skip_cert_verify: sqlconfig.Cert,
 			}
 			proxys = append(proxys, hyproxy2)
+		case Scheme == "tuic":
+			tuic, err := DecodeTuicURL(link)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			// 如果没有名字，就用服务器地址作为名字
+			if tuic.Name == "" {
+				tuic.Name = fmt.Sprintf("%s:%d", tuic.Host, tuic.Port)
+			}
+			disable_sni := false
+			if tuic.Disable_sni == 1 {
+				disable_sni = true
+			}
+			tuicproxy := Proxy{
+				Name:               tuic.Name,
+				Type:               "tuic",
+				Server:             tuic.Host,
+				Port:               tuic.Port,
+				Password:           tuic.Password,
+				Uuid:               tuic.Uuid,
+				Congestion_control: tuic.Congestion_control,
+				Alpn:               []string{tuic.Alpn},
+				Udp_relay_mode:     tuic.Udp_relay_mode,
+				Disable_sni:        disable_sni,
+				Sni:                tuic.Sni,
+				Udp:                sqlconfig.Udp,
+				Skip_cert_verify:   sqlconfig.Cert,
+			}
+			proxys = append(proxys, tuicproxy)
 		}
 	}
 	// 生成Clash配置文件
@@ -274,13 +340,13 @@ func DecodeClash(proxys []Proxy, yamlfile string) ([]byte, error) {
 			return nil, err
 		}
 		defer resp.Body.Close()
-		data, err = ioutil.ReadAll(resp.Body)
+		data, err = io.ReadAll(resp.Body)
 		if err != nil {
 			log.Printf("error: %v", err)
 			return nil, err
 		}
 	} else {
-		data, err = ioutil.ReadFile(yamlfile)
+		data, err = os.ReadFile(yamlfile)
 		if err != nil {
 			log.Printf("error: %v", err)
 			return nil, err

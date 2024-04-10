@@ -3,6 +3,10 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"strings"
 	"sublink/models"
 	"sublink/node"
 
@@ -51,7 +55,37 @@ func GetClash(c *gin.Context) {
 	}
 	urls := []string{}
 	for _, v := range sub.Nodes {
-		urls = append(urls, v.Link)
+		// if strings.Contains(v.Link, ",") {
+		// 	links := strings.Split(v.Link, ",")
+		// 	for _, link := range links {
+		// 		urls = append(urls, link)
+		// 	}
+		// 	continue
+		// } else {
+		// 	urls = append(urls, v.Link)
+		// }
+		switch {
+		// 如果包含多条节点
+		case strings.Contains(v.Link, ","):
+			links := strings.Split(v.Link, ",")
+			urls = append(urls, links...)
+			continue
+		//如果是订阅转换
+		case strings.Contains(v.Link, "http://") || strings.Contains(v.Link, "https://"):
+			resp, err := http.Get(v.Link)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			defer resp.Body.Close()
+			body, _ := io.ReadAll(resp.Body)
+			nodes := node.Base64Decode(string(body))
+			links := strings.Split(nodes, "\n")
+			urls = append(urls, links...)
+		// 默认
+		default:
+			urls = append(urls, v.Link)
+		}
 	}
 
 	var configs node.SqlConfig
