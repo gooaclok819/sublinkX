@@ -67,6 +67,7 @@ func GetIp(c *gin.Context) {
 		} else {
 			// 更新访问次数
 			iplog.Count++
+			iplog.Date = time.Now().Format("2006-01-02 15:04:05")
 			err = iplog.Update()
 			if err != nil {
 				log.Println(err)

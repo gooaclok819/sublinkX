@@ -152,7 +152,32 @@ const currentTableData = computed(() => {
   const end = start + pageSize.value;
   return tableData.value.slice(start, end);
 });
-
+// 复制链接
+const copyUrl = (url: string) => {
+  const textarea = document.createElement('textarea');
+  textarea.value = url;
+  document.body.appendChild(textarea);
+  textarea.select();
+  try {
+    const successful = document.execCommand('copy');
+    const msg = successful ? 'success' : 'warning';
+    const message = successful ? '复制成功！' : '复制失败！';
+    ElMessage({
+      type: msg,
+      message,
+    });
+  } catch (err) {
+    ElMessage({
+      type: 'warning',
+      message: '复制失败！',
+    });
+  } finally {
+    document.body.removeChild(textarea);
+  }
+};
+const copyInfo = (row: any) => {
+  copyUrl(row.Link)
+}
 
 </script>
 
@@ -188,6 +213,7 @@ const currentTableData = computed(() => {
     <el-table-column prop="CreateDate" label="创建时间" sortable  />
     <el-table-column fixed="right" label="操作" width="120">
       <template #default="scope">
+        <el-button link type="primary" size="small" @click="copyInfo(scope.row)">复制</el-button>
         <el-button link type="primary" size="small" @click="handleEdit(scope.row)">编辑</el-button>
   <el-button link type="primary" size="small" @click="handleDel(scope.row)">删除</el-button>
 

@@ -1,4 +1,4 @@
-<div align="center">
+    <div align="center">
 <img src="webs/src/assets/logo.png" width="150px" height="150px" />
 </div>
 
@@ -35,12 +35,17 @@
 
 v2ray为base64通用格式
 
-clash支持协议:ss ssr trojan vmess vless hy hy2
+clash支持协议:ss ssr trojan vmess vless hy hy2 tuic
 
-## [[项目预览]]
+## [项目预览]
 
 ![1712594176714](webs/src/assets/1.png)
 ![1712594176714](webs/src/assets/2.png)
 
+## [安装说明]
+
+
+## Stargazers over time
 [![Stargazers over time](https://starchart.cc/gooaclok819/sublinkX.svg?variant=adaptive)](https://starchart.cc/gooaclok819/sublinkX)
+
 

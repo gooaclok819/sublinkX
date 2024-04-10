@@ -44,7 +44,7 @@ function resetPassword(row: { [key: string]: any }) {
 </script>
 
 <template>
-  <el-card style="margin: 10px;"w-100>
+  <el-card style="margin: 10px;text-align: center;">
     <el-row :gutter="20">
       <el-col :span="18">
         <h2>{{$t('userset.title')}}</h2>

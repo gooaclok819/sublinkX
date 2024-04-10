@@ -2,6 +2,7 @@
 import { ref,onMounted  } from 'vue'
 import {getSubs,AddSub,DelSub,UpdateSub} from "@/api/subcription/subs"
 import {getNodes} from "@/api/subcription/node"
+import QrcodeVue from 'qrcode.vue'
 interface Sub {
   ID: number;
   Name: string;
@@ -34,14 +35,13 @@ const SubTitle = ref('')
 const Subname = ref('')
 const oldSubname = ref('')
 const dialogVisible = ref(false)
-const Delvisible = ref(false)
 const table = ref()
 const NodesList = ref<Node[]>([])
 const value1 = ref<string[]>([])
 const checkList = ref<string[]>([]) // 配置列表
 const iplogsdialog = ref(false)
 const IplogsList = ref<SubLogs[]>([])
-
+const qrcode = ref('')
 async function getsubs() {
   const {data} = await getSubs();
     tableData.value = data
@@ -222,7 +222,6 @@ const copyUrl = (url: string) => {
   textarea.value = url;
   document.body.appendChild(textarea);
   textarea.select();
-
   try {
     const successful = document.execCommand('copy');
     const msg = successful ? 'success' : 'warning';
@@ -257,20 +256,27 @@ const handleClient = (name:string) => {
   })  
   ClientDiaLog.value = true
 }
-const handleOpenUrl = (url:string) => {
-  window.open(url)
+
+const Qrdialog = ref(false)
+
+const handleQrcode = (url:string)=>{
+  Qrdialog.value = true
+  qrcode.value = url
 }
 </script>
 
 <template>
   <div>
-    <el-dialog v-model="ClientDiaLog" title="客户端" width="80%" draggable>
+    <el-dialog v-model="Qrdialog" width="300px" style="text-align: center">
+      <qrcode-vue :value="qrcode" :size="200" level="H" />
+      <el-tag type="primary" effect="dark" round>{{qrcode}}</el-tag>
+      <el-button @click="copyUrl(qrcode)">复制</el-button>
+    </el-dialog>
+    <el-dialog v-model="ClientDiaLog" title="客户端" style="text-align: center" >
       <el-row>
         <el-col v-for="(item,index) in ClientUrls" style="margin-bottom:10px;">
-          <el-tag type="success">{{index}}</el-tag>
-          <el-tag type="primary">{{item}}</el-tag>
-          <el-button @click="handleOpenUrl(item)">打开</el-button>
-          <el-button @click="copyUrl(item)">复制</el-button>
+          <el-tag type="success" size="large">{{index}}</el-tag>
+          <el-button @click="handleQrcode(item)">二维码</el-button>
         </el-col>
         </el-row>
     </el-dialog>
@@ -279,9 +285,9 @@ const handleOpenUrl = (url:string) => {
     <div class="dialog-footer">
       <el-table :data="IplogsList" border style="width: 100%">
         <el-table-column prop="IP" label="Ip" />
-        <el-table-column prop="Count" label="当日访问次数" />
+        <el-table-column prop="Count" label="总访问次数" />
         <el-table-column prop="Addr" label="来源" />
-        <el-table-column prop="Date" label="时间" />
+        <el-table-column prop="Date" label="最近时间" />
       </el-table>
     </div>
   </template>
