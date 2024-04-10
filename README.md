@@ -43,7 +43,8 @@ clash支持协议:ss ssr trojan vmess vless hy hy2 tuic
 ![1712594176714](webs/src/assets/2.png)
 
 ## [安装说明]
-
+linux终端输入：`curl -s https://raw.githubusercontent.com/gooaclok819/sublinkX/main/install.sh | sudo bash
+`
 
 ## Stargazers over time
 [![Stargazers over time](https://starchart.cc/gooaclok819/sublinkX.svg?variant=adaptive)](https://starchart.cc/gooaclok819/sublinkX)
