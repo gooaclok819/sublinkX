@@ -3,7 +3,7 @@ package middlewares
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"sublink/models"
@@ -25,7 +25,7 @@ func GetIp(c *gin.Context) {
 			return
 		}
 		defer resp.Body.Close()
-		body, _ := ioutil.ReadAll(resp.Body)
+		body, _ := io.ReadAll(resp.Body)
 		utf8Body, _ := simplifiedchinese.GBK.NewDecoder().Bytes(body)
 		type IpInfo struct {
 			Addr string `json:"addr"`

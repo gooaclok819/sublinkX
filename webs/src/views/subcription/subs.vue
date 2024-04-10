@@ -218,18 +218,29 @@ const isNameShow = (row: any): boolean =>  {
 }
 // 复制链接
 const copyUrl = (url: string) => {
-  navigator.clipboard.writeText(url).then(function() {
+  const textarea = document.createElement('textarea');
+  textarea.value = url;
+  document.body.appendChild(textarea);
+  textarea.select();
+
+  try {
+    const successful = document.execCommand('copy');
+    const msg = successful ? 'success' : 'warning';
+    const message = successful ? '复制成功！' : '复制失败！';
     ElMessage({
-        type: 'success',
-        message: '复制成功！',
-      })
-}, function(err) {
-  ElMessage({
-        type: 'warning',
-        message: '复制失败！',
-      })
-});
-}
+      type: msg,
+      message,
+    });
+  } catch (err) {
+    ElMessage({
+      type: 'warning',
+      message: '复制失败！',
+    });
+  } finally {
+    document.body.removeChild(textarea);
+  }
+};
+
 const copyInfo = (row: any) => {
   copyUrl(row.Link)
 }
@@ -253,7 +264,7 @@ const handleOpenUrl = (url:string) => {
 
 <template>
   <div>
-    <el-dialog v-model="ClientDiaLog" title="客户端"  draggable>
+    <el-dialog v-model="ClientDiaLog" title="客户端" width="80%" draggable>
       <el-row>
         <el-col v-for="(item,index) in ClientUrls" style="margin-bottom:10px;">
           <el-tag type="success">{{index}}</el-tag>
@@ -331,13 +342,13 @@ const handleOpenUrl = (url:string) => {
     <el-table-column type="selection" fixed prop="ID" label="id"  />
     <el-table-column prop="Name" label="订阅名称 / 节点"  >
     <template #default="{row}">
-      <el-tag :type="row.Nodes ? 'success' : 'primary'">{{row.Name}}</el-tag>
+      <el-tag :type="!row.Nodes ? 'success' : 'primary'" >{{row.Name}}</el-tag>
         </template>
     </el-table-column>
     <el-table-column prop="Link" label="链接" :show-overflow-tooltip="true" >
       <template #default="{row}">
         <div v-if="row.Nodes">
-          <el-button @click="handleClient(row.Name)">客户端</el-button>
+          <el-link type="primary" size="small" @click="handleClient(row.Name)">客户端</el-link>
         </div>
         </template>
       </el-table-column>
