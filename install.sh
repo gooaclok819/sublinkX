@@ -62,6 +62,7 @@ while true; do
     echo "2. 停止服务"
     echo "3. 卸载安装"
     echo "4. 查看服务状态"
+    echo "5. 查看运行目录"
     echo "0. 退出"
     echo -n "请选择一个选项: "
     read option
@@ -85,6 +86,10 @@ while true; do
             ;;
         4)
             systemctl status sublink
+            ;;
+        5)
+            echo "运行目录: /usr/local/bin/sublink"
+            echo "需要备份的目录为db,template目录为模版文件可备份可不备份"
             ;;
         0)
             exit 0
