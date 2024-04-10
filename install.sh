@@ -1,4 +1,10 @@
 #!/bin/bash
+# 检查用户是否为root
+if [ "$(id -u)" != "0" ]; then
+    echo -e "${RED}该脚本必须以root身份运行。${NC}"
+    exit 1
+fi
+
 #创建一个程序目录
 cd /usr/local/bin
 mkdir sublink
