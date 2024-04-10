@@ -74,6 +74,18 @@ func DeleteOpts(opts map[string]interface{}) {
 		}
 	}
 }
+func convertToInt(value interface{}) (int, error) {
+	switch v := value.(type) {
+	case int:
+		return v, nil
+	case float64:
+		return int(v), nil
+	case string:
+		return strconv.Atoi(v)
+	default:
+		return 0, fmt.Errorf("unexpected type %T", v)
+	}
+}
 
 // EncodeClash 用于生成 Clash 配置文件
 func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
@@ -181,8 +193,8 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 			if vmess.Tls != "none" && vmess.Tls != "" {
 				tls = true
 			}
-			port, _ := strconv.Atoi(vmess.Port)
-			aid, _ := strconv.Atoi(vmess.Aid)
+			port, _ := convertToInt(vmess.Port)
+			aid, _ := convertToInt(vmess.Aid)
 			if aid == 0 {
 				aid = 32
 			}
