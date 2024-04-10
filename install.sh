@@ -1,127 +1,79 @@
 #!/bin/bash
 
-red='\033[0;31m'
-green='\033[0;32m'
-plain='\033[0m'
+# 获取机器型号
+ARCH=$(uname -m)
 
-# check root
-[[ $EUID -ne 0 ]] && echo -e "${red}错误：${plain} 必须使用root用户运行此脚本！\n" && exit 1
-
-# check os and architecture
-arch=$(uname -m)
-if [[ $arch == "x86_64" ]]; then
-    arch="amd64"
-elif [[ $arch == "aarch64" ]]; then
-    arch="arm64"
+# 根据机器型号下载对应的发行版本
+if [ "$ARCH" = "x86_64" ]; then
+    wget https://github.com/gooaclok819/sublinkX/releases/download/latest/sublink_amd64 -O /usr/local/bin/sublink
+elif [ "$ARCH" = "aarch64" ]; then
+    wget https://github.com/gooaclok819/sublinkX/releases/download/latest/sublink_arm64 -O /usr/local/bin/sublink
 else
-    echo -e "${red}不支持的架构：${arch}${plain}\n" && exit 1
+    echo "不支持的架构."
+    exit 1
 fi
 
-install_sublink() {
-    echo -e "开始安装 sublink"
-    
-    # Get the latest version
-    latest_version=$(curl --silent "https://api.github.com/repos/gooaclok819/sublinkX/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-    download_url="https://github.com/gooaclok819/sublinkX/releases/download/${latest_version}/sublink_${arch}"
-    
-    wget -N --no-check-certificate -O /usr/local/bin/sublink ${download_url}
-    if [[ $? -ne 0 ]]; then
-        echo -e "${red}下载 sublink 失败，请确保你的服务器能够下载该文件${plain}"
-        exit 1
-    fi
+# 给二进制文件赋予执行权限
+chmod 777 /usr/local/bin/sublink
 
-    chmod +x /usr/local/bin/sublink
-    echo -e "${green}sublink 安装完成${plain}"
-
-    # Create a systemd service file
-    cat > /etc/systemd/system/sublink.service << EOF
+# 创建systemd服务
+cat << EOF > /etc/systemd/system/sublink.service
 [Unit]
 Description=Sublink Service
-After=network.target
 
 [Service]
 ExecStart=/usr/local/bin/sublink
-Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
-    # Reload systemd, enable and start the service
-    systemctl daemon-reload
-    systemctl enable sublink
-    systemctl start sublink
-}
+# 刷新systemd，使之能够识别新的服务
+systemctl daemon-reload
 
-uninstall_sublink() {
-    echo -e "开始卸载 sublink"
-    
-    # Stop and disable the service
-    systemctl stop sublink
-    systemctl disable sublink
+# 设置一个系统变量
+echo "alias sublink='bash /usr/local/bin/menu.sh'" >> ~/.bashrc
+source ~/.bashrc
 
-    # Remove the service file and the program
-    rm -f /etc/systemd/system/sublink.service
-    rm -f /usr/local/bin/sublink
+# 创建菜单脚本
+cat << EOF > /usr/local/bin/menu.sh
+#!/bin/bash
 
-    # Reload systemd
-    systemctl daemon-reload
+echo "1. 安装并启动"
+echo "2. 卸载并退出"
+echo "3. 查看服务状态"
+echo "4. 退出"
 
-    echo -e "${green}sublink 卸载完成${plain}"
-}
+read -p "请输入你的选择: " choice
 
-check_status() {
-    if systemctl --quiet is-active sublink; then
-        echo -e "${green}服务已启动${plain}"
-    else
-        echo -e "${red}服务未启动${plain}"
-    fi
-}
-
-menu() {
-    echo -e "1. 安装服务"
-    echo -e "2. 卸载服务"
-    echo -e "3. 启动服务"
-    echo -e "4. 停止服务"
-    echo -e "5. 查看服务状态"
-    echo -e "6. 查看安装目录"
-    echo -e "7. 查看运行状态"
-    echo -e "8. 退出"
-    read -p "请输入你的选择：" choice
-    case "$choice" in
-        1)
-        install_sublink
-        ;;
-        2)
-        uninstall_sublink
-        ;;
-        3)
+case $choice in
+    1)
         systemctl start sublink
+        echo "Sublink已启动."
         ;;
-        4)
+    2)
         systemctl stop sublink
+        systemctl disable sublink
+        rm /etc/systemd/system/sublink.service
+        systemctl daemon-reload
+        echo "Sublink已卸载."
         ;;
-        5)
+    3)
         systemctl status sublink
         ;;
-        6)
-        echo "/usr/local/bin/sublink"
+    4)
+        echo "正在退出..."
         ;;
-        7)
-        check_status
+    *)
+        echo "无效的选择."
         ;;
-        8)
-        exit 0
-        ;;
-        *)
-        echo -e "${red}无效的选项！${plain}"
-        ;;
-    esac
-}
+esac
 
-# Create a symbolic link to this script
-ln -s $(realpath \\\$0) /usr/local/bin/sublink
+if systemctl -q is-active sublink; then
+    echo "当前运行状态: 已运行"
+else
+    echo "当前运行状态: 未运行"
+fi
+EOF
 
-while true; do
-    menu
-done
+chmod +x /usr/local/bin/menu.sh
