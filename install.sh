@@ -1,17 +1,25 @@
 #!/bin/bash
 
+# 检查是否以 root 权限运行
+if [ "$EUID" -ne 0 ]
+  then echo "请以 root 权限运行此脚本."
+  exit
+fi
+
 # 获取机器型号
 ARCH=$(uname -m)
 
 # 根据机器型号下载对应的发行版本
 if [ "$ARCH" = "x86_64" ]; then
-    wget https://github.com/gooaclok819/sublinkX/releases/download/latest/sublink_amd64 -O /usr/local/bin/sublink
+    FILE_URL=$(curl -s https://api.github.com/repos/gooaclok819/sublinkX/releases/latest | jq -r '.assets[] | select(.name == "sublink_amd64") | .browser_download_url')
 elif [ "$ARCH" = "aarch64" ]; then
-    wget https://github.com/gooaclok819/sublinkX/releases/download/latest/sublink_arm64 -O /usr/local/bin/sublink
+    FILE_URL=$(curl -s https://api.github.com/repos/gooaclok819/sublinkX/releases/latest | jq -r '.assets[] | select(.name == "sublink_arm64") | .browser_download_url')
 else
     echo "不支持的架构."
     exit 1
 fi
+
+wget $FILE_URL -O /usr/local/bin/sublink
 
 # 给二进制文件赋予执行权限
 chmod 777 /usr/local/bin/sublink
@@ -32,12 +40,22 @@ EOF
 systemctl daemon-reload
 
 # 设置一个系统变量
-echo "alias sublink='bash /usr/local/bin/menu.sh'" >> ~/.bashrc
-source ~/.bashrc
+echo "alias sublink='bash /usr/local/bin/menu.sh'" >> /root/.bashrc
+source /root/.bashrc
 
 # 创建菜单脚本
 cat << EOF > /usr/local/bin/menu.sh
 #!/bin/bash
+
+function check_status {
+    if systemctl -q is-active sublink; then
+        echo "当前运行状态: 已运行"
+    else
+        echo "当前运行状态: 未运行"
+    fi
+}
+
+check_status
 
 echo "1. 安装并启动"
 echo "2. 卸载并退出"
@@ -69,11 +87,7 @@ case $choice in
         ;;
 esac
 
-if systemctl -q is-active sublink; then
-    echo "当前运行状态: 已运行"
-else
-    echo "当前运行状态: 未运行"
-fi
+check_status
 EOF
 
 chmod +x /usr/local/bin/menu.sh
