@@ -1,4 +1,9 @@
 #!/bin/bash
+#创建一个程序目录
+cd /usr/local/bin
+mkdir sublink
+cd sublink
+echo "创建/usr/local/bin/sublink目录"
 
 # 获取最新的发行版标签
 latest_release=$(curl --silent "https://api.github.com/repos/gooaclok819/sublinkX/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
@@ -22,14 +27,14 @@ curl -LO "https://github.com/gooaclok819/sublinkX/releases/download/$latest_rele
 chmod +x $file_name
 
 # 移动文件到/usr/local/bin
-sudo mv $file_name /usr/local/bin/sublink
+sudo mv $file_name /usr/local/bin/sublink/sublink
 
 # 创建systemctl服务
 echo "[Unit]
 Description=Sublink Service
 
 [Service]
-ExecStart=/usr/local/bin/sublink
+ExecStart=/usr/local/bin/sublink/sublink
 
 [Install]
 WantedBy=multi-user.target" | sudo tee /etc/systemd/system/sublink.service
@@ -41,7 +46,8 @@ sudo systemctl enable sublink
 echo "安装完成已经启动输入sublink可以呼出菜单"
 
 # 设置一个系统变量
-echo "alias sublink='/usr/local/bin/sublink_menu'" >> ~/.bashrc
+echo "alias sublink='/usr/local/bin/sublink/sublink_menu'" >> ~/.bashrc
+
 
 # 创建sublink_menu.sh脚本
 echo '#!/bin/bash
@@ -68,8 +74,7 @@ while true; do
 		        systemctl disable sublink
 		        rm /etc/systemd/system/sublink.service
 		        systemctl daemon-reload
-		        rm  /usr/local/bin/sublink_menu
-		        rm /usr/local/bin/sublink
+		        rm -r /usr/local/bin/sublink
 		        unalias sublink
             ;;
         3)
@@ -89,7 +94,7 @@ chmod +x sublink_menu.sh
 
 # 移动sublink_menu.sh到/usr/local/bin
 
-sudo mv sublink_menu.sh /usr/local/bin/sublink_menu
+sudo mv sublink_menu.sh /usr/local/bin/sublink/sublink_menu
 
 echo "请在当前 shell 中执行以下命令来启用别名："
 echo "source ~/.bashrc"
