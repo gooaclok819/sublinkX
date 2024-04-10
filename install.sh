@@ -53,23 +53,52 @@ EOF
     systemctl start sublink
 }
 
+uninstall_sublink() {
+    echo -e "开始卸载 sublink"
+    
+    # Stop and disable the service
+    systemctl stop sublink
+    systemctl disable sublink
+
+    # Remove the service file and the program
+    rm -f /etc/systemd/system/sublink.service
+    rm -f /usr/local/bin/sublink
+
+    # Reload systemd
+    systemctl daemon-reload
+
+    echo -e "${green}sublink 卸载完成${plain}"
+}
+
 menu() {
-    echo -e "1. 启动服务"
-    echo -e "2. 停止服务"
-    echo -e "3. 查看安装目录"
-    echo -e "4. 退出"
+    echo -e "1. 安装服务"
+    echo -e "2. 卸载服务"
+    echo -e "3. 启动服务"
+    echo -e "4. 停止服务"
+    echo -e "5. 查看服务状态"
+    echo -e "6. 查看安装目录"
+    echo -e "7. 退出"
     read -p "请输入你的选择：" choice
     case "$choice" in
         1)
-        systemctl start sublink
+        install_sublink
         ;;
         2)
-        systemctl stop sublink
+        uninstall_sublink
         ;;
         3)
-        echo "/usr/local/bin/sublink"
+        systemctl start sublink
         ;;
         4)
+        systemctl stop sublink
+        ;;
+        5)
+        systemctl status sublink
+        ;;
+        6)
+        echo "/usr/local/bin/sublink"
+        ;;
+        7)
         exit 0
         ;;
         *)
@@ -78,11 +107,8 @@ menu() {
     esac
 }
 
-echo -e "${green}开始安装${plain}"
-install_sublink
-
 # Create a symbolic link to this script
-ln -s $(realpath \$0) /usr/local/bin/sublink
+ln -s $(realpath \\$0) /usr/local/bin/sublink
 
 while true; do
     menu
