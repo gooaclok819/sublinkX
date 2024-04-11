@@ -54,10 +54,16 @@ echo "安装完成已经启动输入sublink可以呼出菜单"
 
 # 创建sublink_menu.sh脚本
 echo '#!/bin/bash
-
+# 设置当前版本为
+current_version=$latest_release
+# 获取最新的发行版标签
+latest_release=$(curl --silent "https://api.github.com/repos/gooaclok819/sublinkX/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 while true; do
     # 获取服务状态
     status=$(systemctl is-active sublink)
+    # 获取最新版本
+    echo "最新版本: $latest_release"
+    echo "你当前版本: $current_version"
     # 判断服务状态并打印
     if [ "$status" = "active" ]; then
         echo "当前运行状态: 已运行"
