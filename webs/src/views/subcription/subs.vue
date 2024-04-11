@@ -263,6 +263,9 @@ const handleQrcode = (url:string)=>{
   Qrdialog.value = true
   qrcode.value = url
 }
+const OpenUrl = (url:string) => {
+  window.open(url)
+}
 </script>
 
 <template>
@@ -271,6 +274,7 @@ const handleQrcode = (url:string)=>{
       <qrcode-vue :value="qrcode" :size="200" level="H" />
       <el-tag type="primary" effect="dark" round>{{qrcode}}</el-tag>
       <el-button @click="copyUrl(qrcode)">复制</el-button>
+      <el-button @click="OpenUrl(qrcode)">打开</el-button>
     </el-dialog>
     <el-dialog v-model="ClientDiaLog" title="客户端" style="text-align: center" >
       <el-row>

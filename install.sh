@@ -13,7 +13,7 @@ echo "创建/usr/local/bin/sublink目录"
 
 # 获取最新的发行版标签
 latest_release=$(curl --silent "https://api.github.com/repos/gooaclok819/sublinkX/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-
+echo "最新版本: $latest_release"
 # 检测机器类型
 machine_type=$(uname -m)
 
@@ -48,21 +48,17 @@ WantedBy=multi-user.target" | sudo tee /etc/systemd/system/sublink.service
 # 启动并启用服务
 sudo systemctl start sublink
 sudo systemctl enable sublink
-
-echo "安装完成已经启动输入sublink可以呼出菜单"
-
+echo "服务已启动并已设置为开机启动"
+echo "默认账号admin密码123456 端口8000"
+echo "安装完成已经启动输入sublink或者sudo sublink可以呼出菜单"
 
 # 创建sublink_menu.sh脚本
 echo '#!/bin/bash
-# 设置当前版本为
-# 获取最新的发行版标签
-latest_release=$(curl --silent "https://api.github.com/repos/gooaclok819/sublinkX/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+
 while true; do
     # 获取服务状态
     status=$(systemctl is-active sublink)
-    # 获取最新版本
-    echo "最新版本: $latest_release"
-    echo "你当前版本: 1.1"
+    echo "当前版本: 1.2"
     # 判断服务状态并打印
     if [ "$status" = "active" ]; then
         echo "当前运行状态: 已运行"
@@ -74,6 +70,7 @@ while true; do
     echo "3. 卸载安装"
     echo "4. 查看服务状态"
     echo "5. 查看运行目录"
+    echo "6. 更新 sublink"
     echo "0. 退出"
     echo -n "请选择一个选项: "
     read option
@@ -101,6 +98,33 @@ while true; do
         5)
             echo "运行目录: /usr/local/bin/sublink"
             echo "需要备份的目录为db,template目录为模版文件可备份可不备份"
+            ;;
+        6)
+            echo "开始更新 sublink..."
+            # 停止服务
+            sudo systemctl stop sublink
+            # 获取最新的发行版标签
+            latest_release=$(curl --silent "https://api.github.com/repos/gooaclok819/sublinkX/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+            echo "最新版本: $latest_release"
+            # 检测机器类型
+            machine_type=$(uname -m)
+            if [ "$machine_type" = "x86_64" ]; then
+                file_name="sublink_amd64"
+            elif [ "$machine_type" = "aarch64" ]; then
+                file_name="sublink_arm64"
+            else
+                echo "不支持的机器类型: $machine_type"
+                exit 1
+            fi
+            # 下载文件
+            curl -LO "https://github.com/gooaclok819/sublinkX/releases/download/$latest_release/$file_name"
+            # 设置文件为可执行
+            chmod +x $file_name
+            # 移动文件到/usr/local/bin
+            sudo mv $file_name /usr/local/bin/sublink/sublink
+            # 重新启动服务
+            sudo systemctl start sublink
+            echo "sublink 更新完成."
             ;;
         0)
             exit 0

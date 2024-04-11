@@ -19,7 +19,7 @@ func (node *Node) Update() error {
 
 // 查找节点是否重复
 func (node *Node) Find() error {
-	return DB.Where("link = ? or name = ?", node.Link, node.Name).Find(node).Error
+	return DB.Where("link = ? or name = ?", node.Link, node.Name).First(node).Error
 }
 
 // 节点列表

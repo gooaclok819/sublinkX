@@ -78,7 +78,11 @@ func DecodeHYURL(s string) (HY, error) {
 	upMbps, _ := strconv.Atoi(u.Query().Get("upmbps"))
 	downMbps, _ := strconv.Atoi(u.Query().Get("downmbps"))
 	alpn := u.Query().Get("alpn")
+	// 如果没有设置 Name，则使用 Fragment 作为 Name
 	name := u.Fragment
+	if name == "" {
+		name = server + ":" + u.Port()
+	}
 	if CheckEnvironment() {
 		fmt.Println("server:", server)
 		fmt.Println("port:", port)

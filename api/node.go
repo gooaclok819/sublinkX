@@ -1,9 +1,12 @@
 package api
 
 import (
+	"log"
+	"net/url"
 	"strconv"
 	"strings"
 	"sublink/models"
+	"sublink/node"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -56,9 +59,9 @@ func NodeAdd(c *gin.Context) {
 	var Node models.Node
 	link := c.PostForm("link")
 	name := c.PostForm("name")
-	if link == "" || name == "" {
+	if link == "" {
 		c.JSON(400, gin.H{
-			"msg": "link or name 不能为空",
+			"msg": "link  不能为空",
 		})
 		return
 	}
@@ -68,20 +71,83 @@ func NodeAdd(c *gin.Context) {
 		})
 		return
 	}
-	Node.Link = link
 	Node.Name = name
+	if name == "" {
+		u, err := url.Parse(link)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		switch {
+		case u.Scheme == "ss":
+			ss, err := node.DecodeSSURL(link)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			Node.Name = ss.Name
+		case u.Scheme == "ssr":
+			ssr, err := node.DecodeSSRURL(link)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			Node.Name = ssr.Qurey.Remarks
+		case u.Scheme == "trojan":
+			trojan, err := node.DecodeTrojanURL(link)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			Node.Name = trojan.Name
+		case u.Scheme == "vmess":
+			vmess, err := node.DecodeVMESSURL(link)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			Node.Name = vmess.Ps
+		case u.Scheme == "vless":
+			vless, err := node.DecodeVLESSURL(link)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			Node.Name = vless.Name
+		case u.Scheme == "hy" || u.Scheme == "hysteria":
+			hy, err := node.DecodeHYURL(link)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			Node.Name = hy.Name
+		case u.Scheme == "hy2" || u.Scheme == "hysteria2":
+			hy2, err := node.DecodeHY2URL(link)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			Node.Name = hy2.Name
+		case u.Scheme == "tuic":
+			tuic, err := node.DecodeTuicURL(link)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			Node.Name = tuic.Name
+		}
+	}
+	Node.Link = link
 	Node.CreateDate = time.Now().Format("2006-01-02 15:04:05")
 	err := Node.Find()
-	if err != nil {
-		c.JSON(400, gin.H{
-			"msg": err.Error(),
-		})
-		return
+	// 如果找到记录说明重复
+	if err == nil {
+		Node.Name = name + " " + time.Now().Format("2006-01-02 15:04:05")
 	}
 	err = Node.Add()
 	if err != nil {
 		c.JSON(400, gin.H{
-			"msg": "添加失败",
+			"msg": "添加失败检查一下是否节点重复",
 		})
 		return
 	}

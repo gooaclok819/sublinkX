@@ -14,6 +14,8 @@ const NodeOldname = ref('')
 const dialogVisible = ref(false)
 const table = ref()
 const NodeTitle = ref('')
+const radio1 = ref('1')
+
 async function getnodes() {
   const {data} = await getNodes();
     tableData.value = data
@@ -30,17 +32,30 @@ const handleAddNode = ()=>{
 }
 const addnodes = async ()=>{
   let nodelinks = Nodelink.value.split(/[\r\n,]/);
-  
-  if (nodelinks) {
-    Nodelink.value = nodelinks.join(',');
-  }
-  
-  
+  // 分开 过滤空行和空格
+  nodelinks = nodelinks.map((item) => item.trim()).filter((item) => item !== '');  
    if (NodeTitle.value== '添加节点'){
-      await AddNodes({
+      // 判断合并还是分开
+      if (radio1.value === '1') {
+        if (Nodename.value.trim() === '') {
+          ElMessage.error('备注不能为空')
+          return
+        }
+        if (nodelinks) {
+        Nodelink.value = nodelinks.join(',');
+        await AddNodes({
         link: Nodelink.value.trim(),
         name: Nodename.value.trim(),
       })
+      }
+      } else {
+        for (let i = 0; i < nodelinks.length; i++) {
+          await AddNodes({
+            link: nodelinks[i],
+            name: "",
+          })
+        }
+      }
       ElMessage.success("添加成功");
    }else{
     await UpdateNode({
@@ -178,7 +193,6 @@ const copyUrl = (url: string) => {
 const copyInfo = (row: any) => {
   copyUrl(row.Link)
 }
-
 </script>
 
 <template>
@@ -195,7 +209,11 @@ const copyInfo = (row: any) => {
   style="margin-bottom:10px" 
   :autosize="{ minRows: 2, maxRows: 10}"
   />
-  <el-input v-model="Nodename" placeholder="请输入备注"  />
+  <el-radio-group v-model="radio1" class="ml-4" v-if="NodeTitle== '添加节点'">
+      <el-radio value="1" size="large">合并</el-radio>
+      <el-radio value="2" size="large">分开</el-radio>
+    </el-radio-group>
+  <el-input v-model="Nodename" placeholder="请输入备注"  v-if="radio1!='2'" />
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="dialogVisible = false">关闭</el-button>
@@ -208,7 +226,11 @@ const copyInfo = (row: any) => {
     <div style="margin-bottom: 10px"></div>
       <el-table ref="table" :data="currentTableData" style="width: 100%" @selection-change="handleSelectionChange">
     <el-table-column type="selection" fixed prop="ID" label="id"  />
-    <el-table-column prop="Name" label="备注"  />
+    <el-table-column prop="Name" label="备注"  >
+      <template #default="scope">
+        <el-tag type="success">{{scope.row.Name}}</el-tag>
+      </template>
+    </el-table-column>
     <el-table-column prop="Link" label="节点" :show-overflow-tooltip="true" />
     <el-table-column prop="CreateDate" label="创建时间" sortable  />
     <el-table-column fixed="right" label="操作" width="120">

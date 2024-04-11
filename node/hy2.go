@@ -89,6 +89,10 @@ func DecodeHY2URL(s string) (HY2, error) {
 	obfs := u.Query().Get("obfs")
 	obfsPassword := u.Query().Get("obfs-password")
 	name := u.Fragment
+	// 如果没有设置 Name，则使用 Host:Port 作为 Fragment
+	if name == "" {
+		name = server + ":" + u.Port()
+	}
 	if CheckEnvironment() {
 		fmt.Println("password:", password)
 		fmt.Println("server:", server)
