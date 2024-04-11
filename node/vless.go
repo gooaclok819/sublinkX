@@ -122,7 +122,11 @@ func DecodeVLESSURL(s string) (VLESS, error) {
 	sni := u.Query().Get("sni")
 	path := u.Query().Get("path")
 	host := u.Query().Get("host")
+	// 如果没有设置name,则使用hostname:port
 	name := u.Fragment
+	if name == "" {
+		name = hostname + ":" + u.Port()
+	}
 	if CheckEnvironment() {
 		fmt.Println("uuid:", uuid)
 		fmt.Println("hostname:", hostname)

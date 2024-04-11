@@ -26,11 +26,12 @@ type Proxy struct {
 	Tls                bool                   `yaml:"tls,omitempty"`
 	Servername         string                 `yaml:"servername,omitempty"`
 	Flow               string                 `yaml:"flow,omitempty"`
-	AlterId            int                    `yaml:"alterId,omitempty"`
+	AlterId            string                 `yaml:"alterId,omitempty"`
 	Network            string                 `yaml:"network,omitempty"`
 	Reality_opts       map[string]interface{} `yaml:"reality-opts,omitempty"`
 	Ws_opts            map[string]interface{} `yaml:"ws-opts,omitempty"`
 	Auth_str           string                 `yaml:"auth_str,omitempty"`
+	Auth               string                 `yaml:"auth,omitempty"`
 	Up                 int                    `yaml:"up,omitempty"`
 	Down               int                    `yaml:"down,omitempty"`
 	Alpn               []string               `yaml:"alpn,omitempty"`
@@ -195,9 +196,6 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 			}
 			port, _ := convertToInt(vmess.Port)
 			aid, _ := convertToInt(vmess.Aid)
-			if aid == 0 {
-				aid = 32
-			}
 			vmessproxy := Proxy{
 				Name:             vmess.Ps,
 				Type:             "vmess",
@@ -205,7 +203,7 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Port:             port,
 				Cipher:           vmess.Scy,
 				Uuid:             vmess.Id,
-				AlterId:          aid,
+				AlterId:          strconv.Itoa(aid),
 				Network:          vmess.Net,
 				Tls:              tls,
 				Ws_opts:          ws_opts,

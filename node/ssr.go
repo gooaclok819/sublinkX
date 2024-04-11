@@ -101,6 +101,10 @@ func DecodeSSRURL(s string) (Ssr, error) {
 	protocol := param[len(param)-4]
 	port, _ := strconv.Atoi(param[len(param)-5])
 	server := ValRetIPv6Addr(param[len(param)-6])
+	// 如果没有备注默认使用服务器+端口作为备注
+	if remarks == "" {
+		remarks = server + ":" + strconv.Itoa(port)
+	}
 	if CheckEnvironment() {
 		fmt.Println("password", password)
 		fmt.Println("obfs", obfs)

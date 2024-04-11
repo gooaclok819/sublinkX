@@ -112,6 +112,10 @@ func DecodeTrojanURL(s string) (Trojan, error) {
 	host := u.Query().Get("host")
 	flow := u.Query().Get("flow")
 	name := u.Fragment
+	// 如果没有设置name,则使用hostname:port
+	if name == "" {
+		name = hostname + ":" + u.Port()
+	}
 	if CheckEnvironment() {
 		fmt.Println("password:", password)
 		fmt.Println("hostname:", hostname)

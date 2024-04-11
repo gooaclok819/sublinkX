@@ -41,6 +41,10 @@ func DecodeTuicURL(s string) (Tuic, error) {
 	Udprelay_mode := u.Query().Get("Udp_relay_mode")
 	Disablesni, _ := strconv.Atoi(u.Query().Get("Disable_sni"))
 	name := u.Fragment
+	// 如果没有设置 Name，则使用 Host:Port 作为 Fragment
+	if name == "" {
+		name = server + ":" + u.Port()
+	}
 	if CheckEnvironment() {
 		fmt.Println("password:", password)
 		fmt.Println("server:", server)

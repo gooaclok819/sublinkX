@@ -73,6 +73,10 @@ func DecodeVMESSURL(s string) (Vmess, error) {
 	if vmess.Scy == "" {
 		vmess.Scy = "auto"
 	}
+	// 如果备注为空，则使用服务器地址+端口
+	if vmess.Ps == "" {
+		vmess.Ps = vmess.Add + ":" + vmess.Port.(string)
+	}
 	if CheckEnvironment() {
 		fmt.Println("服务器地址", vmess.Add)
 		fmt.Println("端口", vmess.Port)

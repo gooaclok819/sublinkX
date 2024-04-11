@@ -49,6 +49,7 @@ func GetIp(c *gin.Context) {
 		var iplog models.SubLogs
 		iplog.IP = ip
 		err = iplog.Find(sub.ID)
+		// 如果没有找到记录
 		if err != nil {
 			iploga := []models.SubLogs{
 				{IP: ip,
