@@ -40,7 +40,7 @@ Description=Sublink Service
 
 [Service]
 ExecStart=/usr/local/bin/sublink/sublink
-
+WorkingDirectory=/usr/local/bin/sublink
 [Install]
 WantedBy=multi-user.target" | sudo tee /etc/systemd/system/sublink.service
 
