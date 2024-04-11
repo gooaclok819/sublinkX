@@ -2,3 +2,5 @@
 *.DS_Store
 db
 logs
+sublink_amd64 
+sublink_arm64
