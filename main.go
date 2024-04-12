@@ -27,10 +27,10 @@ func Templateinit() {
 	// 设置template路径
 
 	// 检查目录是否创建
-	_, err := os.Stat("./template")
+	_, err := os.Stat("./template/clash.yaml")
 	if err != nil {
 		if os.IsNotExist(err) {
-			os.Mkdir("./template", os.ModePerm)
+			os.MkdirAll("./template", os.ModePerm)
 		}
 	}
 	_, err = os.Stat("./template/clash.yaml")
@@ -77,6 +77,7 @@ func main() {
 	routers.Nodes(r)
 	routers.Clients(r)
 	routers.Total(r)
+	routers.Templates(r)
 	// 启动服务
 	r.Run(":8000")
 }

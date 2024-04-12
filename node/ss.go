@@ -86,7 +86,7 @@ func DecodeSSURL(s string) (Ss, error) {
 	port, _ := strconv.Atoi(parts[len(parts)-1])
 	server := strings.Replace(ValRetIPv6Addr(addr), ":"+parts[len(parts)-1], "", -1)
 	cipher := strings.Split(param, ":")[0]
-	password := Base64Decode(strings.Replace(param, cipher+":", "", 1))
+	password := Base64Decode2(strings.Replace(param, cipher+":", "", 1))
 	// 开发环境输出结果
 	if CheckEnvironment() {
 		fmt.Println("Param:", Base64Decode(param))

@@ -8,6 +8,7 @@ export default {
     nodelist:"Node List",
     sublist:"Subscription List",
     subcription:"Subscription Management",
+    templatelist:"Template List",
   },
   // 登录页面国际化
   login: {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 type Tuic struct {
@@ -13,7 +14,7 @@ type Tuic struct {
 	Port               int
 	Uuid               string
 	Congestion_control string
-	Alpn               string
+	Alpn               []string
 	Sni                string
 	Udp_relay_mode     string
 	Disable_sni        int
@@ -32,11 +33,15 @@ func DecodeTuicURL(s string) (Tuic, error) {
 	uuid := u.User.Username()
 	password, _ := u.User.Password()
 	// log.Println(password)
-	// password = Base64Decode(password)
+	password = Base64Decode2(password)
 	server := u.Hostname()
 	port, _ := strconv.Atoi(u.Port())
 	Congestioncontrol := u.Query().Get("Congestion_control")
-	alpn := u.Query().Get("alpn")
+	alpns := u.Query().Get("alpn")
+	alpn := strings.Split(alpns, ",")
+	if alpns == "" {
+		alpn = nil
+	}
 	sni := u.Query().Get("sni")
 	Udprelay_mode := u.Query().Get("Udp_relay_mode")
 	Disablesni, _ := strconv.Atoi(u.Query().Get("Disable_sni"))

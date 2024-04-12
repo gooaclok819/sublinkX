@@ -9,6 +9,7 @@ interface Node {
 }
 const tableData = ref<Node[]>([])
 const Nodelink = ref('')
+const NodeOldlink = ref('')
 const Nodename = ref('')
 const NodeOldname = ref('')
 const dialogVisible = ref(false)
@@ -27,6 +28,7 @@ const handleAddNode = ()=>{
   NodeTitle.value= '添加节点'
   Nodelink.value = ''
   Nodename.value = ''
+  radio1.value = '1'
   dialogVisible.value = true
 
 }
@@ -60,6 +62,7 @@ const addnodes = async ()=>{
    }else{
     await UpdateNode({
         oldname: NodeOldname.value.trim(),
+        oldlink: NodeOldlink.value.trim(),
         link: Nodelink.value.trim(),
         name: Nodename.value.trim(),
       })
@@ -84,12 +87,14 @@ const selectAll = () => {
     })
 }
 const handleEdit = (row:any) => {
+  radio1.value = '1'
   for (let i = 0; i < tableData.value.length; i++) {
     if (tableData.value[i].ID === row.ID) {
       NodeTitle.value= '编辑节点'
       Nodename.value = tableData.value[i].Name
       NodeOldname.value = Nodename.value
       Nodelink.value = tableData.value[i].Link
+      NodeOldlink.value = Nodelink.value
       dialogVisible.value = true
       // value1.value = tableData.value[i].Nodes.map((item) => item.Name)
     }

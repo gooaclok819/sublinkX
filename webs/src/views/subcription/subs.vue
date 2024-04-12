@@ -1,6 +1,7 @@
 <script setup lang='ts'>
 import { ref,onMounted  } from 'vue'
 import {getSubs,AddSub,DelSub,UpdateSub} from "@/api/subcription/subs"
+import {getTemp} from "@/api/subcription/temp"
 import {getNodes} from "@/api/subcription/node"
 import QrcodeVue from 'qrcode.vue'
 interface Sub {
@@ -28,7 +29,11 @@ interface SubLogs {
   count: number;
   address: string;
 }
-
+interface Temp {
+  file: string;
+  text: string;
+  CreateDate: string;
+}
 const tableData = ref<Sub[]>([])
 const Clash = ref('')
 const SubTitle = ref('')
@@ -42,13 +47,19 @@ const checkList = ref<string[]>([]) // 配置列表
 const iplogsdialog = ref(false)
 const IplogsList = ref<SubLogs[]>([])
 const qrcode = ref('')
+const templist = ref<Temp[]>([])
 async function getsubs() {
   const {data} = await getSubs();
     tableData.value = data
 }
+async function gettemps() {
+    const {data} = await getTemp();
+    templist.value = data
+    console.log(templist.value);
+}
 onMounted(() => {
     getsubs()
-
+    gettemps()
 })
 onMounted(async() => {
     const {data} = await getNodes();
@@ -266,6 +277,7 @@ const handleQrcode = (url:string)=>{
 const OpenUrl = (url:string) => {
   window.open(url)
 }
+const clientradio = ref('1')
 </script>
 
 <template>
@@ -303,8 +315,15 @@ const OpenUrl = (url:string) => {
   <el-input v-model="Subname" placeholder="请输入订阅名称" />
   
   <el-row >
-  <el-tag type="primary">clash本地模版文件或url连接</el-tag>
-  <el-input v-model="Clash" placeholder="clash模版文件"  />
+  <el-tag type="primary">clash模版选择</el-tag>
+  <el-radio-group v-model="clientradio" class="ml-4">
+      <el-radio value="1">本地</el-radio>
+      <el-radio value="2">url链接</el-radio>
+    </el-radio-group>
+  <el-select v-model="Clash" placeholder="clash模版文件"  v-if="clientradio === '1'">
+    <el-option v-for="template in templist" :key="template.file" :label="template.file" :value="'./template/'+template.file" />
+  </el-select>
+  <el-input v-model="Clash" placeholder="clash模版文件"  v-else />
 </el-row>
 
   <el-row>
