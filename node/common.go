@@ -65,10 +65,33 @@ func Base64Decode(s string) string {
 	}
 }
 
-// url.ParseQuery解析后还原得到原字符，然后解析base64编码
-func Base64NameDecode(s string) string {
-	s = strings.ReplaceAll(s, " ", "+")
-	return Base64Decode(s)
+// base64解码不自动补齐
+func Base64Decode2(s string) string {
+	// 去除空格
+	s = strings.ReplaceAll(s, " ", "")
+	// 判断是否有特殊字符来判断是标准base64还是url base64
+	match, err := regexp.MatchString(`[_-]`, s)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if !match {
+		// 默认使用标准解码
+		decoded, err := base64.StdEncoding.DecodeString(s)
+		if err != nil {
+			return s // 返回原字符串
+		}
+		decoded_str := string(decoded)
+		return decoded_str
+
+	} else {
+		// 如果有特殊字符则使用URL解码
+		decoded, err := base64.URLEncoding.DecodeString(s)
+		if err != nil {
+			return s // 返回原字符串
+		}
+		decoded_str := string(decoded)
+		return decoded_str
+	}
 }
 
 // 检查环境

@@ -93,6 +93,18 @@ func GetMenus(c *gin.Context) {
 						KeepAlive: true,
 					},
 				},
+				{
+					Path:      "template",
+					Component: "subcription/template",
+					Name:      "Template",
+					Meta: Meta{
+						Title:     "templatelist",
+						Icon:      "document",
+						Hidden:    false,
+						Roles:     []string{"ADMIN"},
+						KeepAlive: true,
+					},
+				},
 			},
 		},
 	}

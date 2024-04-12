@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 type HY struct {
@@ -14,7 +15,7 @@ type HY struct {
 	Auth     string
 	UpMbps   int
 	DownMbps int
-	ALPN     string
+	ALPN     []string
 	Name     string
 }
 
@@ -28,7 +29,7 @@ func CallHy() {
 		Auth:     "",
 		UpMbps:   11,
 		DownMbps: 55,
-		ALPN:     "h3",
+		// ALPN:     "h3",
 	}
 	fmt.Println(EncodeHYURL(hy))
 }
@@ -50,7 +51,7 @@ func EncodeHYURL(hy HY) string {
 	q.Set("auth", hy.Auth)
 	q.Set("upmbps", strconv.Itoa(hy.UpMbps))
 	q.Set("downmbps", strconv.Itoa(hy.DownMbps))
-	q.Set("alpn", hy.ALPN)
+	// q.Set("alpn", hy.ALPN)
 	// 检查query是否有空值，有的话删除
 	for k, v := range q {
 		if v[0] == "" {
@@ -77,7 +78,11 @@ func DecodeHYURL(s string) (HY, error) {
 	auth := u.Query().Get("auth")
 	upMbps, _ := strconv.Atoi(u.Query().Get("upmbps"))
 	downMbps, _ := strconv.Atoi(u.Query().Get("downmbps"))
-	alpn := u.Query().Get("alpn")
+	alpns := u.Query().Get("alpn")
+	alpn := strings.Split(alpns, ",")
+	if alpns == "" {
+		alpn = nil
+	}
 	// 如果没有设置 Name，则使用 Fragment 作为 Name
 	name := u.Fragment
 	if name == "" {

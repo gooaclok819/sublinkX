@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 type Trojan struct {
@@ -15,16 +16,16 @@ type Trojan struct {
 	Type     string      `json:"type"`
 }
 type TrojanQuery struct {
-	Peer          string `json:"peer,omitempty"`
-	Type          string `json:"type,omitempty"`
-	Path          string `json:"path,omitempty"`
-	Security      string `json:"security,omitempty"`
-	Fp            string `json:"fp,omitempty"`
-	AllowInsecure int    `json:"allowInsecure,omitempty"`
-	Alpn          string `json:"alpn,omitempty"`
-	Sni           string `json:"sni,omitempty"`
-	Host          string `json:"host,omitempty"`
-	Flow          string `json:"flow,omitempty"`
+	Peer          string   `json:"peer,omitempty"`
+	Type          string   `json:"type,omitempty"`
+	Path          string   `json:"path,omitempty"`
+	Security      string   `json:"security,omitempty"`
+	Fp            string   `json:"fp,omitempty"`
+	AllowInsecure int      `json:"allowInsecure,omitempty"`
+	Alpn          []string `json:"alpn,omitempty"`
+	Sni           string   `json:"sni,omitempty"`
+	Host          string   `json:"host,omitempty"`
+	Flow          string   `json:"flow,omitempty"`
 }
 
 // 开发者测试
@@ -40,7 +41,7 @@ func CallTrojan() {
 			Security:      "tls",
 			Fp:            "",
 			AllowInsecure: 0,
-			Alpn:          "",
+			Alpn:          []string{"h2", "http/1.1"},
 			Sni:           "baidu.com",
 			Host:          "",
 			Flow:          "",
@@ -67,7 +68,7 @@ func EncodeTrojanURL(t Trojan) string {
 	q.Set("path", t.Query.Path)
 	q.Set("security", t.Query.Security)
 	q.Set("fp", t.Query.Fp)
-	q.Set("alpn", t.Query.Alpn)
+	// q.Set("alpn", t.Query.Alpn)
 	q.Set("host", t.Query.Host)
 	q.Set("flow", t.Query.Flow)
 	// 检查query是否有空值，有的话删除
@@ -98,7 +99,7 @@ func DecodeTrojanURL(s string) (Trojan, error) {
 	if u.Scheme != "trojan" {
 		return Trojan{}, fmt.Errorf("非trojan协议: %s", s)
 	}
-	password := Base64Decode(u.User.Username())
+	password := Base64Decode2(u.User.Username())
 	hostname := u.Hostname()
 	port, _ := strconv.Atoi(u.Port())
 	peer := u.Query().Get("peer")
@@ -108,7 +109,11 @@ func DecodeTrojanURL(s string) (Trojan, error) {
 	path := u.Query().Get("path")
 	security := u.Query().Get("security")
 	fp := u.Query().Get("fp")
-	alpn := u.Query().Get("alpn")
+	alpns := u.Query().Get("alpn")
+	alpn := strings.Split(alpns, ",")
+	if alpns == "" {
+		alpn = nil
+	}
 	host := u.Query().Get("host")
 	flow := u.Query().Get("flow")
 	name := u.Fragment
@@ -118,6 +123,7 @@ func DecodeTrojanURL(s string) (Trojan, error) {
 	}
 	if CheckEnvironment() {
 		fmt.Println("password:", password)
+		fmt.Println("password:", u.User.Username())
 		fmt.Println("hostname:", hostname)
 		fmt.Println("port:", port)
 		fmt.Println("peer:", peer)

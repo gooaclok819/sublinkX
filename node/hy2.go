@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 type HY2 struct {
@@ -15,7 +16,7 @@ type HY2 struct {
 	Auth         string
 	UpMbps       int
 	DownMbps     int
-	ALPN         string
+	ALPN         []string
 	Name         string
 	Sni          string
 	Obfs         string
@@ -33,7 +34,7 @@ func CallHy2() {
 		Auth:     "",
 		UpMbps:   11,
 		DownMbps: 55,
-		ALPN:     "h3",
+		// ALPN:     "h3",
 	}
 	fmt.Println(EncodeHY2URL(hy2))
 }
@@ -56,7 +57,7 @@ func EncodeHY2URL(hy2 HY2) string {
 	q.Set("auth", hy2.Auth)
 	q.Set("upmbps", strconv.Itoa(hy2.UpMbps))
 	q.Set("downmbps", strconv.Itoa(hy2.DownMbps))
-	q.Set("alpn", hy2.ALPN)
+	// q.Set("alpn", hy2.ALPN)
 	// 检查query是否有空值，有的话删除
 	for k, v := range q {
 		if v[0] == "" {
@@ -72,19 +73,23 @@ func EncodeHY2URL(hy2 HY2) string {
 func DecodeHY2URL(s string) (HY2, error) {
 	u, err := url.Parse(s)
 	if err != nil {
-		return HY2{}, fmt.Errorf("解析失败的URL: %s", s)
+		return HY2{}, fmt.Errorf("解析失败的URL: %s,错误:%s", s, err)
 	}
 	if u.Scheme != "hy2" && u.Scheme != "hysteria2" {
 		return HY2{}, fmt.Errorf("非hy2协议: %s", s)
 	}
-	password := Base64Decode(u.User.Username())
+	password := Base64Decode2(u.User.Username())
 	server := u.Hostname()
 	port, _ := strconv.Atoi(u.Port())
 	insecure, _ := strconv.Atoi(u.Query().Get("insecure"))
 	auth := u.Query().Get("auth")
 	upMbps, _ := strconv.Atoi(u.Query().Get("upmbps"))
 	downMbps, _ := strconv.Atoi(u.Query().Get("downmbps"))
-	alpn := u.Query().Get("alpn")
+	alpns := u.Query().Get("alpn")
+	alpn := strings.Split(alpns, ",")
+	if alpns == "" {
+		alpn = nil
+	}
 	sni := u.Query().Get("sni")
 	obfs := u.Query().Get("obfs")
 	obfsPassword := u.Query().Get("obfs-password")

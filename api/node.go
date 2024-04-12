@@ -15,6 +15,8 @@ import (
 func NodeUpdadte(c *gin.Context) {
 	var node models.Node
 	name := c.PostForm("name")
+	oldname := c.PostForm("oldname")
+	oldlink := c.PostForm("oldlink")
 	link := c.PostForm("link")
 	if name == "" || link == "" {
 		c.JSON(400, gin.H{
@@ -22,9 +24,19 @@ func NodeUpdadte(c *gin.Context) {
 		})
 		return
 	}
+	// 查找旧节点
+	node.Name = oldname
+	node.Link = oldlink
+	err := node.Find()
+	if err != nil {
+		c.JSON(400, gin.H{
+			"msg": err.Error(),
+		})
+		return
+	}
 	node.Name = name
 	node.Link = link
-	err := node.Update()
+	err = node.Update()
 	if err != nil {
 		c.JSON(400, gin.H{
 			"msg": "更新失败",

@@ -15,18 +15,18 @@ type VLESS struct {
 	Query  VLESSQuery `json:"query"`
 }
 type VLESSQuery struct {
-	Security   string `json:"security"`
-	Alpn       string `json:"alpn"`
-	Sni        string `json:"sni"`
-	Fp         string `json:"fp"`
-	Sid        string `json:"sid"`
-	Pbk        string `json:"pbk"`
-	Flow       string `json:"flow"`
-	Encryption string `json:"encryption"`
-	Type       string `json:"type"`
-	HeaderType string `json:"headerType"`
-	Path       string `json:"path"`
-	Host       string `json:"host"`
+	Security   string   `json:"security"`
+	Alpn       []string `json:"alpn"`
+	Sni        string   `json:"sni"`
+	Fp         string   `json:"fp"`
+	Sid        string   `json:"sid"`
+	Pbk        string   `json:"pbk"`
+	Flow       string   `json:"flow"`
+	Encryption string   `json:"encryption"`
+	Type       string   `json:"type"`
+	HeaderType string   `json:"headerType"`
+	Path       string   `json:"path"`
+	Host       string   `json:"host"`
 }
 
 func CallVLESS() {
@@ -36,8 +36,8 @@ func CallVLESS() {
 		Server: "ss.com",
 		Port:   443,
 		Query: VLESSQuery{
-			Security:   "reality",
-			Alpn:       "",
+			Security: "reality",
+			// Alpn:       "",
 			Sni:        "ss.com",
 			Fp:         "chrome",
 			Sid:        "",
@@ -65,7 +65,7 @@ func EncodeVLESSURL(v VLESS) string {
 	}
 	q := u.Query()
 	q.Set("security", v.Query.Security)
-	q.Set("alpn", v.Query.Alpn)
+	// q.Set("alpn", v.Query.Alpn)
 	q.Set("sni", v.Query.Sni)
 	q.Set("fp", v.Query.Fp)
 	q.Set("sid", v.Query.Sid)
@@ -118,7 +118,11 @@ func DecodeVLESSURL(s string) (VLESS, error) {
 	pbk := u.Query().Get("pbk")
 	sid := u.Query().Get("sid")
 	fp := u.Query().Get("fp")
-	alpn := u.Query().Get("alpn")
+	alpns := u.Query().Get("alpn")
+	alpn := strings.Split(alpns, ",")
+	if alpns == "" {
+		alpn = nil
+	}
 	sni := u.Query().Get("sni")
 	path := u.Query().Get("path")
 	host := u.Query().Get("host")
