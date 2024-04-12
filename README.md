@@ -44,14 +44,22 @@ clash支持协议:ss ssr trojan vmess vless hy hy2 tuic
 
 ## [安装说明]
 linux终端输入：
-``curl -s https://raw.githubusercontent.com/gooaclok819/sublinkX/main/install.sh | sudo bash
-``
+```
+curl -s https://raw.githubusercontent.com/gooaclok819/sublinkX/main/install.sh | sudo bash
+```
 
 docker方式：
+
+在自己需要的位置创建一个目录比如mkdir sublinkx
+
+然后cd进入这个目录，输入下面指令之后数据就挂载过来
+
+需要备份的就是db和template
 ```
 docker run --name sublinkx -p 8000:8000 \
 -v $PWD/db:/app/db \
 -v $PWD/template:/app/template \
+-v $PWD/logs:/app/logs \
 -d jaaksi/sublinkx
 ```
 
