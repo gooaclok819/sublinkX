@@ -30,10 +30,11 @@
 
  !  [1712594176714](webs/src/assets/1.png)!  [1712594176714](webs/src/assets/2.png) 
 
- ## [Installation Instructions] Linux Terminal Input: 
+ ## [Installation Instructions]  
+ ### linux: 
  ```curl -s https://raw.githubusercontent.com/gooaclok819/sublinkX/main/install.sh | sudo bash ``` 
 
- Docker method: 
+ ### Docker method: 
 
  Create a directory where you need it, such as mkdir sublinkx 
 
