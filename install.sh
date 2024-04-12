@@ -58,7 +58,7 @@ echo '#!/bin/bash
 while true; do
     # 获取服务状态
     status=$(systemctl is-active sublink)
-    echo "当前版本: 1.2"
+    echo "当前版本: 1.3"
     # 判断服务状态并打印
     if [ "$status" = "active" ]; then
         echo "当前运行状态: 已运行"
@@ -76,7 +76,7 @@ while true; do
 
     case $option in
         1)
-            sudo systemctl start sublink
+            systemctl start sublink
             systemctl daemon-reload
             ;;
         2)
