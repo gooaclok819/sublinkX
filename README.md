@@ -43,12 +43,12 @@ clash支持协议:ss ssr trojan vmess vless hy hy2 tuic
 ![1712594176714](webs/src/assets/2.png)
 
 ## [安装说明]
-linux终端输入：
+### linux方式：
 ```
 curl -s https://raw.githubusercontent.com/gooaclok819/sublinkX/main/install.sh | sudo bash
 ```
 
-docker方式：
+### docker方式：
 
 在自己需要的位置创建一个目录比如mkdir sublinkx
 
