@@ -2,5 +2,9 @@
 *.DS_Store
 db
 logs
+webs
+README.md
+README.en-US.md
+*.sh
 sublink_amd64 
 sublink_arm64
