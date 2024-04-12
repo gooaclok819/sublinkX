@@ -88,7 +88,6 @@ while true; do
 		        systemctl disable sublink
 		        rm /etc/systemd/system/sublink.service
 		        systemctl daemon-reload
-		        rm -r /usr/local/bin/sublink
 		        rm /usr/bin/sublink
             ;;
         4)
