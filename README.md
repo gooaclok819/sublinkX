@@ -46,6 +46,13 @@ clash支持协议:ss ssr trojan vmess vless hy hy2 tuic
 linux终端输入：
 ``curl -s https://raw.githubusercontent.com/gooaclok819/sublinkX/main/install.sh | sudo bash
 ``
+docker方式：
+```
+docker run --name sublinkx -p 8000:8000 \
+-v $PWD/db:/app/db \
+-v $PWD/template:/app/template \
+-d jaaksi/sublinkx
+```
 
 ## Stargazers over time
 [![Stargazers over time](https://starchart.cc/gooaclok819/sublinkX.svg?variant=adaptive)](https://starchart.cc/gooaclok819/sublinkX)
