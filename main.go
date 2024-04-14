@@ -25,47 +25,44 @@ var Template embed.FS
 
 func Templateinit() {
 	// 设置template路径
-
 	// 检查目录是否创建
-	Template, err := fs.Sub(embeddedFiles, "template")
+	subFS, err := fs.Sub(Template, "template")
 	if err != nil {
 		log.Println(err)
+		return // 如果出错，直接返回
 	}
-	Templates, err := fs.ReadDir(Template, ".")
+	entries, err := fs.ReadDir(subFS, ".")
 	if err != nil {
 		log.Println(err)
+		return // 如果出错，直接返回
 	}
-	for _, v := range Templates {
-		_, err := os.Stat("./template/" + v.Name())
+	// 创建template目录
+	_, err = os.Stat("./template")
+	if os.IsNotExist(err) {
+		err = os.Mkdir("./template", 0666)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+	}
+	// 写入默认模板
+	for _, entry := range entries {
+		_, err := os.Stat("./template/" + entry.Name())
 		//如果文件不存在则写入默认模板
 		if os.IsNotExist(err) {
-			data, err := fs.ReadFile(Template, v.Name())
+			data, err := fs.ReadFile(subFS, entry.Name())
 			if err != nil {
 				log.Println(err)
 				continue
 			}
-			err = os.WriteFile("./template/"+v.Name(), data, 0666)
+			err = os.WriteFile("./template/"+entry.Name(), data, 0666)
 			if err != nil {
 				log.Println(err)
 			}
 		}
 	}
-	// _, err := os.Stat("./template/clash.yaml")
-	// if err != nil {
-	// 	if os.IsNotExist(err) {
-	// 		os.MkdirAll("./template", os.ModePerm)
-	// 	}
-	// }
-	// _, err = os.Stat("./template/clash.yaml")
-	// if os.IsNotExist(err) {
-	// 	err = os.WriteFile("./template/clash.yaml", clashTemplate, 0666)
-	// 	if err != nil {
-	// 		log.Println(err)
-	// 		return
-	// 	}
-	// }
-
 }
+
 func main() {
 	// 初始化gin框架
 	r := gin.Default()
