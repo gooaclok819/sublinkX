@@ -41,10 +41,11 @@ func EncodeSurge(urls []string, sqlconfig SqlConfig) (string, error) {
 			if vmess.Tls != "none" && vmess.Tls != "" {
 				tls = true
 			}
+			port, _ := convertToInt(vmess.Port)
 			proxy := map[string]interface{}{
 				"name":             vmess.Ps,
 				"server":           vmess.Add,
-				"port":             vmess.Port,
+				"port":             port,
 				"uuid":             vmess.Id,
 				"tls":              tls,
 				"network":          vmess.Net,
@@ -53,8 +54,7 @@ func EncodeSurge(urls []string, sqlconfig SqlConfig) (string, error) {
 				"udp":              sqlconfig.Udp,
 				"skip-cert-verify": sqlconfig.Cert,
 			}
-
-			vmessproxy := fmt.Sprintf("%s = vmess, %s, %d, username=%s , tls=%s, vmess-aead=true,  udp-relay=%t , skip-cert-verify=%t",
+			vmessproxy := fmt.Sprintf("%s = vmess, %s, %d, username=%s , tls=%t, vmess-aead=true,  udp-relay=%t , skip-cert-verify=%t",
 				proxy["name"], proxy["server"], proxy["port"], proxy["uuid"], proxy["tls"], proxy["udp"], proxy["skip-cert-verify"])
 			if vmess.Net == "ws" {
 				vmessproxy = fmt.Sprintf("%s, ws=true,ws-path=%s", vmessproxy, proxy["ws-path"])

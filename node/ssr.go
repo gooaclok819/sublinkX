@@ -95,7 +95,7 @@ func DecodeSSRURL(s string) (Ssr, error) {
 	if len(param) < 6 {
 		return Ssr{}, errors.New("长度没有6")
 	}
-	password := Base64Decode2(param[len(param)-1])
+	password := param[len(param)-1]
 	obfs := param[len(param)-2]
 	method := param[len(param)-3]
 	protocol := param[len(param)-4]
