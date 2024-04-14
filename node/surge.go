@@ -103,7 +103,7 @@ func EncodeSurge(urls []string, sqlconfig SqlConfig) (string, error) {
 				"udp":              sqlconfig.Udp,
 				"skip-cert-verify": sqlconfig.Cert,
 			}
-			hy2proxy := fmt.Sprintf("%s = hy2, %s, %d, password=%s, udp-relay=%t, skip-cert-verify=%t",
+			hy2proxy := fmt.Sprintf("%s = hysteria2, %s, %d, password=%s, udp-relay=%t, skip-cert-verify=%t",
 				proxy["name"], proxy["server"], proxy["port"], proxy["password"], proxy["udp"], proxy["skip-cert-verify"])
 			if hy2.Sni != "" {
 				hy2proxy = fmt.Sprintf("%s, sni=%s", hy2proxy, hy2.Sni)
