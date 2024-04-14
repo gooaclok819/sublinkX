@@ -49,6 +49,11 @@ surge支持协议:ss trojan vmess hy2 tuic
 curl -s https://raw.githubusercontent.com/gooaclok819/sublinkX/main/install.sh | sudo bash
 ```
 
+linux更新方法:
+```sudo sublink``` 呼出菜单卸载安装然后0退出
+
+然后输入安装脚本即可
+
 ### docker方式：
 
 在自己需要的位置创建一个目录比如mkdir sublinkx
