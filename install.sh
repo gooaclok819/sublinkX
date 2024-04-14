@@ -58,7 +58,7 @@ echo '#!/bin/bash
 while true; do
     # 获取服务状态
     status=$(systemctl is-active sublink)
-    echo "当前版本: 1.3"
+    echo "当前版本: 1.4"
     # 判断服务状态并打印
     if [ "$status" = "active" ]; then
         echo "当前运行状态: 已运行"
