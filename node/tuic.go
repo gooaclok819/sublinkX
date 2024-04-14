@@ -33,7 +33,7 @@ func DecodeTuicURL(s string) (Tuic, error) {
 	uuid := u.User.Username()
 	password, _ := u.User.Password()
 	// log.Println(password)
-	password = Base64Decode2(password)
+	// password = Base64Decode2(password)
 	server := u.Hostname()
 	port, _ := strconv.Atoi(u.Port())
 	Congestioncontrol := u.Query().Get("Congestion_control")
