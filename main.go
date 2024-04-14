@@ -20,27 +20,50 @@ import (
 //go:embed static/index.html
 var embeddedFiles embed.FS
 
-//go:embed template/clash.yaml
-var clashTemplate []byte
+//go:embed template
+var Template embed.FS
 
 func Templateinit() {
 	// 设置template路径
 
 	// 检查目录是否创建
-	_, err := os.Stat("./template/clash.yaml")
+	Template, err := fs.Sub(embeddedFiles, "template")
 	if err != nil {
+		log.Println(err)
+	}
+	Templates, err := fs.ReadDir(Template, ".")
+	if err != nil {
+		log.Println(err)
+	}
+	for _, v := range Templates {
+		_, err := os.Stat("./template/" + v.Name())
+		//如果文件不存在则写入默认模板
 		if os.IsNotExist(err) {
-			os.MkdirAll("./template", os.ModePerm)
+			data, err := fs.ReadFile(Template, v.Name())
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			err = os.WriteFile("./template/"+v.Name(), data, 0666)
+			if err != nil {
+				log.Println(err)
+			}
 		}
 	}
-	_, err = os.Stat("./template/clash.yaml")
-	if os.IsNotExist(err) {
-		err = os.WriteFile("./template/clash.yaml", clashTemplate, 0666)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-	}
+	// _, err := os.Stat("./template/clash.yaml")
+	// if err != nil {
+	// 	if os.IsNotExist(err) {
+	// 		os.MkdirAll("./template", os.ModePerm)
+	// 	}
+	// }
+	// _, err = os.Stat("./template/clash.yaml")
+	// if os.IsNotExist(err) {
+	// 	err = os.WriteFile("./template/clash.yaml", clashTemplate, 0666)
+	// 	if err != nil {
+	// 		log.Println(err)
+	// 		return
+	// 	}
+	// }
 
 }
 func main() {

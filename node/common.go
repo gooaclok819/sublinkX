@@ -8,6 +8,13 @@ import (
 	"strings"
 )
 
+type SqlConfig struct {
+	Clash string `json:"clash"`
+	Surge string `json:"surge"`
+	Udp   bool   `json:"udp"`
+	Cert  bool   `json:"cert"`
+}
+
 // ipv6地址匹配规则
 func ValRetIPv6Addr(s string) string {
 	pattern := `\[([0-9a-fA-F:]+)\]`
