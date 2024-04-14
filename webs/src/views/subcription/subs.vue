@@ -20,6 +20,7 @@ interface Node {
 }
 interface Config {
   clash: string;
+  surge:string;
   udp: string;
   cert: string;
 }
@@ -36,6 +37,7 @@ interface Temp {
 }
 const tableData = ref<Sub[]>([])
 const Clash = ref('')
+const Surge = ref('')
 const SubTitle = ref('')
 const Subname = ref('')
 const oldSubname = ref('')
@@ -70,6 +72,7 @@ onMounted(async() => {
 const addSubs = async ()=>{
     const config = JSON.stringify({
     "clash": Clash.value.trim(),
+    "surge": Surge.value.trim(),
     "udp": checkList.value.includes('udp') ? true :  false,
     "cert": checkList.value.includes('cert') ? true :  false
 
@@ -128,6 +131,7 @@ const handleAddSub = ()=>{
   oldSubname.value = ''
   checkList.value = []
   Clash.value = './template/clash.yaml'
+  Surge.value = './template/surge.conf'
   dialogVisible.value = true
   value1.value = []
 }
@@ -152,6 +156,7 @@ const handleEdit = (row:any) => {
         checkList.value.push('cert')
       }
       Clash.value = config.clash
+      Surge.value = config.surge
       dialogVisible.value = true
       value1.value = tableData.value[i].Nodes.map((item) => item.Name)
     }
@@ -224,9 +229,7 @@ const currentTableData = computed(() => {
   const end = start + pageSize.value;
   return tableData.value.slice(start, end);
 });
-const isNameShow = (row: any): boolean =>  {
-  return row.Name.length > 10;
-}
+
 // 复制链接
 const copyUrl = (url: string) => {
   const textarea = document.createElement('textarea');
@@ -258,7 +261,7 @@ const handleBase64 = (text: string) => {
   return  window.btoa(unescape(encodeURIComponent(text)));
 }
 const ClientDiaLog = ref(false)
-const ClientList = ['v2ray','clash'] // 客户端列表
+const ClientList = ['v2ray','clash','surge'] // 客户端列表
 const ClientUrls = ref<Record<string, string>>({})
 const handleClient = (name:string) => {
   let serverAddress = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '');
@@ -324,6 +327,17 @@ const clientradio = ref('1')
     <el-option v-for="template in templist" :key="template.file" :label="template.file" :value="'./template/'+template.file" />
   </el-select>
   <el-input v-model="Clash" placeholder="clash模版文件"  v-else />
+</el-row>
+<el-row >
+  <el-tag type="primary">surge模版选择</el-tag>
+  <el-radio-group v-model="clientradio" class="ml-4">
+      <el-radio value="1">本地</el-radio>
+      <el-radio value="2">url链接</el-radio>
+    </el-radio-group>
+  <el-select v-model="Surge" placeholder="surge模版文件"  v-if="clientradio === '1'">
+    <el-option v-for="template in templist" :key="template.file" :label="template.file" :value="'./template/'+template.file" />
+  </el-select>
+  <el-input v-model="Surge" placeholder="surge模版文件"  v-else />
 </el-row>
 
   <el-row>

@@ -13,6 +13,7 @@ func Clients(r *gin.Engine) {
 	{
 		ClientsGroup.GET("/v2ray/:subname", api.GetV2ray)
 		ClientsGroup.GET("/clash/:subname", api.GetClash)
+		ClientsGroup.GET("/surge/:subname", api.GetSurge)
 	}
 
 }

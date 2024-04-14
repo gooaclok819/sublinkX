@@ -53,11 +53,6 @@ type Config struct {
 	Proxies      []Proxy      `yaml:"proxies"`
 	Proxy_groups []ProxyGroup `yaml:"proxy-groups"`
 }
-type SqlConfig struct {
-	Clash string `json:"clash"`
-	Udp   bool   `json:"udp"`
-	Cert  bool   `json:"cert"`
-}
 
 // 删除opts中的空值
 func DeleteOpts(opts map[string]interface{}) {
