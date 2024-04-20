@@ -3,7 +3,6 @@ package node
 import (
 	"fmt"
 	"net/url"
-	"regexp"
 	"strconv"
 	"strings"
 )
@@ -28,16 +27,26 @@ func parsingSS(s string) (string, string, string) {
 	第二部分 为服务器地址和端口，格式为：服务器地址:端口	示例：xxx.xxx:12345
 	第三部分 为备注，格式为：#备注	示例：#备注
 	*/
-	pattern := `ss:\/\/(.*?)@([^#]*)(#(.*))?`
-	re := regexp.MustCompile(pattern)
-	match := re.FindStringSubmatch(s)
-
-	if len(match) > 0 {
-		decodedName, _ := url.QueryUnescape(match[4]) // decode the URL encoded name
-		return match[1], match[2], decodedName
-	} else {
-		return "", "", ""
+	s = strings.Replace(s, "ss://", "", 1)
+	addrIndex := strings.Index(s, "@")
+	NameIndex := strings.Index(s, "#")
+	var addr, name string
+	par := s
+	if NameIndex != -1 {
+		name, _ = url.QueryUnescape(s[NameIndex+1:])
+		par = s[:NameIndex]
 	}
+
+	if addrIndex != -1 {
+		addr = s[addrIndex+1:]
+		par = s[:addrIndex]
+
+	} else {
+		addr = strings.Split(Base64Decode(par), "@")[1]
+		par = strings.Split(Base64Decode(par), "@")[0]
+	}
+	// log.Println(par, name, addr)
+	return par, addr, name
 }
 
 // 开发者测试
@@ -77,16 +86,16 @@ func DecodeSSURL(s string) (Ss, error) {
 	if param == "" || addr == "" {
 		return Ss{}, fmt.Errorf("invalid SS URL")
 	}
-	// 如果没有备注，则使用服务器地址作为备注
-	if name == "" {
-		name = addr
-	}
 	// 解析参数
 	parts := strings.Split(addr, ":")
 	port, _ := strconv.Atoi(parts[len(parts)-1])
 	server := strings.Replace(ValRetIPv6Addr(addr), ":"+parts[len(parts)-1], "", -1)
 	cipher := strings.Split(param, ":")[0]
 	password := strings.Replace(param, cipher+":", "", 1)
+	// 如果没有备注则使用服务器加端口命名
+	if name == "" {
+		name = addr
+	}
 	// 开发环境输出结果
 	if CheckEnvironment() {
 		fmt.Println("Param:", Base64Decode(param))

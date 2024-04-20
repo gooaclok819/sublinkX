@@ -236,7 +236,7 @@ const copyInfo = (row: any) => {
         <el-tag type="success">{{scope.row.Name}}</el-tag>
       </template>
     </el-table-column>
-    <el-table-column prop="Link" label="节点" :show-overflow-tooltip="true" />
+    <el-table-column prop="Link" label="节点" sortable :show-overflow-tooltip="true" />
     <el-table-column prop="CreateDate" label="创建时间" sortable  />
     <el-table-column fixed="right" label="操作" width="120">
       <template #default="scope">

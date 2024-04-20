@@ -36,6 +36,7 @@
 v2ray为base64通用格式
 
 clash支持协议:ss ssr trojan vmess vless hy hy2 tuic
+
 surge支持协议:ss trojan vmess hy2 tuic
 
 ## [项目预览]
@@ -50,6 +51,9 @@ curl -s https://raw.githubusercontent.com/gooaclok819/sublinkX/main/install.sh |
 ```
 
 linux更新方法:
+
+卸载并不会清除数据
+
 ```sudo sublink``` 呼出菜单卸载安装然后0退出
 
 然后输入安装脚本即可

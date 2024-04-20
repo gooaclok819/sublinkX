@@ -50,7 +50,7 @@ sudo systemctl enable sublink
 sudo systemctl daemon-reload
 echo "服务已启动并已设置为开机启动"
 echo "默认账号admin密码123456 端口8000"
-echo "安装完成已经启动输入sublink或者sudo sublink可以呼出菜单"
+echo "安装完成已经启动输入sudo sublink可以呼出菜单"
 
 # 创建sublink_menu.sh脚本
 echo '#!/bin/bash
@@ -58,7 +58,7 @@ echo '#!/bin/bash
 while true; do
     # 获取服务状态
     status=$(systemctl is-active sublink)
-    echo "当前版本: 1.4"
+    echo "当前版本: 1.5"
     # 判断服务状态并打印
     if [ "$status" = "active" ]; then
         echo "当前运行状态: 已运行"
