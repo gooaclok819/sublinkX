@@ -179,6 +179,12 @@ func GetSurge(c *gin.Context) {
 	c.Writer.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	host := c.Request.Host
 	url := c.Request.URL.String()
+	// 如果包含头部更新信息
+	if strings.Contains(DecodeClash, "#!MANAGED-CONFIG") {
+		c.Writer.WriteString(DecodeClash)
+		return
+	}
+	// 否则就插入头部更新信息
 	interval := fmt.Sprintf("#!MANAGED-CONFIG %s interval=86400 strict=false", host+url)
 	c.Writer.WriteString(string(interval + "\n" + DecodeClash))
 }
