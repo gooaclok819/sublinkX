@@ -45,6 +45,8 @@ func parsingSS(s string) (string, string, string) {
 		addr = strings.Split(Base64Decode(par), "@")[1]
 		par = strings.Split(Base64Decode(par), "@")[0]
 	}
+	//修复ss的addr获取到包含名字，导致地址端口获取不到问题
+	addr = strings.Split(addr, "#")[0]
 	// log.Println(par, name, addr)
 	return par, addr, name
 }
