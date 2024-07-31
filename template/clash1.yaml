@@ -1,0 +1,592 @@
+port: 7890
+socks-port: 7891
+allow-lan: true
+mode: Rule
+log-level: info
+external-controller: :9090
+dns:
+  enable: true
+  listen: 0.0.0.0:1053
+  default-nameserver:
+  - 223.5.5.5
+  - 8.8.8.8
+  - 1.1.1.1
+  nameserver-policy:
+    geosite:gfw,geolocation-!cn:
+    - https://1.1.1.1/dns-query
+    - https://1.0.0.1/dns-query
+    - https://8.8.8.8/dns-query
+  nameserver:
+  - https://223.5.5.5/dns-query
+  - https://1.12.12.12/dns-query
+  - https://8.8.8.8/dns-query
+  fallback:
+  - https://1.1.1.1/dns-query
+  - https://1.0.0.1/dns-query
+  - https://8.8.8.8/dns-query
+  fallback-filter:
+    geoip: false
+    geoip-code: CN
+    ipcidr:
+    - 240.0.0.0/4
+  fake-ip-filter:
+  - +.lan
+  - +.microsoft*.com
+  - localhost.ptlogin2.qq.com
+TEST_URL: https://www.gstatic.com/generate_204
+proxies: ~
+proxy-groups:
+  - name: 🚀 节点选择
+    type: select
+    proxies:
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+    - DIRECT
+  - name: ♻️ 自动选择
+    type: url-test
+  - name: 🚀 手动切换1
+    type: select
+  - name: 🚀 手动切换2
+    type: select
+  - name: 🔯 故障转移
+    type: fallback
+  - name: 🔮 负载均衡
+    type: load-balance
+  - name: 🤖 ChatBot
+    type: select
+    proxies:
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+    - DIRECT
+    - REJECT
+  - name: 📲 电报消息
+    type: select
+    proxies:
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+    - DIRECT
+    - REJECT
+  - name: 📹 油管视频
+    type: select
+    proxies:
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+    - DIRECT
+    - REJECT
+  - name: 🎥 奈飞视频
+    type: select
+    proxies:
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+    - DIRECT
+    - REJECT
+  - name: 📺 巴哈姆特
+    type: select
+    proxies:
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+    - DIRECT
+    - REJECT
+  - name: 📺 哔哩哔哩
+    type: select
+    proxies:
+    - DIRECT
+    - REJECT
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+  - name: 🌍 国外媒体
+    type: select
+    proxies:
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+    - DIRECT
+    - REJECT
+  - name: 🌏 国内媒体
+    type: select
+    proxies:
+    - DIRECT
+    - REJECT
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+  - name: 📢 谷歌FCM
+    type: select
+    proxies:
+    - DIRECT
+    - REJECT
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+  - name: 📢 谷歌服务
+    type: select
+    proxies:
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+    - DIRECT
+    - REJECT
+  - name: Ⓜ️ 微软Bing
+    type: select
+    proxies:
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+    - DIRECT
+    - REJECT
+  - name: Ⓜ️ 微软云盘
+    type: select
+    proxies:
+    - DIRECT
+    - REJECT
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+  - name: Ⓜ️ 微软服务
+    type: select
+    proxies:
+    - DIRECT
+    - REJECT
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+  - name: 🍎 苹果服务
+    type: select
+    proxies:
+    - DIRECT
+    - REJECT
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+  - name: 🎮 游戏平台
+    type: select
+    proxies:
+    - DIRECT
+    - REJECT
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+  - name: 🎶 网易音乐
+    type: select
+    proxies:
+    - DIRECT
+    - REJECT
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+  - name: 🎶 Spotify
+    type: select
+    proxies:
+    - DIRECT
+    - REJECT
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+  - name: 🎯 全球直连
+    type: select
+    proxies:
+    - DIRECT
+    - REJECT
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+  - name: 🛑 广告拦截
+    type: select
+    proxies:
+    - REJECT
+    - DIRECT
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+  - name: 🍃 应用净化
+    type: select
+    proxies:
+    - REJECT
+    - DIRECT
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+  - name: 🛡️ 隐私防护
+    type: select
+    proxies:
+    - REJECT
+    - DIRECT
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+  - name: 🐟 漏网之鱼
+    type: select
+    proxies:
+    - 🚀 节点选择
+    - ♻️ 自动选择
+    - 🚀 手动切换1
+    - 🚀 手动切换2
+    - 🔯 故障转移
+    - 🔮 负载均衡
+    - DIRECT
+    - REJECT
+rule-providers:
+  OpenAi:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/OpenAi.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FRuleset%2FOpenAi.list
+  ChatBot:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/ChatBot.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FRuleset%2FChatBot.list
+  LocalAreaNetwork:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/LocalAreaNetwork.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FLocalAreaNetwork.list
+  UnBan:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/UnBan.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FUnBan.list
+  BanAD:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/BanAD.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FBanAD.list
+  BanProgramAD:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/BanProgramAD.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FBanProgramAD.list
+  BanEasyList:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/BanEasyList.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FBanEasyList.list
+  BanEasyListChina:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/BanEasyListChina.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FBanEasyListChina.list
+  BanEasyPrivacy:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/BanEasyPrivacy.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FBanEasyPrivacy.list
+  GoogleFCM:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/GoogleFCM.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FRuleset%2FGoogleFCM.list
+  Google:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/Google.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FRuleset%2FGoogle.list
+  Adobe:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/Adobe.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FRuleset%2FAdobe.list
+  Bing:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/Bing.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FBing.list
+  OneDrive:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/OneDrive.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FOneDrive.list
+  Microsoft:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/Microsoft.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FMicrosoft.list
+  Apple:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/Apple.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FApple.list
+  Telegram:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/Telegram.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FTelegram.list
+  NetEaseMusic:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/NetEaseMusic.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FRuleset%2FNetEaseMusic.list
+  Spotify:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/Spotify.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FRuleset%2FSpotify.list
+  Epic:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/Epic.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FRuleset%2FEpic.list
+  Origin:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/Origin.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FRuleset%2FOrigin.list
+  Sony:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/Sony.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FRuleset%2FSony.list
+  Steam:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/Steam.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FRuleset%2FSteam.list
+  Nintendo:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/Nintendo.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FRuleset%2FNintendo.list
+  YouTube:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/YouTube.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FRuleset%2FYouTube.list
+  Netflix:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/Netflix.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FRuleset%2FNetflix.list
+  Bahamut:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/Bahamut.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FRuleset%2FBahamut.list
+  BilibiliHMT:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/BilibiliHMT.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FRuleset%2FBilibiliHMT.list
+  Bilibili:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/Bilibili.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FRuleset%2FBilibili.list
+  ChinaMedia:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/ChinaMedia.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FChinaMedia.list
+  ProxyMedia:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/ProxyMedia.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FProxyMedia.list
+  ProxyGFWlist:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/ProxyGFWlist.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FProxyGFWlist.list
+  ChinaIp:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/ChinaIp.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FChinaIp.list
+  ChinaDomain:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/ChinaDomain.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FChinaDomain.list
+  ChinaCompanyIp:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/ChinaCompanyIp.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FChinaCompanyIp.list
+  Download:
+    type: http
+    behavior: classical
+    format: text
+    interval: 604800
+    path: ./rule/Download.txt
+    url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FDownload.list
+rules:
+- DOMAIN,link.axfun.eu.org,DIRECT
+- RULE-SET,OpenAi,🤖 ChatBot
+- RULE-SET,ChatBot,🤖 ChatBot
+- RULE-SET,LocalAreaNetwork,🎯 全球直连
+- RULE-SET,UnBan,🎯 全球直连
+- RULE-SET,BanAD,🛑 广告拦截
+- RULE-SET,BanProgramAD,🍃 应用净化
+- RULE-SET,BanEasyList,🛑 广告拦截
+- RULE-SET,BanEasyListChina,🛑 广告拦截
+- RULE-SET,BanEasyPrivacy,🛡️ 隐私防护
+- RULE-SET,GoogleFCM,📢 谷歌FCM
+- RULE-SET,Google,📢 谷歌服务
+- RULE-SET,Adobe,🎯 全球直连
+- RULE-SET,Bing,Ⓜ️ 微软Bing
+- RULE-SET,OneDrive,Ⓜ️ 微软云盘
+- RULE-SET,Microsoft,Ⓜ️ 微软服务
+- RULE-SET,Apple,🍎 苹果服务
+- RULE-SET,Telegram,📲 电报消息
+- RULE-SET,NetEaseMusic,🎶 网易音乐
+- RULE-SET,Spotify,🎶 Spotify
+- RULE-SET,Epic,🎮 游戏平台
+- RULE-SET,Origin,🎮 游戏平台
+- RULE-SET,Sony,🎮 游戏平台
+- RULE-SET,Steam,🎮 游戏平台
+- RULE-SET,Nintendo,🎮 游戏平台
+- RULE-SET,YouTube,📹 油管视频
+- RULE-SET,Netflix,🎥 奈飞视频
+- RULE-SET,Bahamut,📺 巴哈姆特
+- RULE-SET,BilibiliHMT,📺 哔哩哔哩
+- RULE-SET,Bilibili,📺 哔哩哔哩
+- RULE-SET,ChinaMedia,🌏 国内媒体
+- RULE-SET,ProxyMedia,🌍 国外媒体
+- RULE-SET,ProxyGFWlist,🚀 节点选择
+- RULE-SET,ChinaIp,🎯 全球直连
+- RULE-SET,ChinaDomain,🎯 全球直连
+- RULE-SET,ChinaCompanyIp,🎯 全球直连
+- RULE-SET,Download,🎯 全球直连
+- GEOIP,CN,🎯 全球直连
+- MATCH,🐟 漏网之鱼
