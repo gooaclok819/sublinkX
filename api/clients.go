@@ -15,7 +15,7 @@ import (
 )
 
 func GetV2ray(c *gin.Context) {
-	var sub models.Subcription
+	var sub models.Subscription
 	subname := c.Param("subname")
 	subname = node.Base64Decode(subname)
 	sub.Name = subname
@@ -61,7 +61,7 @@ func GetV2ray(c *gin.Context) {
 	c.Writer.WriteString(node.Base64Encode(baselist))
 }
 func GetClash(c *gin.Context) {
-	var sub models.Subcription
+	var sub models.Subscription
 	subname := c.Param("subname")
 	subname = node.Base64Decode(subname)
 	sub.Name = subname
@@ -120,7 +120,7 @@ func GetClash(c *gin.Context) {
 	c.Writer.WriteString(string(DecodeClash))
 }
 func GetSurge(c *gin.Context) {
-	var sub models.Subcription
+	var sub models.Subscription
 	subname := c.Param("subname")
 	subname = node.Base64Decode(subname)
 	sub.Name = subname

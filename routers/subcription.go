@@ -6,13 +6,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Subcription(r *gin.Engine) {
-	SubcriptionGroup := r.Group("/api/v1/subcription")
+func Subscription(r *gin.Engine) {
+	SubscriptionGroup := r.Group("/api/v1/subscription")
 	{
-		SubcriptionGroup.POST("/add", api.SubAdd)
-		SubcriptionGroup.DELETE("/delete", api.SubDel)
-		SubcriptionGroup.GET("/get", api.SubGet)
-		SubcriptionGroup.POST("/update", api.SubUpdate)
+		SubscriptionGroup.POST("/add", api.SubAdd)
+		SubscriptionGroup.DELETE("/delete", api.SubDel)
+		SubscriptionGroup.GET("/get", api.SubGet)
+		SubscriptionGroup.POST("/update", api.SubUpdate)
 	}
 
 }
