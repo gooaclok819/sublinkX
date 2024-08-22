@@ -1,41 +1,41 @@
 package models
 
-type Subcription struct {
+type Subscription struct {
 	ID         int
 	Name       string
 	Config     string    `gorm:"embedded"`
-	Nodes      []Node    `gorm:"many2many:subcription_nodes;"` // 多对多关系
-	SubLogs    []SubLogs `gorm:"foreignKey:SubcriptionID;"`    // 一对多关系 约束父表被删除子表记录跟着删除
+	Nodes      []Node    `gorm:"many2many:subscription_nodes;"` // 多对多关系
+	SubLogs    []SubLogs `gorm:"foreignKey:SubscriptionID;"`    // 一对多关系 约束父表被删除子表记录跟着删除
 	CreateDate string
 }
 
 // Add 添加订阅
-func (sub *Subcription) Add() error {
+func (sub *Subscription) Add() error {
 	return DB.Create(sub).Error
 }
 
-// 添加节点列表建立多对多关系
-func (sub *Subcription) AddNode() error {
+// AddNode 添加节点列表建立多对多关系
+func (sub *Subscription) AddNode() error {
 	return DB.Model(sub).Association("Nodes").Append(sub.Nodes)
 }
 
-// 更新订阅
-func (sub *Subcription) Update() error {
+// Update 更新订阅
+func (sub *Subscription) Update() error {
 	return DB.Where("id = ? or name = ?", sub.ID, sub.Name).Updates(sub).Error
 }
 
-// 更新节点列表建立多对多关系
-func (sub *Subcription) UpdateNodes() error {
+// UpdateNodes 更新节点列表建立多对多关系
+func (sub *Subscription) UpdateNodes() error {
 	return DB.Model(sub).Association("Nodes").Replace(sub.Nodes)
 }
 
-// 查找订阅
-func (sub *Subcription) Find() error {
+// Find 查找订阅
+func (sub *Subscription) Find() error {
 	return DB.Where("id = ? or name = ?", sub.ID, sub.Name).First(sub).Error
 }
 
-// 读取订阅
-func (sub *Subcription) GetSub() error {
+// GetSub 读取订阅
+func (sub *Subscription) GetSub() error {
 	// err := DB.Find(sub).Error
 	// if err != nil {
 	// 	return err
@@ -43,9 +43,9 @@ func (sub *Subcription) GetSub() error {
 	return DB.Model(sub).Association("Nodes").Find(&sub.Nodes)
 }
 
-// 订阅列表
-func (sub *Subcription) List() ([]Subcription, error) {
-	var subs []Subcription
+// List 订阅列表
+func (sub *Subscription) List() ([]Subscription, error) {
+	var subs []Subscription
 	err := DB.Find(&subs).Error
 	if err != nil {
 		return nil, err
@@ -57,12 +57,13 @@ func (sub *Subcription) List() ([]Subcription, error) {
 	return subs, nil
 }
 
-func (sub *Subcription) IPlogUpdate() error {
+// IPLogUpdate IP记录更新
+func (sub *Subscription) IPLogUpdate() error {
 	return DB.Model(sub).Association("SubLogs").Replace(&sub.SubLogs)
 }
 
-// 删除订阅
-func (sub *Subcription) Del() error {
+// Del 删除订阅
+func (sub *Subscription) Del() error {
 	err := DB.Model(sub).Association("Nodes").Clear()
 	if err != nil {
 		return err

@@ -93,7 +93,7 @@ func main() {
 	// 注册路由
 	routers.User(r)
 	routers.Mentus(r)
-	routers.Subcription(r)
+	routers.Subscription(r)
 	routers.Nodes(r)
 	routers.Clients(r)
 	routers.Total(r)
