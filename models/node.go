@@ -9,7 +9,7 @@ type Node struct {
 	ID         int
 	Link       string
 	Name       string
-	Sort       int
+	Sort       int `gorm:"default:0"`
 	CreateDate string
 }
 
