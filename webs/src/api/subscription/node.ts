@@ -38,7 +38,6 @@ export function DelNode(data: any) {
 }
 
 export function SortNode(data: any) {
-  console.log(data)
   return request({
     url: "/api/v1/nodes/sort",
     method: "post",
