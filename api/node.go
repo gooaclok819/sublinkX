@@ -225,5 +225,9 @@ func NodeSort(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, gin.H{"msg": "排序更新成功"})
+	c.JSON(200, gin.H{
+		"code": "00000",
+		"data": nil,
+		"msg":  "排序更新成功",
+	})
 }
