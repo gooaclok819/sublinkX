@@ -7,7 +7,7 @@ export default {
     system:"system management",
     nodelist:"Node List",
     sublist:"Subscription List",
-    subcription:"Subscription Management",
+    subscription:"Subscription Management",
     templatelist:"Template List",
   },
   // 登录页面国际化
