@@ -24,7 +24,7 @@ func InitSqlite() {
 		log.Println("连接数据库失败")
 	}
 	DB = db
-	err = db.AutoMigrate(&User{}, &Subcription{}, &Node{}, &SubLogs{})
+	err = db.AutoMigrate(&User{}, &Subscription{}, &Node{}, &SubLogs{})
 	if err != nil {
 		log.Println("数据表迁移失败")
 	}

@@ -1,14 +1,14 @@
 import request from "@/utils/request";
 export function getSubs(){
   return request({
-    url: "/api/v1/subcription/get",
+    url: "/api/v1/subscription/get",
     method: "get",
   });
 }
 
 export function AddSub(data: any){
   return request({
-    url: "/api/v1/subcription/add",
+    url: "/api/v1/subscription/add",
     method: "post",
     data,
     headers: {
@@ -18,7 +18,7 @@ export function AddSub(data: any){
 }
 export function DelSub(data: any){
   return request({
-    url: "/api/v1/subcription/delete",
+    url: "/api/v1/subscription/delete",
     method: "delete",
     params: data,
   });
@@ -26,7 +26,7 @@ export function DelSub(data: any){
 
 export function UpdateSub(data: any){
   return request({
-    url: "/api/v1/subcription/update",
+    url: "/api/v1/subscription/update",
     method: "post",
     data,
     headers: {

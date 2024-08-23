@@ -1,8 +1,8 @@
 <script setup lang='ts'>
 import { ref,onMounted  } from 'vue'
-import {getSubs,AddSub,DelSub,UpdateSub} from "@/api/subcription/subs"
-import {getTemp} from "@/api/subcription/temp"
-import {getNodes} from "@/api/subcription/node"
+import {getSubs,AddSub,DelSub,UpdateSub} from "@/api/subscription/subs"
+import {getTemp} from "@/api/subscription/temp"
+import {getNodes} from "@/api/subscription/node"
 import QrcodeVue from 'qrcode.vue'
 interface Sub {
   ID: number;

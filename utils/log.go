@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func Loginit() {
+func LogsInit() {
 	t := time.Now().Format("2006-01-02") + ".log"
 	// 检查目录是否创建
 	_, err := os.Stat("./logs")
