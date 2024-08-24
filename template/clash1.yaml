@@ -4,35 +4,209 @@ allow-lan: true
 mode: Rule
 log-level: info
 external-controller: :9090
+ipv6: true
+find-process-mode: strict
+unified-delay: false
+tcp-concurrent: true
+global-client-fingerprint: chrome
+
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+geo-auto-update: true
+geo-update-interval: 24
+geodata-loader: standard
+
+geodata-mode: true
+geox-url:
+  geoip: "https://mirror.ghproxy.com/https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip-lite.dat"
+  geosite: "https://mirror.ghproxy.com/https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat"
+  mmdb: "https://mirror.ghproxy.com/https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/country-lite.mmdb"
+  asn: "https://mirror.ghproxy.com/https://github.com/xishang0128/geoip/releases/download/latest/GeoLite2-ASN.mmdb"
+
+sniffer:
+  enable: true
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
+  skip-domain:
+    - "Mijia Cloud"
+    - "+.push.apple.com"
+
 dns:
   enable: true
-  listen: 0.0.0.0:1053
-  default-nameserver:
-  - 223.5.5.5
-  - 8.8.8.8
-  - 1.1.1.1
-  nameserver-policy:
-    geosite:gfw,geolocation-!cn:
-    - https://1.1.1.1/dns-query
-    - https://1.0.0.1/dns-query
-    - https://8.8.8.8/dns-query
+  prefer-h3: true
+  listen: 127.0.0.1:53
+  ipv6: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 28.0.0.1/8
+  use-hosts: true
+  use-system-hosts: true
+  respect-rules: false
   nameserver:
-  - https://223.5.5.5/dns-query
-  - https://1.12.12.12/dns-query
-  - https://8.8.8.8/dns-query
-  fallback:
-  - https://1.1.1.1/dns-query
-  - https://1.0.0.1/dns-query
-  - https://8.8.8.8/dns-query
-  fallback-filter:
-    geoip: false
-    geoip-code: CN
-    ipcidr:
-    - 240.0.0.0/4
+    - 'https://8.8.8.8/dns-query#h3=true'
+    - 'https://1.1.1.1/dns-query#h3=true'
+    - 'https://185.222.222.222/dns-query#h3=true'
+    - 'https://101.101.101.101/dns-query#h3=true'
+  nameserver-policy:
+    "geosite:cn,private":
+      - 'https://223.5.5.5/dns-query#h3=true'
+      - 'https://1.12.12.12/dns-query#h3=true'
+      - 180.76.76.76
+      - 180.184.1.1
+      - 202.96.128.86
+      - 202.96.134.33
   fake-ip-filter:
-  - +.lan
-  - +.microsoft*.com
-  - localhost.ptlogin2.qq.com
+  #LAN
+  - '*.lan'
+  - '*.localdomain'
+  - '*.example'
+  - '*.invalid'
+  - '*.localhost'
+  - '*.test'
+  - '*.local'
+  - '*.home.arpa'
+  #放行NTP服务
+  - 'time.*.com'
+  - 'time.*.gov'
+  - 'time.*.edu.cn'
+  - 'time.*.apple.com'
+  - 'time-ios.apple.com'
+  - 'time1.*.com'
+  - 'time2.*.com'
+  - 'time3.*.com'
+  - 'time4.*.com'
+  - 'time5.*.com'
+  - 'time6.*.com'
+  - 'time7.*.com'
+  - 'ntp.*.com'
+  - 'ntp1.*.com'
+  - 'ntp2.*.com'
+  - 'ntp3.*.com'
+  - 'ntp4.*.com'
+  - 'ntp5.*.com'
+  - 'ntp6.*.com'
+  - 'ntp7.*.com'
+  - '*.time.edu.cn'
+  - '*.ntp.org.cn'
+  - '+.pool.ntp.org'
+  - 'time1.cloud.tencent.com'
+  #放行网易云音乐
+  - 'music.163.com'
+  - '*.music.163.com'
+  - '*.126.net'
+  #百度音乐
+  - 'musicapi.taihe.com'
+  - 'music.taihe.com'
+  #酷狗音乐
+  - 'songsearch.kugou.com'
+  - 'trackercdn.kugou.com'
+  #酷我音乐
+  - '*.kuwo.cn'
+  #JOOX音乐
+  - 'api-jooxtt.sanook.com'
+  - 'api.joox.com'
+  - 'joox.com'
+  #QQ音乐
+  - 'y.qq.com'
+  - '*.y.qq.com'
+  - 'streamoc.music.tc.qq.com'
+  - 'mobileoc.music.tc.qq.com'
+  - 'isure.stream.qqmusic.qq.com'
+  - 'dl.stream.qqmusic.qq.com'
+  - 'aqqmusic.tc.qq.com'
+  - 'amobile.music.tc.qq.com'
+  #虾米音乐
+  - '*.xiami.com'
+  #咪咕音乐'
+  - '*.music.migu.cn'
+  - 'music.migu.cn'
+  #win10本地连接检测'
+  - '+.msftconnecttest.com'
+  - '+.msftncsi.com'
+  #QQ登录
+  - 'localhost.ptlogin2.qq.com'
+  - 'localhost.sec.qq.com'
+  - '+.qq.com'
+  - '+.tencent.com'
+  #Game
+  #Nintendo Switch
+  - '+.srv.nintendo.net'
+  - '*.n.n.srv.nintendo.net'
+  #Sony PlayStation'
+  - '+.stun.playstation.net'
+  #Microsoft Xbox
+  - 'xbox.*.*.microsoft.com'
+  - '*.*.xboxlive.com'
+  - 'xbox.*.microsoft.com'
+  - 'xnotify.xboxlive.com'
+  #Wotgame
+  - '+.battlenet.com.cn'
+  - '+.wotgame.cn'
+  - '+.wggames.cn'
+  - '+.wowsgame.cn'
+  - '+.wargaming.net'
+  #Golang
+  - 'proxy.golang.org'
+  #STUN
+  - 'stun.*.*'
+  - 'stun.*.*.*'
+  - '+.stun.*.*'
+  - '+.stun.*.*.*'
+  - '+.stun.*.*.*.*'
+  - '+.stun.*.*.*.*.*'
+  #Linksys Router
+  - 'heartbeat.belkin.com'
+  - '*.linksys.com'
+  - '*.linksyssmartwifi.com'
+  #ASUS Router
+  - '*.router.asus.com'
+  #Apple Software Update Service
+  - 'mesu.apple.com'
+  - 'swscan.apple.com'
+  - 'swquery.apple.com'
+  - 'swdownload.apple.com'
+  - 'swcdn.apple.com'
+  - 'swdist.apple.com'
+  #Google
+  - 'lens.l.google.com'
+  - 'stun.l.google.com'
+  - 'na.b.g-tun.com'
+  #Netflix
+  - '+.nflxvideo.net'
+  #FinalFantasy XIV Worldwide Server & CN Server
+  - '*.square-enix.com'
+  - '*.finalfantasyxiv.com'
+  - '*.ffxiv.com'
+  - '*.ff14.sdo.com'
+  - 'ff.dorado.sdo.com'
+  #Bilibili
+  - '*.mcdn.bilivideo.cn'
+  #Disney Plus
+  - '+.media.dssott.com'
+  #shark007 Codecs
+  - 'shark007.net'
+  #招商银行
+  - '+.cmbchina.com'
+  - '+.cmbimg.com'
+  #AdGuard
+  - 'local.adguard.org'
+  #迅雷
+  - '+.sandai.net'
+  - '+.n0808.com'
+  #应用商店商店
+  - 'services.googleapis.cn'
+  #其它
+  - 'dns.msftncsi.com'
+  - 'www.msftncsi.com'
+  - 'www.msftconnecttest.com'
+  - "+.market.xiaomi.com"
 TEST_URL: https://www.gstatic.com/generate_204
 proxies: ~
 proxy-groups:
@@ -552,6 +726,7 @@ rule-providers:
     url: https://link.axfun.eu.org/proxy?url=https%3A%2F%2Fraw.githubusercontent.com%2FSubConv%2FZJU-Rule%2Fmain%2FClash%2FDownload.list
 rules:
 - DOMAIN,link.axfun.eu.org,DIRECT
+- DOMAIN,voice.google.com,🚀 手动切换1
 - RULE-SET,OpenAi,🤖 ChatBot
 - RULE-SET,ChatBot,🤖 ChatBot
 - RULE-SET,LocalAreaNetwork,🎯 全球直连
