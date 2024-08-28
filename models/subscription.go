@@ -51,8 +51,14 @@ func (sub *Subscription) List() ([]Subscription, error) {
 		return nil, err
 	}
 	for i := range subs {
-		DB.Model(&subs[i]).Association("Nodes").Find(&subs[i].Nodes)
-		DB.Model(&subs[i]).Association("SubLogs").Find(&subs[i].SubLogs)
+		err := DB.Model(&subs[i]).Association("Nodes").Find(&subs[i].Nodes)
+		if err != nil {
+			return nil, err
+		}
+		logsErr := DB.Model(&subs[i]).Association("SubLogs").Find(&subs[i].SubLogs)
+		if logsErr != nil {
+			return nil, logsErr
+		}
 	}
 	return subs, nil
 }
