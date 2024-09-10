@@ -403,9 +403,11 @@ func DecodeClash(proxys []Proxy, yamlfile string) ([]byte, error) {
 				validProxies = append(validProxies, p)
 			}
 		}
+		if proxyGroup["name"] == "♻️ 自动选择" || proxyGroup["name"] == "🚀 手动切换1" || proxyGroup["name"] == "🚀 手动切换2" || proxyGroup["name"] == "🔯 故障转移" || proxyGroup["name"] == "🔮 负载均衡" {
 		// 添加新代理
-		for _, newProxy := range ProxiesNameList {
-			validProxies = append(validProxies, newProxy)
+			for _, newProxy := range ProxiesNameList {
+				validProxies = append(validProxies, newProxy)
+			}
 		}
 		proxyGroup["proxies"] = validProxies
 		proxyGroups[i] = proxyGroup
