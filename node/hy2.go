@@ -79,6 +79,18 @@ func DecodeHY2URL(s string) (HY2, error) {
 		return HY2{}, fmt.Errorf("非hy2协议: %s", s)
 	}
 	password := u.User.Username()
+	if password == "" {
+		protocolEnd := strings.Index(s, "://")
+		atSymbol := strings.Index(s, "@")
+		if atSymbol > protocolEnd {
+			password = s[protocolEnd+3 : atSymbol]
+			remainingURL := s[:protocolEnd+3] + s[atSymbol+1:]
+			u, err = url.Parse(remainingURL)
+			if err != nil {
+				return HY2{}, fmt.Errorf("解析失败的URL: %s,错误:%s", s, err)
+			}
+		}
+	}
 	server := u.Hostname()
 	port, _ := strconv.Atoi(u.Port())
 	insecure, _ := strconv.Atoi(u.Query().Get("insecure"))
