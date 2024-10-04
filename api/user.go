@@ -46,7 +46,7 @@ func UserMe(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"code": "00000",
 		"data": gin.H{
-			"avatar":   "https://oss.youlai.tech/youlai-boot/2023/05/16/811270ef31f548af9cffc026dfc3777b.gif",
+			"avatar":   "static/avatar.gif",
 			"nickname": user.Nickname,
 			"userId":   user.ID,
 			"username": user.Username,
@@ -81,7 +81,7 @@ func UserPages(c *gin.Context) {
 			ID:       users[i].ID,
 			Username: users[i].Username,
 			Nickname: users[i].Nickname,
-			Avatar:   "https://oss.youlai.tech/youlai-boot/2023/05/16/811270ef31f548af9cffc026dfc3777b.gif",
+			Avatar:   "static/avatar.gif",
 		})
 	}
 	c.JSON(200, gin.H{

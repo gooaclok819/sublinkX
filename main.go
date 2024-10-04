@@ -17,7 +17,7 @@ import (
 //go:embed static/js/*
 //go:embed static/css/*
 //go:embed static/img/*
-//go:embed static/index.html
+//go:embed static/*
 var embeddedFiles embed.FS
 
 //go:embed template
