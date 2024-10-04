@@ -44,6 +44,16 @@ surge支持协议:ss trojan vmess hy2 tuic
 ![1712594176714](webs/src/assets/1.png)
 ![1712594176714](webs/src/assets/2.png)
 
+## [更新说明]
+
+修复头像失效
+
+采纳两名共享者给出的修复代码：lay-g Godtokoo666
+
+修复IP访问记录
+
+修复ss的addr获取到包含名字，导致地址端口获取不到问题
+
 ## [安装说明]
 ### linux方式：
 ```
