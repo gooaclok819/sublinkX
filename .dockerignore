@@ -8,3 +8,4 @@ README.en-US.md
 *.sh
 sublink_amd64 
 sublink_arm64
+sublink.exe
