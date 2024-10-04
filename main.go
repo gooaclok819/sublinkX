@@ -23,7 +23,7 @@ var embeddedFiles embed.FS
 //go:embed template
 var Template embed.FS
 
-func Templateinit() {
+func TemplateInit() {
 	// 设置template路径
 	// 检查目录是否创建
 	subFS, err := fs.Sub(Template, "template")
@@ -67,11 +67,11 @@ func main() {
 	// 初始化gin框架
 	r := gin.Default()
 	// 初始化日志配置
-	utils.Loginit()
+	utils.LogsInit()
 	// 初始化数据库
 	models.InitSqlite()
 	// 初始化模板
-	Templateinit()
+	TemplateInit()
 	// 安装中间件
 	r.Use(middlewares.AuthorToken) // jwt验证token
 	// 设置静态资源路径
@@ -93,7 +93,7 @@ func main() {
 	// 注册路由
 	routers.User(r)
 	routers.Mentus(r)
-	routers.Subcription(r)
+	routers.Subscription(r)
 	routers.Nodes(r)
 	routers.Clients(r)
 	routers.Total(r)

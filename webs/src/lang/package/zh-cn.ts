@@ -7,7 +7,7 @@ export default {
     system:"系统管理",
     nodelist:"节点列表",
     sublist:"订阅列表",
-    subcription:"订阅管理",
+    subscription:"订阅管理",
     templatelist:"模板列表",
   },
   // 登录页面国际化
