@@ -14,6 +14,7 @@ func (ipLog *SubLogs) Add() error {
 	return DB.Create(ipLog).Error
 }
 
+
 // Find 查找IP
 func (ipLog *SubLogs) Find(id int) error {
 	return DB.Where("ip = ? or subscription_id  = ?", ipLog.IP, id).First(ipLog).Error
