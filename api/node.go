@@ -12,11 +12,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// NodeUpdate 节点更新
-func NodeUpdate(c *gin.Context) {
-	var nodeUpdating models.Node
-	idStr := c.PostForm("id")
+func NodeUpdadte(c *gin.Context) {
+	var node models.Node
 	name := c.PostForm("name")
+	oldname := c.PostForm("oldname")
+	oldlink := c.PostForm("oldlink")
 	link := c.PostForm("link")
 	if name == "" || link == "" {
 		c.JSON(400, gin.H{
@@ -24,18 +24,19 @@ func NodeUpdate(c *gin.Context) {
 		})
 		return
 	}
-	id, err := strconv.Atoi(idStr)
+	// 查找旧节点
+	node.Name = oldname
+	node.Link = oldlink
+	err := node.Find()
 	if err != nil {
-		// 处理转换错误，比如返回一个错误响应
 		c.JSON(400, gin.H{
-			"error": "无效的ID",
+			"msg": err.Error(),
 		})
 		return
 	}
-	nodeUpdating.ID = id
-	nodeUpdating.Name = name
-	nodeUpdating.Link = link
-	err = nodeUpdating.UpdateById()
+	node.Name = name
+	node.Link = link
+	err = node.Update()
 	if err != nil {
 		c.JSON(400, gin.H{
 			"msg": "更新失败",
@@ -48,7 +49,7 @@ func NodeUpdate(c *gin.Context) {
 	})
 }
 
-// NodeGet 获取节点列表
+// 获取节点列表
 func NodeGet(c *gin.Context) {
 	var Node models.Node
 	nodes, err := Node.List()
@@ -65,7 +66,7 @@ func NodeGet(c *gin.Context) {
 	})
 }
 
-// NodeAdd 添加节点
+// 添加节点
 func NodeAdd(c *gin.Context) {
 	var Node models.Node
 	link := c.PostForm("link")
@@ -168,7 +169,7 @@ func NodeAdd(c *gin.Context) {
 	})
 }
 
-// NodeDel 删除节点
+// 删除节点
 func NodeDel(c *gin.Context) {
 	var Node models.Node
 	id := c.Query("id")
@@ -193,7 +194,7 @@ func NodeDel(c *gin.Context) {
 	})
 }
 
-// NodesTotal 节点统计
+// 节点统计
 func NodesTotal(c *gin.Context) {
 	var Node models.Node
 	nodes, err := Node.List()
@@ -208,26 +209,5 @@ func NodesTotal(c *gin.Context) {
 		"code": "00000",
 		"data": count,
 		"msg":  "取得节点统计",
-	})
-}
-
-func NodeSort(c *gin.Context) {
-	var nodes []models.Node
-	// 解析请求体中的 JSON 数据
-	if err := c.BindJSON(&nodes); err != nil {
-		c.JSON(400, gin.H{"msg": "解析失败", "error": err.Error()})
-		return
-	}
-
-	// 更新节点排序
-	if err := models.UpdateSort(nodes); err != nil {
-		c.JSON(500, gin.H{"msg": "排序更新失败", "error": err.Error()})
-		return
-	}
-
-	c.JSON(200, gin.H{
-		"code": "00000",
-		"data": nil,
-		"msg":  "排序更新成功",
 	})
 }
