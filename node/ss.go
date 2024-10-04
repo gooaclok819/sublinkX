@@ -2,6 +2,7 @@ package node
 
 import (
 	"fmt"
+	"log"
 	"net/url"
 	"strconv"
 	"strings"
@@ -27,26 +28,31 @@ func parsingSS(s string) (string, string, string) {
 	第二部分 为服务器地址和端口，格式为：服务器地址:端口	示例：xxx.xxx:12345
 	第三部分 为备注，格式为：#备注	示例：#备注
 	*/
-	s = strings.Replace(s, "ss://", "", 1)
-	addrIndex := strings.Index(s, "@")
-	NameIndex := strings.Index(s, "#")
-	var addr, name string
-	par := s
-	if NameIndex != -1 {
-		name, _ = url.QueryUnescape(s[NameIndex+1:])
-		par = s[:NameIndex]
+	u, err := url.Parse(s)
+	if err != nil {
+		log.Println("ss url parse fail.", err)
+		return "", "", ""
 	}
-
-	if addrIndex != -1 {
-		addr = s[addrIndex+1:]
-		par = s[:addrIndex]
-
-	} else {
-		addr = strings.Split(Base64Decode(par), "@")[1]
-		par = strings.Split(Base64Decode(par), "@")[0]
+	if u.Scheme != "ss" {
+		log.Println("ss url parse fail, not ss url.")
+		return "", "", ""
 	}
-	// log.Println(par, name, addr)
-	return par, addr, name
+	// 处理url全编码的情况
+	if u.User == nil {
+		// 截取ss://后的字符串
+		raw := s[5:]
+		s = "ss://" + Base64Decode(raw)
+		u, err = url.Parse(s)
+	}
+	var auth, addr, name string
+	auth = u.User.String()
+	if u.Host != "" {
+		addr = u.Host
+	}
+	if u.Fragment != "" {
+		name = u.Fragment
+	}
+	return auth, addr, name
 }
 
 // 开发者测试
