@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 import { ref,onMounted,nextTick  } from 'vue'
-import {getTemp,AddTemp,UpdateTemp,DelTemp} from "@/api/subcription/temp"
+import {getTemp,AddTemp,UpdateTemp,DelTemp} from "@/api/subscription/temp"
 interface Temp {
   file: string;
   text: string;
@@ -215,4 +215,4 @@ const currentTableData = computed(() => {
 .el-input{
   margin-bottom: 10px;
 }
-</style>@/api/subcription/temp
+</style>@/api/subscription/temp

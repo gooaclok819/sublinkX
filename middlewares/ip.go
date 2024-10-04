@@ -37,7 +37,7 @@ func GetIp(c *gin.Context) {
 			log.Println(err)
 			return
 		}
-		var sub models.Subcription
+		var sub models.Subscription
 		if subname, ok := subname.(string); ok {
 			sub.Name = subname
 		}
@@ -53,10 +53,10 @@ func GetIp(c *gin.Context) {
 		if err != nil {
 			iploga := []models.SubLogs{
 				{IP: ip,
-					Addr:          ipinfo.Addr,
-					SubcriptionID: sub.ID,
-					Date:          time.Now().Format("2006-01-02 15:04:05"),
-					Count:         1,
+					Addr:           ipinfo.Addr,
+					SubscriptionID: sub.ID,
+					Date:           time.Now().Format("2006-01-02 15:04:05"),
+					Count:          1,
 				},
 			}
 			sub.SubLogs = iploga
