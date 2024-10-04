@@ -58,12 +58,12 @@ func GetMenus(c *gin.Context) {
 		},
 		// 订阅管理
 		{
-			Path:      "/subscription",
+			Path:      "/subcription",
 			Component: "Layout",
-			Redirect:  "/subscription/subs",
-			Name:      "subscription",
+			Redirect:  "/subcription/subs",
+			Name:      "subcription",
 			Meta: Meta{
-				Title:  "subscription",
+				Title:  "subcription",
 				Icon:   "client",
 				Hidden: false,
 				Roles:  []string{"ADMIN"},
@@ -71,7 +71,7 @@ func GetMenus(c *gin.Context) {
 			Children: []Child{
 				{
 					Path:      "subs",
-					Component: "subscription/subs",
+					Component: "subcription/subs",
 					Name:      "Subs",
 					Meta: Meta{
 						Title:     "sublist",
@@ -83,7 +83,7 @@ func GetMenus(c *gin.Context) {
 				},
 				{
 					Path:      "nodes",
-					Component: "subscription/nodes",
+					Component: "subcription/nodes",
 					Name:      "Nodes",
 					Meta: Meta{
 						Title:     "nodelist",
@@ -95,7 +95,7 @@ func GetMenus(c *gin.Context) {
 				},
 				{
 					Path:      "template",
-					Component: "subscription/template",
+					Component: "subcription/template",
 					Name:      "Template",
 					Meta: Meta{
 						Title:     "templatelist",

@@ -10,7 +10,7 @@ import (
 )
 
 func SubTotal(c *gin.Context) {
-	var Sub models.Subscription
+	var Sub models.Subcription
 	subs, err := Sub.List()
 	count := len(subs)
 	if err != nil {
@@ -28,7 +28,7 @@ func SubTotal(c *gin.Context) {
 
 // 获取订阅列表
 func SubGet(c *gin.Context) {
-	var Sub models.Subscription
+	var Sub models.Subcription
 	Subs, err := Sub.List()
 	if err != nil {
 		c.JSON(500, gin.H{
@@ -45,7 +45,7 @@ func SubGet(c *gin.Context) {
 
 // 添加节点
 func SubAdd(c *gin.Context) {
-	var sub models.Subscription
+	var sub models.Subcription
 	name := c.PostForm("name")
 	config := c.PostForm("config")
 	nodes := c.PostForm("nodes")
@@ -92,7 +92,7 @@ func SubAdd(c *gin.Context) {
 
 // 更新节点
 func SubUpdate(c *gin.Context) {
-	var sub models.Subscription
+	var sub models.Subcription
 	name := c.PostForm("name")
 	oldname := c.PostForm("oldname")
 	config := c.PostForm("config")
@@ -150,7 +150,7 @@ func SubUpdate(c *gin.Context) {
 
 // 删除节点
 func SubDel(c *gin.Context) {
-	var sub models.Subscription
+	var sub models.Subcription
 	id := c.Query("id")
 	if id == "" {
 		c.JSON(400, gin.H{
