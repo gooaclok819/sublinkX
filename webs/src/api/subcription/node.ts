@@ -1,13 +1,12 @@
 import request from "@/utils/request";
-
-export function getNodes() {
+export function getNodes(){
   return request({
     url: "/api/v1/nodes/get",
     method: "get",
   });
 }
 
-export function AddNodes(data: any) {
+export function AddNodes(data: any){
   return request({
     url: "/api/v1/nodes/add",
     method: "post",
@@ -17,8 +16,7 @@ export function AddNodes(data: any) {
     },
   });
 }
-
-export function UpdateNode(data: any) {
+export function UpdateNode(data: any){
   return request({
     url: "/api/v1/nodes/update",
     method: "post",
@@ -28,22 +26,10 @@ export function UpdateNode(data: any) {
     },
   });
 }
-
-export function DelNode(data: any) {
+export function DelNode(data: any){
   return request({
     url: "/api/v1/nodes/delete",
     method: "delete",
     params: data,
-  });
-}
-
-export function SortNode(data: any) {
-  return request({
-    url: "/api/v1/nodes/sort",
-    method: "post",
-    data,
-    headers: {
-      "Content-Type": "application/json",
-    },
   });
 }
