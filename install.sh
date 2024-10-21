@@ -70,6 +70,8 @@ while true; do
     echo "3. 卸载安装"
     echo "4. 查看服务状态"
     echo "5. 查看运行目录"
+    echo "6. 修改端口"
+    echo "7. 重置账户密码"
     echo "0. 退出"
     echo -n "请选择一个选项: "
     read option
@@ -80,15 +82,15 @@ while true; do
             systemctl daemon-reload
             ;;
         2)
-				    systemctl stop sublink
-				    systemctl daemon-reload
-				    ;;
+            systemctl stop sublink
+            systemctl daemon-reload
+            ;;
         3)
-		        systemctl stop sublink
-		        systemctl disable sublink
-		        rm /etc/systemd/system/sublink.service
-		        systemctl daemon-reload
-		        rm /usr/bin/sublink
+            systemctl stop sublink
+            systemctl disable sublink
+            rm /etc/systemd/system/sublink.service
+            systemctl daemon-reload
+            rm /usr/bin/sublink
             ;;
         4)
             systemctl status sublink
@@ -97,17 +99,9 @@ while true; do
             echo "运行目录: /usr/local/bin/sublink"
             echo "需要备份的目录为db,template目录为模版文件可备份可不备份"
             ;;
-        0)
-            exit 0
+        6)
+            read -p "请输入要修改的端口: " new_port
+            /usr/local/bin/sublink/sublink run --port "$new_port"
             ;;
-        *)
-            echo "无效的选项"
-            ;;
-    esac
-done' > sublink_menu.sh
-
-# 移动sublink_menu.sh到/usr/bin
-
-sudo mv sublink_menu.sh /usr/bin/sublink
-
-chmod +x /usr/bin/sublink
+        7)
+            read -
