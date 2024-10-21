@@ -26,11 +26,16 @@ while true; do
     case $option in
         1)  
             systemctl start sublink
-            systemctl daemon-reload
+            sleep 1  # 等待一秒，给服务一些时间来启动
+            if [ "$(systemctl is-active sublink)" = "active" ]; then
+                echo "服务已成功启动"
+            else
+                echo "服务启动失败，请检查日志"
+            fi
             ;;
         2)
             systemctl stop sublink
-            systemctl daemon-reload
+            echo "服务已停止"
             ;;
         3)
             systemctl stop sublink
@@ -38,6 +43,7 @@ while true; do
             rm /etc/systemd/system/sublink.service
             systemctl daemon-reload
             rm /usr/bin/sublink
+            echo "服务已卸载"
             ;;
         4)
             systemctl status sublink
@@ -50,13 +56,13 @@ while true; do
             systemctl stop sublink
             echo -n "请输入新的端口号: "
             read new_port
-            systemctl start sublink run --port "$new_port"
+            systemctl start sublink run --port "$new_port" &
             systemctl daemon-reload
             echo "服务已使用新端口 $new_port 启动"
             ;;
         7)  # 处理重置账户密码的选项
             echo "正在重置账户密码为默认值..."
-            systemctl start sublink setting --username admin --password 123456
+            systemctl start sublink setting --username admin --password 123456 &
             systemctl daemon-reload
             echo "账户密码已重置为默认值：admin/123456"
             ;;
