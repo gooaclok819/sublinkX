@@ -59,4 +59,8 @@ while true; do
             echo "无效的选项"
             ;;
     esac
-done
+done > sublink_menu.sh
+
+# 移动sublink_menu.sh到/usr/bin
+
+sudo mv sublink_menu.sh /usr/bin/sublink
