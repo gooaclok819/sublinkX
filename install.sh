@@ -25,8 +25,9 @@ while true; do
 
     case $option in
         1)  
-            systemctl start sublink
-            sleep 1  # 等待一秒，给服务一些时间来启动
+            echo "正在启动服务..."
+            systemctl start sublink && echo "服务启动命令已执行" || echo "服务启动失败"
+            sleep 1
             if [ "$(systemctl is-active sublink)" = "active" ]; then
                 echo "服务已成功启动"
             else
@@ -34,10 +35,11 @@ while true; do
             fi
             ;;
         2)
-            systemctl stop sublink
-            echo "服务已停止"
+            echo "正在停止服务..."
+            systemctl stop sublink && echo "服务已停止" || echo "停止服务失败"
             ;;
         3)
+            echo "正在卸载服务..."
             systemctl stop sublink
             systemctl disable sublink
             rm /etc/systemd/system/sublink.service
@@ -46,6 +48,7 @@ while true; do
             echo "服务已卸载"
             ;;
         4)
+            echo "查看服务状态..."
             systemctl status sublink
             ;;
         5)
@@ -53,24 +56,16 @@ while true; do
             echo "需要备份的目录为db,template目录为模版文件可备份可不备份"
             ;;
         6)  # 处理修改端口的选项
+            echo "正在停止服务..."
             systemctl stop sublink
             echo -n "请输入新的端口号: "
             read new_port
-            systemctl start sublink run --port "$new_port" &
+            echo "正在使用新端口启动服务..."
+            systemctl start sublink run --port "$new_port" && echo "服务已使用新端口 $new_port 启动" || echo "启动失败"
             systemctl daemon-reload
-            echo "服务已使用新端口 $new_port 启动"
             ;;
         7)  # 处理重置账户密码的选项
             echo "正在重置账户密码为默认值..."
-            systemctl start sublink setting --username admin --password 123456 &
+            systemctl start sublink setting --username admin --password 123456 && echo "账户密码已重置为默认值：admin/123456" || echo "重置密码失败"
             systemctl daemon-reload
-            echo "账户密码已重置为默认值：admin/123456"
-            ;;
-        0)
-            exit 0
-            ;;
-        *)
-            echo "无效的选项"
-            ;;
-    esac
-done
+ 
