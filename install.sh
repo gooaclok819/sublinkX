@@ -21,7 +21,10 @@ while true; do
     echo "7. 重置账户密码"  # 新增选项
     echo "0. 退出"
     echo -n "请选择一个选项: "
-    read option
+    read -r option
+    option=$(echo "$option" | tr -d ' ')  # 去掉空格
+
+    echo "您选择的选项是: $option"  # 输出选择的选项，用于调试
 
     case $option in
         1)  
@@ -59,7 +62,7 @@ while true; do
             echo "正在停止服务..."
             systemctl stop sublink
             echo -n "请输入新的端口号: "
-            read new_port
+            read -r new_port
             echo "正在使用新端口启动服务..."
             systemctl start sublink run --port "$new_port" && echo "服务已使用新端口 $new_port 启动" || echo "启动失败"
             systemctl daemon-reload
@@ -68,4 +71,12 @@ while true; do
             echo "正在重置账户密码为默认值..."
             systemctl start sublink setting --username admin --password 123456 && echo "账户密码已重置为默认值：admin/123456" || echo "重置密码失败"
             systemctl daemon-reload
- 
+            ;;
+        0)
+            exit 0
+            ;;
+        *)
+            echo "无效的选项"
+            ;;
+    esac
+done
