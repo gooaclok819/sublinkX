@@ -1,16 +1,15 @@
-# 创建sublink_menu.sh脚本
-echo '#!/bin/bash
+#!/bin/bash
 
 while true; do
-    # 获取服务状态
     status=$(systemctl is-active sublink)
-    echo "当前版本: 1.6"
-    # 判断服务状态并打印
+    echo "当前版本: 1.6.1"
+    
     if [ "$status" = "active" ]; then
         echo "当前运行状态: 已运行"
     else
         echo "当前运行状态: 未运行"
     fi
+    
     echo "1. 启动服务"
     echo "2. 停止服务"
     echo "3. 卸载安装"
@@ -19,23 +18,21 @@ while true; do
     echo "6. 修改端口"
     echo "7. 重置账户密码"
     echo "0. 退出"
+    
     echo -n "请选择一个选项: "
     read option
 
     case $option in
         1)
             systemctl start sublink
-            systemctl daemon-reload
             ;;
         2)
             systemctl stop sublink
-            systemctl daemon-reload
             ;;
         3)
             systemctl stop sublink
             systemctl disable sublink
             rm /etc/systemd/system/sublink.service
-            systemctl daemon-reload
             rm /usr/bin/sublink
             ;;
         4)
@@ -43,7 +40,6 @@ while true; do
             ;;
         5)
             echo "运行目录: /usr/local/bin/sublink"
-            echo "需要备份的目录为db,template目录为模版文件可备份可不备份"
             ;;
         6)
             read -p "请输入要修改的端口: " new_port
@@ -63,4 +59,4 @@ while true; do
             echo "无效的选项"
             ;;
     esac
-done' > sublink_menu.sh
+done
