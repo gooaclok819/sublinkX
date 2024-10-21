@@ -3,7 +3,7 @@
 while true; do
     # 获取服务状态
     status=$(systemctl is-active sublink)
-    echo "当前版本: 1.6"
+    echo "当前版本: 1.6.1"
     
     # 判断服务状态并打印
     if [ "$status" = "active" ]; then
