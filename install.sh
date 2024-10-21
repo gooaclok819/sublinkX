@@ -70,7 +70,6 @@ while true; do
     echo "3. 卸载安装"
     echo "4. 查看服务状态"
     echo "5. 查看运行目录"
-    echo "6. 修改端口"
     echo "0. 退出"
     echo -n "请选择一个选项: "
     read option
@@ -97,10 +96,6 @@ while true; do
         5)
             echo "运行目录: /usr/local/bin/sublink"
             echo "需要备份的目录为db,template目录为模版文件可备份可不备份"
-            ;;
-        6)
-            read -p "请输入要修改的端口: " new_port
-            /usr/local/bin/sublink/sublink run --port "$new_port"
             ;;
         0)
             exit 0
