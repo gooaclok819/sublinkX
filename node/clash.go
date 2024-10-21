@@ -395,7 +395,11 @@ func DecodeClash(proxys []Proxy, yamlfile string) ([]byte, error) {
 		if proxyGroup["proxies"] == nil {
 			proxyGroup["proxies"] = []interface{}{}
 		}
-
+		// 如果为链式代理的话则不插入返回
+		// log.Print("代理类型为:", proxyGroup["type"])
+		if proxyGroup["type"] == "relay" {
+			break
+		}
 		// 清除 nil 值
 		var validProxies []interface{}
 		for _, p := range proxyGroup["proxies"].([]interface{}) {

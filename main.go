@@ -2,6 +2,8 @@ package main
 
 import (
 	"embed"
+	"flag"
+	"fmt"
 	"io/fs"
 	"log"
 	"net/http"
@@ -9,6 +11,7 @@ import (
 	"sublink/middlewares"
 	"sublink/models"
 	"sublink/routers"
+	"sublink/settings"
 	"sublink/utils"
 
 	"github.com/gin-gonic/gin"
@@ -64,12 +67,47 @@ func Templateinit() {
 }
 
 func main() {
+	var port int
+	// 初始化数据库
+	models.InitSqlite()
+	// 获取命令行参数
+	args := os.Args
+	// 如果长度小于2则没有接收到任何参数
+	if len(args) < 2 {
+		port = 8000
+		Run(port)
+		return
+	}
+	// 命令行参数选择
+	settingCmd := flag.NewFlagSet("setting", flag.ExitOnError)
+	var username, password string
+	var reset bool
+	settingCmd.BoolVar(&reset, "reset", false, "重置账号密码标识符")
+	settingCmd.StringVar(&username, "username", "", "设置账号")
+	settingCmd.StringVar(&password, "password", "", "设置密码")
+	settingCmd.IntVar(&port, "port", 8000, "修改端口")
+	switch args[1] {
+	// 解析setting命令标志
+	case "setting":
+		if reset {
+			settingCmd.Parse(args[2:])
+			settings.ResetUser(username, password)
+		}
+	case "run":
+		settingCmd.Parse(args[2:])
+		Run(port)
+
+	default:
+		return
+
+	}
+}
+
+func Run(port int) {
 	// 初始化gin框架
 	r := gin.Default()
 	// 初始化日志配置
 	utils.Loginit()
-	// 初始化数据库
-	models.InitSqlite()
 	// 初始化模板
 	Templateinit()
 	// 安装中间件
@@ -99,5 +137,5 @@ func main() {
 	routers.Total(r)
 	routers.Templates(r)
 	// 启动服务
-	r.Run(":8000")
+	r.Run(fmt.Sprintf(":%d", port))
 }
