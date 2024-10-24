@@ -47,13 +47,15 @@ surge支持协议:ss trojan vmess hy2 tuic
 ## [更新说明]
 
 支持clash链式代理
+
 增加修改端口命令
-增厚重置账户密码命令
+
+增加重置账户密码命令
 
 ## [安装说明]
 ### linux方式：
 ```
-curl -s https://raw.githubusercontent.com/gooaclok819/sublinkX/main/install.sh | sudo bash
+curl -s -H "Cache-Control: no-cache" -H "Pragma: no-cache" https://raw.githubusercontent.com/gooaclok819/sublinkX/main/install.sh | sudo bash
 ```
 
 linux更新方法:
