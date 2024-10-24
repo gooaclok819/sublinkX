@@ -54,8 +54,8 @@ systemctl daemon-reload
 systemctl start sublink
 systemctl enable sublink
 echo "服务已启动并已设置为开机启动"
-echo "默认账号admin密码123456 端口8000"
-echo "安装完成已经启动输入sudo sublink可以呼出菜单"
+echo "默认账号admin密码123456 默认端口8000"
+echo "安装完成已经启动输入sublink可以呼出菜单"
 
 
 # 下载menu.sh并设置权限
