@@ -132,7 +132,7 @@ function Select {
                 systemctl stop sublink
             fi
             # 检查是否为最新版本
-            if [[ version = latest_release ]]; then
+            if [[ $version = $latest_release ]]; then
                 echo "当前已经是最新版本"
             else
                 Up
