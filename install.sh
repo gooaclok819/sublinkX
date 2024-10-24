@@ -52,7 +52,9 @@ echo "服务已启动并已设置为开机启动"
 echo "默认账号admin密码123456 端口8000"
 echo "安装完成已经启动输入sudo sublink可以呼出菜单"
 
-sudo curl -o /usr/bin/sublink/menu.sh https://raw.githubusercontent.com/gooaclok819/sublinkX/main/menu.sh
+# 创建sublink目录
+sudo mkdir -p /usr/bin/sublink
 
-sudo chmod 755 /usr/bin/sublink/menu.sh
-
+# 下载menu.sh并设置权限
+sudo curl -o /usr/bin/sublink https://raw.githubusercontent.com/gooaclok819/sublinkX/main/menu.sh
+sudo chmod 755 /usr/bin/sublink
