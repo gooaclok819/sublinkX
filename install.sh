@@ -52,12 +52,16 @@ echo "服务已启动并已设置为开机启动"
 echo "默认账号admin密码123456 端口8000"
 echo "安装完成已经启动输入sudo sublink可以呼出菜单"
 
-# 创建sublink_menu.sh脚本
-echo '#!/bin/bash
+#!/bin/bash
 
-while true; do
+# 创建sublink.sh脚本内容并写入到 /usr/bin/sublink
+echo '#!/bin/bash
+function Select {
+    # 获取最新的发行版标签
+    latest_release=$(curl --silent "https://api.github.com/repos/gooaclok819/sublinkX/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
     # 获取服务状态
     status=$(systemctl is-active sublink)
+    echo "最新版本:$latest_release"
     echo "当前版本: 1.6"
     # 判断服务状态并打印
     if [ "$status" = "active" ]; then
@@ -80,15 +84,15 @@ while true; do
             systemctl daemon-reload
             ;;
         2)
-				    systemctl stop sublink
-				    systemctl daemon-reload
-				    ;;
+            systemctl stop sublink
+            systemctl daemon-reload
+            ;;
         3)
-		        systemctl stop sublink
-		        systemctl disable sublink
-		        rm /etc/systemd/system/sublink.service
-		        systemctl daemon-reload
-		        rm /usr/bin/sublink
+            systemctl stop sublink
+            systemctl disable sublink
+            rm /etc/systemd/system/sublink.service
+            systemctl daemon-reload
+            rm /usr/bin/sublink
             ;;
         4)
             systemctl status sublink
@@ -96,16 +100,21 @@ while true; do
         5)
             echo "运行目录: /usr/local/bin/sublink"
             echo "需要备份的目录为db,template目录为模版文件可备份可不备份"
+            cd /usr/local/bin/sublink
+            echo "已经切换到运行目录"
             ;;
         0)
             exit 0
             ;;
         *)
-            echo "无效的选项"
+            echo "无效的选项,请重新选择"
+            Select
             ;;
     esac
-done' > sublink_menu.sh
+}
 
-# 移动sublink_menu.sh到/usr/bin
+Select
+' | sudo tee /usr/bin/sublink
 
-sudo mv sublink_menu.sh /usr/bin/sublink
+# 将sublink脚本移动到 /usr/bin 并赋予执行权限
+sudo chmod 755 /usr/bin/sublink
