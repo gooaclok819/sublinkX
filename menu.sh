@@ -32,14 +32,26 @@ function Select {
             systemctl daemon-reload
             ;;
         3)
-            systemctl stop sublink
-            systemctl disable sublink
-            rm /etc/systemd/system/sublink.service
-            systemctl daemon-reload
-            rm /usr/bin/sublink
-            rm -r /usr/local/bin/sublink/template
-            rm -r /usr/local/bin/sublink/logs
-            rm /usr/local/bin/sublink/sublink
+            # 停止服务之前检查服务是否存在
+            if systemctl is-active --quiet sublink; then
+                systemctl stop sublink
+            fi
+            if systemctl is-enabled --quiet sublink; then
+                systemctl disable sublink
+            fi
+            # 删除服务文件
+            if [ -f /etc/systemd/system/sublink.service ]; then
+                rm /etc/systemd/system/sublink.service
+            fi
+            # 删除相关文件和目录
+            if [ -d /usr/local/bin/sublink ]; then
+                rm -r /usr/local/bin/sublink/*
+                rmdir /usr/local/bin/sublink
+            fi
+            if [ -d /usr/bin/sublink ]; then
+                rm -r /usr/bin/sublink
+            fi
+            echo "卸载完成"
             ;;
         4)
             systemctl status sublink
