@@ -59,5 +59,5 @@ echo "安装完成已经启动输入sublink可以呼出菜单"
 
 
 # 下载menu.sh并设置权限
-curl -o "/usr/bin/sublink" https://raw.githubusercontent.com/gooaclok819/sublinkX/main/menu.sh
+curl -o /usr/bin/sublink -H "Cache-Control: no-cache" -H "Pragma: no-cache" https://raw.githubusercontent.com/gooaclok819/sublinkX/main/menu.sh
 chmod 755 "/usr/bin/sublink"
