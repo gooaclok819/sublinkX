@@ -58,7 +58,7 @@ echo "安装完成已经启动输入sudo sublink可以呼出菜单"
 echo '#!/bin/bash
 function Select {
     # 获取最新的发行版标签
-    latest_release=$(curl --silent "https://api.github.com/repos/gooaclok819/sublinkX/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    latest_release=$(curl --silent "https://api.github.com/repos/gooaclok819/sublinkX/releases/latest" | grep '\"tag_name\":' | sed -E 's/.*\"([^\"]+)\".*/\1/')
     # 获取服务状态
     status=$(systemctl is-active sublink)
     echo "最新版本:$latest_release"
