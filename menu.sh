@@ -41,15 +41,16 @@ function Select {
             fi
             # 删除服务文件
             if [ -f /etc/systemd/system/sublink.service ]; then
-                rm /etc/systemd/system/sublink.service
+                sudo rm /etc/systemd/system/sublink.service
             fi
             # 删除相关文件和目录
             if [ -d /usr/local/bin/sublink ]; then
-                rm -r /usr/local/bin/sublink/*
-                rmdir /usr/local/bin/sublink
+                sudo rm -r /usr/local/bin/sublink/*
+                sudo rm -r /usr/local/bin/sublink/template
+                sudo rm -r /usr/local/bin/sublink/logs
             fi
             if [ -d /usr/bin/sublink ]; then
-                rm -r /usr/bin/sublink
+                sudo rm -r /usr/bin/sublink
             fi
             echo "卸载完成"
             ;;
@@ -66,24 +67,24 @@ function Select {
             SERVICE_FILE="/etc/systemd/system/sublink.service"
             read -p "请输入新的端口号: " Port
             echo "新的端口号: $Port"
-            PARAMETER="-port $Port"
+            PARAMETER="run -port $Port"
             # 检查服务文件是否存在
             if [ ! -f "$SERVICE_FILE" ]; then
                 echo "服务文件不存在: $SERVICE_FILE"
                 exit 1
             fi
-
             # 检查 ExecStart 是否已经包含该参数
             if grep -q "$PARAMETER" "$SERVICE_FILE"; then
                 echo "参数已存在，无需修改。"
             else
+                #暂停服务
+                systemctl stop sublink
                 # 使用 sed 替换 ExecStart 行，添加启动参数
                 sudo sed -i "/^ExecStart=/ s|$| $PARAMETER|" "$SERVICE_FILE"
                 echo "参数已添加到 ExecStart 行: $PARAMETER"
                 
                 # 重新加载 systemd 守护进程
                 sudo systemctl daemon-reload
-
                 # 重启 sublink 服务
                 sudo systemctl restart sublink
 
