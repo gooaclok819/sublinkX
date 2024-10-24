@@ -37,6 +37,9 @@ function Select {
             rm /etc/systemd/system/sublink.service
             systemctl daemon-reload
             rm /usr/bin/sublink
+            rm -r /usr/local/bin/sublink/template
+            rm -r /usr/local/bin/sublink/logs
+            rm /usr/local/bin/sublink/sublink
             ;;
         4)
             systemctl status sublink
