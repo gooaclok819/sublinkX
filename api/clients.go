@@ -77,11 +77,8 @@ func GetClient(c *gin.Context) {
 
 				}
 			}
-		} else {
-			c.Writer.WriteString("找不到这个订阅")
 		}
 	}
-	// c.Writer.WriteString("找不到这个订阅")
 
 }
 func GetV2ray(c *gin.Context) {
@@ -91,12 +88,12 @@ func GetV2ray(c *gin.Context) {
 		return
 	}
 	// subname := c.Param("subname")
-	subname := SunName
-	subname = node.Base64Decode(subname)
-	sub.Name = subname
+	// subname := SunName
+	// subname = node.Base64Decode(subname)
+	sub.Name = SunName
 	err := sub.Find()
 	if err != nil {
-		c.Writer.WriteString("找不到这个订阅:" + subname)
+		c.Writer.WriteString("找不到这个订阅:" + SunName)
 		return
 	}
 	err = sub.GetSub()
@@ -128,8 +125,8 @@ func GetV2ray(c *gin.Context) {
 			baselist += v.Link + "\n"
 		}
 	}
-	c.Set("subname", subname)
-	filename := fmt.Sprintf("%s.txt", subname)
+	c.Set("subname", SunName)
+	filename := fmt.Sprintf("%s.txt", SunName)
 	encodedFilename := url.QueryEscape(filename)
 	c.Writer.Header().Set("Content-Disposition", "inline; filename*=utf-8''"+encodedFilename)
 	c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
