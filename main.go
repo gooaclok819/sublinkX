@@ -134,5 +134,5 @@ func Run(port int) {
 	routers.Total(r)
 	routers.Templates(r)
 	// 启动服务
-	r.Run(fmt.Sprintf(":%d", port))
+	r.Run(fmt.Sprintf("0.0.0.0:%d", port))
 }
