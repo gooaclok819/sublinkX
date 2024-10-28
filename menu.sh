@@ -76,7 +76,7 @@ function Select {
             # 删除相关文件和目录
             sudo rm -r /usr/local/bin/sublink/*
             sudo rm -r /usr/bin/sublink
-            read -p "是否保留数据(y/n): " isDelete
+            read -p "是否删除数据(y/n): " isDelete
             if [ "$isDelete" = "y" ]; then
                 sudo rm -r /usr/local/bin/sublink/db
                 sudo rm -r /usr/local/bin/sublink/template
