@@ -31,7 +31,7 @@ function Select {
     latest_release=$(curl --silent "https://api.github.com/repos/gooaclok819/sublinkX/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
     # 获取服务状态
     status=$(systemctl is-active sublink)
-    version="1.6.1"
+    version="1.7"
     echo "最新版本:$latest_release"
     echo "当前版本:$version"
     # 判断服务状态并打印
