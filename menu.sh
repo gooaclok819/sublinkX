@@ -96,7 +96,7 @@ function Select {
             SERVICE_FILE="/etc/systemd/system/sublink.service"
             read -p "请输入新的端口号: " Port
             echo "新的端口号: $Port"
-            PARAMETER="-port $Port"
+            PARAMETER="run --port $Port"
             # 检查服务文件是否存在
             if [ ! -f "$SERVICE_FILE" ]; then
                 echo "服务文件不存在: $SERVICE_FILE"
@@ -104,16 +104,12 @@ function Select {
             fi
 
             # 检查 ExecStart 是否已经包含该参数
-            if grep -q "-port" "$SERVICE_FILE"; then
+            if grep -q "run --port" "$SERVICE_FILE"; then
                 echo "参数已存在，正在替换..."
-                # 暂停服务
-                systemctl stop sublink
                 # 使用 sed 替换 ExecStart 行中的 -port 参数
                 sudo sed -i "s/-port [0-9]\+/-port $Port/" "$SERVICE_FILE"
             else
                 # 如果没有 -port 参数，添加新参数
-                # 暂停服务
-                systemctl stop sublink
                 # 使用 sed 替换 ExecStart 行，添加启动参数
                 sudo sed -i "/^ExecStart=/ s|$| $PARAMETER|" "$SERVICE_FILE"
                 echo "参数已添加到 ExecStart 行: $PARAMETER"
