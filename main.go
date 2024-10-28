@@ -81,22 +81,19 @@ func main() {
 	// 命令行参数选择
 	settingCmd := flag.NewFlagSet("setting", flag.ExitOnError)
 	var username, password string
-	var reset bool
-	settingCmd.BoolVar(&reset, "reset", false, "重置账号密码标识符")
 	settingCmd.StringVar(&username, "username", "", "设置账号")
 	settingCmd.StringVar(&password, "password", "", "设置密码")
 	settingCmd.IntVar(&port, "port", 8000, "修改端口")
 	switch args[1] {
 	// 解析setting命令标志
 	case "setting":
-		if reset {
-			settingCmd.Parse(args[2:])
-			settings.ResetUser(username, password)
-		}
+		settingCmd.Parse(args[2:])
+		fmt.Println(username, password)
+		settings.ResetUser(username, password)
+		return
 	case "run":
 		settingCmd.Parse(args[2:])
 		Run(port)
-
 	default:
 		return
 

@@ -1,6 +1,8 @@
 package api
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -14,9 +16,82 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var SunName string
+
+// md5加密
+func Md5(src string) string {
+	m := md5.New()
+	m.Write([]byte(src))
+	res := hex.EncodeToString(m.Sum(nil))
+	return res
+}
+func GetClient(c *gin.Context) {
+	// 获取协议头
+	token := c.Query("token")
+	if token == "" {
+		log.Println("token为空")
+		c.Writer.WriteString("token为空")
+		return
+	}
+	// fmt.Println(c.Query("token"))
+	Sub := new(models.Subcription)
+	// 获取所有订阅
+	list, _ := Sub.List()
+	// 查找订阅是否包含此名字
+	for _, sub := range list {
+		//查找token的md5是否匹配并且转换成小写
+		if Md5(sub.Name) == strings.ToLower(token) {
+			fmt.Println("找到了", sub.Name)
+			// 解析客户端
+			ClientList := []string{"clash", "surge"}
+			for k, v := range c.Request.Header {
+				if k == "User-Agent" {
+					for _, UserAgent := range v {
+						if UserAgent == "" {
+							fmt.Println("User-Agent为空")
+						}
+						// fmt.Println(UserAgent)
+						// 遍历客户端列表
+						SunName = sub.Name
+						for _, client := range ClientList {
+							if strings.Contains(strings.ToLower(UserAgent), strings.ToLower(client)) {
+								fmt.Println("订阅名", SunName)
+								switch client {
+								case "clash":
+									GetClash(c)
+								case "surge":
+									GetSurge(c)
+								default:
+									fmt.Println("未知客户端") // 这个应该是不能达到的，因为已经在上面列出所有情况
+								}
+								// 找到匹配的客户端后退出循环
+								break
+							}
+							// 如果未匹配到任何客户端
+							// fmt.Println("未知客户端")
+							GetV2ray(c)
+							break
+						}
+
+					}
+
+				}
+			}
+		} else {
+			c.Writer.WriteString("找不到这个订阅")
+		}
+	}
+	// c.Writer.WriteString("找不到这个订阅")
+
+}
 func GetV2ray(c *gin.Context) {
 	var sub models.Subcription
-	subname := c.Param("subname")
+	if SunName == "" {
+		c.Writer.WriteString("订阅名为空")
+		return
+	}
+	// subname := c.Param("subname")
+	subname := SunName
 	subname = node.Base64Decode(subname)
 	sub.Name = subname
 	err := sub.Find()
@@ -62,12 +137,12 @@ func GetV2ray(c *gin.Context) {
 }
 func GetClash(c *gin.Context) {
 	var sub models.Subcription
-	subname := c.Param("subname")
-	subname = node.Base64Decode(subname)
-	sub.Name = subname
+	// subname := c.Param("subname")
+	// subname := node.Base64Decode(SunName)
+	sub.Name = SunName
 	err := sub.Find()
 	if err != nil {
-		c.Writer.WriteString("找不到这个订阅:" + subname)
+		c.Writer.WriteString("找不到这个订阅:" + SunName)
 		return
 	}
 	err = sub.GetSub()
@@ -112,8 +187,8 @@ func GetClash(c *gin.Context) {
 		c.Writer.WriteString(err.Error())
 		return
 	}
-	c.Set("subname", subname)
-	filename := fmt.Sprintf("%s.yaml", subname)
+	c.Set("subname", SunName)
+	filename := fmt.Sprintf("%s.yaml", SunName)
 	encodedFilename := url.QueryEscape(filename)
 	c.Writer.Header().Set("Content-Disposition", "inline; filename*=utf-8''"+encodedFilename)
 	c.Writer.Header().Set("Content-Type", "text/plain; charset=utf-8")
@@ -121,12 +196,12 @@ func GetClash(c *gin.Context) {
 }
 func GetSurge(c *gin.Context) {
 	var sub models.Subcription
-	subname := c.Param("subname")
-	subname = node.Base64Decode(subname)
-	sub.Name = subname
+	// subname := c.Param("subname")
+	// subname := node.Base64Decode(SunName)
+	sub.Name = SunName
 	err := sub.Find()
 	if err != nil {
-		c.Writer.WriteString("找不到这个订阅:" + subname)
+		c.Writer.WriteString("找不到这个订阅:" + SunName)
 		return
 	}
 	err = sub.GetSub()
@@ -172,8 +247,8 @@ func GetSurge(c *gin.Context) {
 		c.Writer.WriteString(err.Error())
 		return
 	}
-	c.Set("subname", subname)
-	filename := fmt.Sprintf("%s.conf", subname)
+	c.Set("subname", SunName)
+	filename := fmt.Sprintf("%s.conf", SunName)
 	encodedFilename := url.QueryEscape(filename)
 	c.Writer.Header().Set("Content-Disposition", "inline; filename*=utf-8''"+encodedFilename)
 	c.Writer.Header().Set("Content-Type", "text/plain; charset=utf-8")

@@ -1,6 +1,6 @@
 {
   "name": "sublinkx-admin",
-  "version": "1.6",
+  "version": "1.7",
   "private": true,
   "type": "module",
   "scripts": {
@@ -51,6 +51,7 @@
     "echarts": "^5.5.0",
     "element-plus": "^2.6.1",
     "lodash-es": "^4.17.21",
+    "md5": "^2.3.0",
     "net": "^1.0.2",
     "nprogress": "^0.2.0",
     "path-browserify": "^1.0.1",

@@ -4,6 +4,7 @@ import {getSubs,AddSub,DelSub,UpdateSub} from "@/api/subcription/subs"
 import {getTemp} from "@/api/subcription/temp"
 import {getNodes} from "@/api/subcription/node"
 import QrcodeVue from 'qrcode.vue'
+import md5 from 'md5'
 interface Sub {
   ID: number;
   Name: string;
@@ -263,12 +264,19 @@ const handleBase64 = (text: string) => {
 const ClientDiaLog = ref(false)
 const ClientList = ['v2ray','clash','surge'] // 客户端列表
 const ClientUrls = ref<Record<string, string>>({})
+const ClientUrl = ref('')
 const handleClient = (name:string) => {
   let serverAddress = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '');
-  ClientList.forEach((item:string) => {
-    ClientUrls.value[item]=`${serverAddress}/c/${item}/${handleBase64(name)}`
-  })  
   ClientDiaLog.value = true
+  ClientUrl.value = `${serverAddress}/c/?token=${md5(name)}`
+  handleQrcode(ClientUrl.value)
+  // console.log(`${serverAddress}/c/?token=${md5(name)}`);
+  // ClientList.forEach((item:string) => {
+  //   // ClientUrls.value[item]=`${serverAddress}/c/${item}/${handleBase64(name)}`
+  //   ClientUrls.value[item]=`${serverAddress}/c/?token=${md5(name)}`
+
+  // })  
+
 }
 
 const Qrdialog = ref(false)
@@ -285,20 +293,25 @@ const clientradio = ref('1')
 
 <template>
   <div>
-    <el-dialog v-model="Qrdialog" width="300px" style="text-align: center">
-      <qrcode-vue :value="qrcode" :size="200" level="H" />
-      <el-tag type="primary" effect="dark" round>{{qrcode}}</el-tag>
+    <el-dialog v-model="Qrdialog" width="300px" style="text-align: center" title="客户端(自动识别)">
+      <qrcode-vue :value="qrcode"  :size="200" level="H" />
+      <el-input
+      v-model="qrcode"
+      >
+      </el-input>
       <el-button @click="copyUrl(qrcode)">复制</el-button>
       <el-button @click="OpenUrl(qrcode)">打开</el-button>
     </el-dialog>
-    <el-dialog v-model="ClientDiaLog" title="客户端" style="text-align: center" >
+
+    <!-- <el-dialog v-model="ClientDiaLog" title="客户端" style="text-align: center" >
       <el-row>
+        <el-tag type="success" size="large">{{ClientUrl}}</el-tag>
         <el-col v-for="(item,index) in ClientUrls" style="margin-bottom:10px;">
           <el-tag type="success" size="large">{{index}}</el-tag>
           <el-button @click="handleQrcode(item)">二维码</el-button>
         </el-col>
         </el-row>
-    </el-dialog>
+    </el-dialog> -->
     <el-dialog v-model="iplogsdialog" title="访问记录" width="80%" draggable>
   <template #footer>
     <div class="dialog-footer">
