@@ -39,8 +39,6 @@ clash支持协议:ss ssr trojan vmess vless hy hy2 tuic
 
 surge支持协议:ss trojan vmess hy2 tuic
 
-初始账户密码为 admin 123456
-
 ## [项目预览]
 
 ![1712594176714](webs/src/assets/1.png)
