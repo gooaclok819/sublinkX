@@ -41,7 +41,6 @@ func GetClient(c *gin.Context) {
 	for _, sub := range list {
 		//查找token的md5是否匹配并且转换成小写
 		if Md5(sub.Name) == strings.ToLower(token) {
-			fmt.Println("找到了", sub.Name)
 			// 解析客户端
 			ClientList := []string{"clash", "surge"}
 			for k, v := range c.Request.Header {
@@ -50,29 +49,29 @@ func GetClient(c *gin.Context) {
 						if UserAgent == "" {
 							fmt.Println("User-Agent为空")
 						}
-						// fmt.Println(UserAgent)
+						// fmt.Println("协议头:", UserAgent)
 						// 遍历客户端列表
 						SunName = sub.Name
 						for _, client := range ClientList {
+							// fmt.Println(strings.ToLower(UserAgent), strings.ToLower(client))
+							// fmt.Println(strings.Contains(strings.ToLower(UserAgent), strings.ToLower(client)))
 							if strings.Contains(strings.ToLower(UserAgent), strings.ToLower(client)) {
-								fmt.Println("订阅名", SunName)
+								// fmt.Println("客户端", client)
 								switch client {
 								case "clash":
 									GetClash(c)
+									return
 								case "surge":
 									GetSurge(c)
+									return
 								default:
 									fmt.Println("未知客户端") // 这个应该是不能达到的，因为已经在上面列出所有情况
 								}
 								// 找到匹配的客户端后退出循环
-								break
-							}
-							// 如果未匹配到任何客户端
-							// fmt.Println("未知客户端")
-							GetV2ray(c)
-							break
-						}
 
+							}
+						}
+						GetV2ray(c)
 					}
 
 				}

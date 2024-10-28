@@ -170,11 +170,14 @@ func DecodeSurge(proxys, groups []string, file string) (string, error) {
 		lines := strings.Split(s, "\n")
 		grouplist := strings.Join(groups, ",")
 		for i, line := range lines {
+
 			if strings.Contains(line, "=") {
-				lines[i] = line + "," + grouplist
+				lines[i] = strings.TrimSpace(line) + ", " + grouplist
+				// lines[i] = line + "," + grouplist
 			}
 		}
 		return strings.Join(lines, "\n") + s[len("[Proxy Group]"):]
 	})
+
 	return groupPart, nil
 }
