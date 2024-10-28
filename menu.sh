@@ -74,9 +74,9 @@ function Select {
                 sudo rm /etc/systemd/system/sublink.service
             fi
             # 删除相关文件和目录
-            sudo rm -r /usr/local/bin/sublink/*
+            sudo rm -r /usr/local/bin/sublink/sublink
             sudo rm -r /usr/bin/sublink
-            read -p "是否删除数据(y/n): " isDelete
+            read -p "是否删除模板文件和数据库(y/n): " isDelete
             if [ "$isDelete" = "y" ]; then
                 sudo rm -r /usr/local/bin/sublink/db
                 sudo rm -r /usr/local/bin/sublink/template
@@ -136,20 +136,17 @@ function Select {
             fi
             ;;
         8)
-            systemctl stop sublink
             read -p "请输入新的账号: " User
             read -p "请输入新的密码: " Password
             # 运行二进制文件并传递启动参数，放在后台运行
-            /usr/local/bin/sublink/sublink setting -username "$User" -password "$Password" &
+            cd /usr/local/bin/sublink
+            ./sublink setting --username "$User" --password "$Password" &
             # 获取该程序的PID
             pid=$!
             # 等待程序完成
             wait $pid
             # 如果需要可以在此处进行清理
-            echo "新的账号: $User"
-            echo "新的密码: $Password"
-            systemctl daemon-reload
-            systemctl start sublink
+            systemctl restart sublink
             ;;
         0)
             exit 0
