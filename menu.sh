@@ -140,7 +140,7 @@ function Select {
             read -p "请输入新的账号: " User
             read -p "请输入新的密码: " Password
             # 运行二进制文件并传递启动参数，放在后台运行
-            /usr/local/bin/sublink/sublink -setting -username "$User" -password "$Password" &
+            /usr/local/bin/sublink/sublink setting -username "$User" -password "$Password" &
             # 获取该程序的PID
             pid=$!
             # 等待程序完成
