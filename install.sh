@@ -29,6 +29,7 @@ else
 fi
 
 # 下载文件
+cd ~
 curl -LO "https://github.com/gooaclok819/sublinkX/releases/download/$latest_release/$file_name"
 
 # 设置文件为可执行
