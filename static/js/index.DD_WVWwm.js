@@ -1,1 +1,0 @@
-import{d as a,aC as e,aD as s,e as r,c as t}from"./index.NByQEtge.js";const p=a({__name:"index",setup(a){const p=e(),n=s(),{params:d,query:o}=p,{path:u}=d;return n.replace({path:"/"+u,query:o}),(a,e)=>(t(),r("div"))}});export{p as default};

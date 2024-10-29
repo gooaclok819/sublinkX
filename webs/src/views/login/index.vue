@@ -15,7 +15,7 @@
     <el-card class="!border-none !bg-transparent !rounded-4% w-100 <sm:w-85">
       <div class="text-center relative">
         <h2>{{ defaultSettings.title }}</h2>
-        <el-tag class="ml-2 absolute-rt">{{ defaultSettings.version }}</el-tag>
+        <el-tag class="ml-2 absolute-rt">{{ version }}</el-tag>
       </div>
 
       <el-form
@@ -104,13 +104,25 @@
 
 <script setup lang="ts">
 import { useSettingsStore, useUserStore } from "@/store";
-import { getCaptchaApi } from "@/api/auth";
+import { getCaptchaApi , GetVersion } from "@/api/auth";
 import { LoginData } from "@/api/auth/types";
 import { Sunny, Moon } from "@element-plus/icons-vue";
 import { LocationQuery, LocationQueryValue, useRoute } from "vue-router";
 import router from "@/router";
 import defaultSettings from "@/settings";
 import { ThemeEnum } from "@/enums/ThemeEnum";
+// 获取版本号
+const version = ref('')  
+const fetchVersion = function(){
+  GetVersion().then((res) => {
+    console.log("Version fetched:", res.data); // 输出返回内容
+    version.value = res.data;
+  }).catch((error) => {
+    console.error("Error fetching version:", error);
+  });
+}() 
+
+
 
 // Stores
 const userStore = useUserStore();

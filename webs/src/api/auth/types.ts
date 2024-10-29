@@ -57,3 +57,10 @@ export interface CaptchaResult {
    */
   captchaBase64: string;
 }
+
+export interface VersionResult {
+  /**
+   * 版本号
+   */
+  version: string;
+}

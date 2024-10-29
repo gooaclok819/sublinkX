@@ -26,6 +26,8 @@ var embeddedFiles embed.FS
 //go:embed template
 var Template embed.FS
 
+var version string
+
 func Templateinit() {
 	// 设置template路径
 	// 检查目录是否创建
@@ -68,6 +70,15 @@ func Templateinit() {
 
 func main() {
 	var port int
+	// 获取版本号
+	var Isversion bool
+	version = "1.7.2"
+	flag.BoolVar(&Isversion, "version", false, "显示版本号")
+	flag.Parse()
+	if Isversion {
+		fmt.Println("1.7.2")
+		return
+	}
 	// 初始化数据库
 	models.InitSqlite()
 	// 获取命令行参数
@@ -133,6 +144,7 @@ func Run(port int) {
 	routers.Clients(r)
 	routers.Total(r)
 	routers.Templates(r)
+	routers.Version(r, version)
 	// 启动服务
 	r.Run(fmt.Sprintf("0.0.0.0:%d", port))
 }

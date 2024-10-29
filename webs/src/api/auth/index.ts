@@ -1,6 +1,6 @@
 import request from "@/utils/request";
 import { AxiosPromise } from "axios";
-import { CaptchaResult, LoginData, LoginResult } from "./types";
+import { CaptchaResult, LoginData, LoginResult , VersionResult } from "./types";
 
 /**
  * 登录API
@@ -40,6 +40,22 @@ export function logoutApi() {
 export function getCaptchaApi(): AxiosPromise<CaptchaResult> {
   return request({
     url: "/api/v1/auth/captcha",
+    method: "get",
+  });
+}
+
+// // 获取版本号
+// export function GetVersion():AxiosPromise<VersionResult>{
+//   return request({
+//     url: "/api/v1/version",
+//     method: "get",
+//   });
+// }
+
+// 获取版本号
+export function GetVersion(): AxiosPromise<string> {
+  return request({
+    url: "/api/v1/version",
     method: "get",
   });
 }
