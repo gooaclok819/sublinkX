@@ -20,7 +20,7 @@ type JwtClaims struct {
 // AuthorToken 验证token中间件
 func AuthorToken(c *gin.Context) {
 	// 定义白名单
-	list := []string{"/static", "/api/v1/auth/login", "/api/v1/auth/captcha", "/c/"}
+	list := []string{"/static", "/api/v1/auth/login", "/api/v1/auth/captcha", "/c/", "/api/v1/version"}
 	// 如果是首页直接跳过
 	if c.Request.URL.Path == "/" {
 		c.Next()
