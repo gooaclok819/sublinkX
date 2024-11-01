@@ -10,10 +10,9 @@ FROM alpine:latest
 WORKDIR /app
 
 # 设置时区为 Asia/Shanghai
-RUN apk add --no-cache tzdata \
-    && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-    && echo "Asia/Shanghai" > /etc/timezone
+ENV TZ=Asia/Shanghai
 
 COPY --from=builder /app/sublinkX /app/sublinkX
 EXPOSE 8000
 CMD ["/app/sublinkX"]
+

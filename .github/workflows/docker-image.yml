@@ -35,5 +35,6 @@ jobs:
       # 构建并推送多平台 Docker 镜像
       - name: Build and Push Multi-Arch Docker Image
         run: |
-          docker buildx create --use
-          docker buildx build --platform linux/amd64,linux/arm64 -t jaaksi/sublinkx:latest --push .
+          docker buildx build --platform linux/amd64,linux/arm64 \
+            -t jaaksi/sublinkx:latest \
+            --push .
