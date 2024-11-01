@@ -14,7 +14,7 @@ import (
 
 type Proxy struct {
 	Name               string                 `yaml:"name,omitempty"`
-	请键入               string                 `yaml:"type,omitempty"`
+	Type               string                 `yaml:"type,omitempty"`
 	Server             string                 `yaml:"server,omitempty"`
 	Port               int                    `yaml:"port,omitempty"`
 	Cipher             string                 `yaml:"cipher,omitempty"`
