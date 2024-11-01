@@ -14,7 +14,7 @@ import (
 
 type Proxy struct {
 	Name               string                 `yaml:"name,omitempty"`
-	Type               string                 `yaml:"type,omitempty"`
+	请键入               string                 `yaml:"type,omitempty"`
 	Server             string                 `yaml:"server,omitempty"`
 	Port               int                    `yaml:"port,omitempty"`
 	Cipher             string                 `yaml:"cipher,omitempty"`
@@ -232,6 +232,9 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 			tls := false
 			if vless.Query.Security != "" {
 				tls = true
+			}
+			if vless.Query.Security == "none" {
+				tls = false
 			}
 			vlessproxy := Proxy{
 				Name:               vless.Name,
