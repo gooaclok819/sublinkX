@@ -10,6 +10,6 @@ services:
     volumes:
       - .:/app  # 将当前目录挂载到容器的 /app 目录，便于开发时实时更新
     environment:
-      - ENV_VAR_NAME=value  # 可选，您可以在此处设置环境变量
+      - ENV_VAR_NAME=value  # 可选，您可以在此处设置其他环境变量
+      - TZ=Asia/Shanghai  # 设置时区为 Asia/Shanghai
     restart: unless-stopped  # 设置容器重启策略
-
