@@ -28,6 +28,7 @@ func Md5(src string) string {
 func GetClient(c *gin.Context) {
 	// 获取协议头
 	token := c.Query("token")
+	ClientIndex := c.Query("client") // 客户端标识
 	if token == "" {
 		log.Println("token为空")
 		c.Writer.WriteString("token为空")
@@ -39,9 +40,23 @@ func GetClient(c *gin.Context) {
 	list, _ := Sub.List()
 	// 查找订阅是否包含此名字
 	for _, sub := range list {
+		// 数据库订阅名字赋值变量
+		SunName = sub.Name
 		//查找token的md5是否匹配并且转换成小写
-		if Md5(sub.Name) == strings.ToLower(token) {
-			// 解析客户端
+		if Md5(SunName) == strings.ToLower(token) {
+			// 判断是否带客户端参数
+			switch ClientIndex {
+			case "clash":
+				GetClash(c)
+				return
+			case "surge":
+				GetSurge(c)
+				return
+			case "v2ray":
+				GetV2ray(c)
+				return
+			}
+			// 自动识别客户端
 			ClientList := []string{"clash", "surge"}
 			for k, v := range c.Request.Header {
 				if k == "User-Agent" {
@@ -51,7 +66,7 @@ func GetClient(c *gin.Context) {
 						}
 						// fmt.Println("协议头:", UserAgent)
 						// 遍历客户端列表
-						SunName = sub.Name
+						// SunName = sub.Name
 						for _, client := range ClientList {
 							// fmt.Println(strings.ToLower(UserAgent), strings.ToLower(client))
 							// fmt.Println(strings.Contains(strings.ToLower(UserAgent), strings.ToLower(client)))
