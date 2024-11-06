@@ -269,21 +269,17 @@ const handleClient = (name:string) => {
   let serverAddress = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '');
   ClientDiaLog.value = true
   ClientUrl.value = `${serverAddress}/c/?token=${md5(name)}`
-  handleQrcode(ClientUrl.value)
-  // console.log(`${serverAddress}/c/?token=${md5(name)}`);
-  // ClientList.forEach((item:string) => {
-  //   // ClientUrls.value[item]=`${serverAddress}/c/${item}/${handleBase64(name)}`
-  //   ClientUrls.value[item]=`${serverAddress}/c/?token=${md5(name)}`
-
-  // })  
-
+  ClientList.forEach((item:string) => {
+    ClientUrls.value[item]=`${serverAddress}/c/?token=${md5(name)}`
+  })
 }
 
 const Qrdialog = ref(false)
-
-const handleQrcode = (url:string)=>{
+const QrTitle = ref('')
+const handleQrcode = (url:string,title:string)=>{
   Qrdialog.value = true
-  qrcode.value = url
+  qrcode.value = url 
+  QrTitle.value = title
 }
 const OpenUrl = (url:string) => {
   window.open(url)
@@ -293,7 +289,7 @@ const clientradio = ref('1')
 
 <template>
   <div>
-    <el-dialog v-model="Qrdialog" width="300px" style="text-align: center" title="客户端(自动识别)">
+    <el-dialog v-model="Qrdialog" width="300px" style="text-align: center" :title="QrTitle">
       <qrcode-vue :value="qrcode"  :size="200" level="H" />
       <el-input
       v-model="qrcode"
@@ -303,15 +299,19 @@ const clientradio = ref('1')
       <el-button @click="OpenUrl(qrcode)">打开</el-button>
     </el-dialog>
 
-    <!-- <el-dialog v-model="ClientDiaLog" title="客户端" style="text-align: center" >
+    <el-dialog v-model="ClientDiaLog" title="客户端(点击二维码获取地址)" style="text-align: center" >
       <el-row>
-        <el-tag type="success" size="large">{{ClientUrl}}</el-tag>
+        <el-col>
+        <el-tag type="success" size="large">自动识别</el-tag>
+        <el-button @click="handleQrcode(ClientUrl,'自动识别客户端')">二维码</el-button>
+      </el-col>
         <el-col v-for="(item,index) in ClientUrls" style="margin-bottom:10px;">
           <el-tag type="success" size="large">{{index}}</el-tag>
-          <el-button @click="handleQrcode(item)">二维码</el-button>
+          <el-button @click="handleQrcode(`${item}&client=${index}`,index)">二维码</el-button>
         </el-col>
         </el-row>
-    </el-dialog> -->
+    </el-dialog>
+    
     <el-dialog v-model="iplogsdialog" title="访问记录" width="80%" draggable>
   <template #footer>
     <div class="dialog-footer">

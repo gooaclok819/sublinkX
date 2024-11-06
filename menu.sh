@@ -71,7 +71,8 @@ function Select {
                 systemctl disable sublink
             fi
             # 删除服务文件
-            if [ -f /etc/systemd/system/sublink.service ]; then
+            read -p "是否删除systemd服务文件(包含端口设置)(y/n): " isDelSystemd
+            if [ "$isDelSystemd" = "y" ]; then
                 sudo rm /etc/systemd/system/sublink.service
             fi
             # 删除相关文件和目录
@@ -135,6 +136,10 @@ function Select {
             else
                 Up
             fi
+            # 更新菜单
+            sudo rm /usr/bin/sublink
+            curl -o /usr/bin/sublink -H "Cache-Control: no-cache" -H "Pragma: no-cache" https://raw.githubusercontent.com/gooaclok819/sublinkX/main/menu.sh
+            chmod 755 "/usr/bin/sublink"
             ;;
         8)
             read -p "请输入新的账号: " User

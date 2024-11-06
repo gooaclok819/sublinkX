@@ -46,9 +46,9 @@ surge支持协议:ss trojan vmess hy2 tuic
 
 ## [更新说明]
 
-修复surge无效 包含模版解析错误
+新增指定客户端
 
-修复少许bug
+修复菜单更新功能没更新菜单版本
 
 ## [安装说明]
 ### linux方式：

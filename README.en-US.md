@@ -1,6 +1,6 @@
  <div align="center"><img src="webs/src/assets/logo.png" width="150px" height="150px" /></div> 
 
- <div align="center">     <img src="https://img.shields.io/badge/Vue-5.0.8-brightgreen.svg"/>     <img src="https://img.shields.io/badge/Go-1.22.0-green.svg"/>     <img src="https://img.shields.io/badge/Element Plus-2.6.1-blue.svg"/>     <img src="https://img.shields.io/badge/license-MIT-green.svg"/>     <a href="https://t.me/+u6gLWF0yP5NiZWQ1" target="_blank">         <img src="https://img.shields.io/badge/TG-交流群-orange.svg"/>     </a>     <div align="center"><a href="README.md">Chinese</a>|English</div></div> 
+ <div align="center">     <img src="https://img.shields.io/badge/Vue-5.0.8-brightgreen.svg"/>     <img src="https://img.shields.io/badge/Go-1.22.0-green.svg"/>     <img src="https://img.shields.io/badge/Element Plus-2.6.1-blue.svg"/>     <img src="https://img.shields.io/badge/license-MIT-green.svg"/>     <a href="https://t.me/+u6gLWF0yP5NiZWQ1" target="_blank">         <img src="https://img.shields.io/badge/TG-交流群-orange.svg"/>     </a>     <div align="center">Chinese|<a href="README.en-US.md">English</div></div> 
 
  ## [Project Profile] 
 
@@ -20,19 +20,30 @@
 
  Binary compilation without Docker containers 
 
- Currently only supported client: v2ray smash 
+ Currently only supported clients: v2ray crash surge 
 
  v2ray is base64 generic format 
 
  Clash Support Protocol:ss ssr trojan vmess vless hy hy2 tuic 
 
+ surge Support Protocol:ss trojan vmess hy2 tuic 
+
  ## [Project Preview] 
 
  !  [1712594176714](webs/src/assets/1.png)!  [1712594176714](webs/src/assets/2.png) 
 
- ## [Installation Instructions]  
- ### linux: 
- ```curl -s https://raw.githubusercontent.com/gooaclok819/sublinkX/main/install.sh | sudo bash ``` 
+ ## [update description] 
+
+ Add specified client 
+
+ Fix menu update function does not update menu version 
+
+ ## [Installation Instructions]### Linux Mode: 
+ ```curl -s -H "Cache-Control: no-cache" -H "Pragma: no-cache" https://raw.githubusercontent.com/gooaclok819/sublinkX/main/install.sh | sudo bash ``` 
+
+ ```sublink``outgoing menu 
+
+ Then enter the installation script 
 
  ### Docker method: 
 
