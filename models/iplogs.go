@@ -1,31 +1,31 @@
 package models
 
 type SubLogs struct {
-	ID             int
-	IP             string
-	Date           string
-	Addr           string
-	Count          int
-	SubscriptionID int
+	ID            int
+	IP            string
+	Date          string
+	Addr          string
+	Count         int
+	SubcriptionID int
 }
 
 // Add 添加IP
-func (ipLog *SubLogs) Add() error {
-	return DB.Create(ipLog).Error
+func (iplog *SubLogs) Add() error {
+	return DB.Create(iplog).Error
 }
 
-// Find 查找IP
-func (ipLog *SubLogs) Find(id int) error {
-	return DB.Where("ip = ? and subscription_id  = ?", ipLog.IP, id).First(ipLog).Error
+// 查找IP
+func (iplog *SubLogs) Find(id int) error {
+	return DB.Where("ip = ? and subcription_id  = ?", iplog.IP, id).First(iplog).Error
 }
 
 // Update 更新IP
-func (ipLog *SubLogs) Update() error {
-	return DB.Where("id = ? or ip = ?", ipLog.ID, ipLog.IP).Updates(ipLog).Error
+func (iplog *SubLogs) Update() error {
+	return DB.Where("id = ? or ip = ?", iplog.ID, iplog.IP).Updates(iplog).Error
 }
 
 // List 获取IP列表
-func (ipLog *SubLogs) List() ([]SubLogs, error) {
+func (iplog *SubLogs) List() ([]SubLogs, error) {
 	var iplogs []SubLogs
 	err := DB.Find(&iplogs).Error
 	if err != nil {
@@ -35,6 +35,6 @@ func (ipLog *SubLogs) List() ([]SubLogs, error) {
 }
 
 // Del 删除IP
-func (ipLog *SubLogs) Del() error {
-	return DB.Delete(ipLog).Error
+func (iplog *SubLogs) Del() error {
+	return DB.Delete(iplog).Error
 }

@@ -5,14 +5,17 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 
-#创建一个程序目录
-cd /usr/local/bin
-mkdir sublink
-cd sublink
+# 创建一个程序目录
+INSTALL_DIR="/usr/local/bin/sublink"
+
+if [ ! -d "$INSTALL_DIR" ]; then
+    mkdir -p "$INSTALL_DIR"
+fi
 
 # 获取最新的发行版标签
 latest_release=$(curl --silent "https://api.github.com/repos/gooaclok819/sublinkX/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 echo "最新版本: $latest_release"
+
 # 检测机器类型
 machine_type=$(uname -m)
 
@@ -26,88 +29,36 @@ else
 fi
 
 # 下载文件
+cd ~
 curl -LO "https://github.com/gooaclok819/sublinkX/releases/download/$latest_release/$file_name"
 
 # 设置文件为可执行
 chmod +x $file_name
 
-# 移动文件到/usr/local/bin
-sudo mv $file_name /usr/local/bin/sublink/sublink
+# 移动文件到指定目录
+mv $file_name "$INSTALL_DIR/sublink"
 
 # 创建systemctl服务
 echo "[Unit]
 Description=Sublink Service
 
 [Service]
-ExecStart=/usr/local/bin/sublink/sublink
-WorkingDirectory=/usr/local/bin/sublink
+ExecStart=$INSTALL_DIR/sublink
+WorkingDirectory=$INSTALL_DIR
 [Install]
-WantedBy=multi-user.target" | sudo tee /etc/systemd/system/sublink.service
+WantedBy=multi-user.target" | tee /etc/systemd/system/sublink.service
+
+# 重新加载systemd守护进程
+systemctl daemon-reload
 
 # 启动并启用服务
-sudo systemctl start sublink
-sudo systemctl enable sublink
-sudo systemctl daemon-reload
+systemctl start sublink
+systemctl enable sublink
 echo "服务已启动并已设置为开机启动"
-echo "默认账号admin密码123456 端口8000"
-echo "安装完成已经启动输入sudo sublink可以呼出菜单"
+echo "默认账号admin密码123456 默认端口8000"
+echo "安装完成已经启动输入sublink可以呼出菜单"
 
-# 创建sublink_menu.sh脚本
-echo '#!/bin/bash
 
-while true; do
-    # 获取服务状态
-    status=$(systemctl is-active sublink)
-    echo "当前版本: 1.5"
-    # 判断服务状态并打印
-    if [ "$status" = "active" ]; then
-        echo "当前运行状态: 已运行"
-    else
-        echo "当前运行状态: 未运行"
-    fi
-    echo "1. 启动服务"
-    echo "2. 停止服务"
-    echo "3. 卸载安装"
-    echo "4. 查看服务状态"
-    echo "5. 查看运行目录"
-    echo "0. 退出"
-    echo -n "请选择一个选项: "
-    read option
-
-    case $option in
-        1)
-            systemctl start sublink
-            systemctl daemon-reload
-            ;;
-        2)
-				    systemctl stop sublink
-				    systemctl daemon-reload
-				    ;;
-        3)
-		        systemctl stop sublink
-		        systemctl disable sublink
-		        rm /etc/systemd/system/sublink.service
-		        systemctl daemon-reload
-		        rm /usr/bin/sublink
-            ;;
-        4)
-            systemctl status sublink
-            ;;
-        5)
-            echo "运行目录: /usr/local/bin/sublink"
-            echo "需要备份的目录为db,template目录为模版文件可备份可不备份"
-            ;;
-        0)
-            exit 0
-            ;;
-        *)
-            echo "无效的选项"
-            ;;
-    esac
-done' > sublink_menu.sh
-
-# 移动sublink_menu.sh到/usr/bin
-
-sudo mv sublink_menu.sh /usr/bin/sublink
-
-chmod +x /usr/bin/sublink
+# 下载menu.sh并设置权限
+curl -o /usr/bin/sublink -H "Cache-Control: no-cache" -H "Pragma: no-cache" https://raw.githubusercontent.com/gooaclok819/sublinkX/main/menu.sh
+chmod 755 "/usr/bin/sublink"

@@ -44,17 +44,19 @@ surge支持协议:ss trojan vmess hy2 tuic
 ![1712594176714](webs/src/assets/1.png)
 ![1712594176714](webs/src/assets/2.png)
 
+## [更新说明]
+
+新增指定客户端
+
+修复菜单更新功能没更新菜单版本
+
 ## [安装说明]
 ### linux方式：
 ```
-curl -s https://raw.githubusercontent.com/gooaclok819/sublinkX/main/install.sh | sudo bash
+curl -s -H "Cache-Control: no-cache" -H "Pragma: no-cache" https://raw.githubusercontent.com/gooaclok819/sublinkX/main/install.sh | sudo bash
 ```
 
-linux更新方法:
-
-卸载并不会清除数据
-
-```sudo sublink``` 呼出菜单卸载安装然后0退出
+```sublink``` 呼出菜单
 
 然后输入安装脚本即可
 

@@ -1,0 +1,15 @@
+version: '3.8'  # 使用 Docker Compose 文件的版本
+
+services:
+  sublink:
+    build:
+      context: .  # 指定 Dockerfile 的上下文（当前目录）
+      dockerfile: Dockerfile  # 指定 Dockerfile 的名称，如果是默认的 "Dockerfile"，可以省略此行
+    ports:
+      - "8000:8000"  # 将容器的 8000 端口映射到主机的 8000 端口
+    volumes:
+      - .:/app  # 将当前目录挂载到容器的 /app 目录，便于开发时实时更新
+    environment:
+      - ENV_VAR_NAME=value  # 可选，您可以在此处设置其他环境变量
+      - TZ=Asia/Shanghai  # 设置时区为 Asia/Shanghai
+    restart: unless-stopped  # 设置容器重启策略

@@ -2,6 +2,8 @@ package main
 
 import (
 	"embed"
+	"flag"
+	"fmt"
 	"io/fs"
 	"log"
 	"net/http"
@@ -9,6 +11,7 @@ import (
 	"sublink/middlewares"
 	"sublink/models"
 	"sublink/routers"
+	"sublink/settings"
 	"sublink/utils"
 
 	"github.com/gin-gonic/gin"
@@ -17,13 +20,15 @@ import (
 //go:embed static/js/*
 //go:embed static/css/*
 //go:embed static/img/*
-//go:embed static/index.html
+//go:embed static/*
 var embeddedFiles embed.FS
 
 //go:embed template
 var Template embed.FS
 
-func TemplateInit() {
+var version string
+
+func Templateinit() {
 	// 设置template路径
 	// 检查目录是否创建
 	subFS, err := fs.Sub(Template, "template")
@@ -64,14 +69,55 @@ func TemplateInit() {
 }
 
 func main() {
+	var port int
+	// 获取版本号
+	var Isversion bool
+	version = "1.8"
+	flag.BoolVar(&Isversion, "version", false, "显示版本号")
+	flag.Parse()
+	if Isversion {
+		fmt.Println(version)
+		return
+	}
+	// 初始化数据库
+	models.InitSqlite()
+	// 获取命令行参数
+	args := os.Args
+	// 如果长度小于2则没有接收到任何参数
+	if len(args) < 2 {
+		port = 8000
+		Run(port)
+		return
+	}
+	// 命令行参数选择
+	settingCmd := flag.NewFlagSet("setting", flag.ExitOnError)
+	var username, password string
+	settingCmd.StringVar(&username, "username", "", "设置账号")
+	settingCmd.StringVar(&password, "password", "", "设置密码")
+	settingCmd.IntVar(&port, "port", 8000, "修改端口")
+	switch args[1] {
+	// 解析setting命令标志
+	case "setting":
+		settingCmd.Parse(args[2:])
+		fmt.Println(username, password)
+		settings.ResetUser(username, password)
+		return
+	case "run":
+		settingCmd.Parse(args[2:])
+		Run(port)
+	default:
+		return
+
+	}
+}
+
+func Run(port int) {
 	// 初始化gin框架
 	r := gin.Default()
 	// 初始化日志配置
-	utils.LogsInit()
-	// 初始化数据库
-	models.InitSqlite()
+	utils.Loginit()
 	// 初始化模板
-	TemplateInit()
+	Templateinit()
 	// 安装中间件
 	r.Use(middlewares.AuthorToken) // jwt验证token
 	// 设置静态资源路径
@@ -93,11 +139,12 @@ func main() {
 	// 注册路由
 	routers.User(r)
 	routers.Mentus(r)
-	routers.Subscription(r)
+	routers.Subcription(r)
 	routers.Nodes(r)
 	routers.Clients(r)
 	routers.Total(r)
 	routers.Templates(r)
+	routers.Version(r, version)
 	// 启动服务
-	r.Run(":8000")
+	r.Run(fmt.Sprintf("0.0.0.0:%d", port))
 }
