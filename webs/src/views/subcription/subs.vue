@@ -74,7 +74,6 @@ onMounted(async() => {
     NodesList.value = data
 })
 
-
 const addSubs = async ()=>{
     const config = JSON.stringify({
     "clash": Clash.value.trim(),
@@ -177,7 +176,7 @@ const handleEdit = (row:any) => {
 }
 
 // 关闭对话框时清空数据
-const closeDialog = () => {
+const handleEditDialogClose = () => {
   dialogVisible.value = false;
   sortSubID.value = null; // 清空订阅 ID
   sortValue.value = []; // 清空排序数据
@@ -319,31 +318,20 @@ const onDragEnd = () => {
 const saveSortOrder = async () => {
   try {
     const nodesJson = JSON.stringify(sortValue.value.map((node) => ({
-      subscriptionID: sortSubID.value,
       nodeID: node.ID,
       sort: node.sort,
     })));
     await UpdateSubSort({
-      sub_id: sortSubID.value,
+      subId: sortSubID.value,
       nodes: nodesJson,
     });
     ElMessage.success('排序更新成功');
-    getsubs()
   } catch (error) {
     console.error('Error updating nodes sort:', error);
     ElMessage.error('排序更新失败');
   }
+  getsubs()
 };
-
-onMounted(() => {
-  getsubs();
-  gettemps();
-});
-
-onMounted(async () => {
-  const { data } = await getNodes();
-  NodesList.value = data;
-});
 
 </script>
 
@@ -438,33 +426,27 @@ onMounted(async () => {
     </el-select>
   </div>
   <!-- 添加节点排序 -->
-      <div class="m-4">
-        <p>节点排序</p>
-        <!-- 使用 vuedraggable 实现拖拽排序 -->
-        <draggable
-          v-model="sortValue"
-          tag="ul"
-        item-key="ID"
-        @end="onDragEnd"
-        >
-        <template #item="{ element, index }">
-          <li class="draggable-item">
-            <!-- 使用 el-tag 展示排序数字 -->
-            <el-tag type="info" class="sort-tag">
-              {{ index + 1 }}
-            </el-tag>
-            <!-- 节点名称 -->
-            <el-tag>{{ element.Name }}</el-tag>
-          </li>
-        </template>
-        </draggable>
-      </div>
-
+  <div class="m-4">
+    <p>节点排序</p>
+    <!-- 使用 vuedraggable 实现拖拽排序 -->
+    <draggable v-model="sortValue" tag="ul" item-key="ID" @end="onDragEnd">
+      <template #item="{ element, index }">
+        <li class="draggable-item">
+          <!-- 使用 el-tag 展示排序数字 -->
+          <el-tag type="info" class="sort-tag">
+            {{ index + 1 }}
+          </el-tag>
+          <!-- 节点名称 -->
+          <el-tag>{{ element.Name }}</el-tag>
+        </li>
+      </template>
+    </draggable>
+  </div>
     <template #footer>
       <div class="dialog-footer">
         <!-- 根据 subId 是否为空动态禁用按钮 -->
         <el-button type="primary" @click="saveSortOrder" :disabled="!sortSubID">保存排序</el-button>
-        <el-button @click="closeDialog">关闭</el-button>
+        <el-button @click="handleEditDialogClose">关闭</el-button>
         <el-button type="primary" @click="addSubs">确定</el-button>
       </div>
     </template>

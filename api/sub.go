@@ -185,7 +185,7 @@ func SubDel(c *gin.Context) {
 func SubUpdateSort(c *gin.Context) {
 	var nodeSorts []models.SubscriptionNodes
 
-	subIDStr := c.PostForm("sub_id")
+	subIDStr := c.PostForm("subId")
 	if subIDStr == "" {
 		c.JSON(400, gin.H{
 			"msg": "订阅ID不能为空",
