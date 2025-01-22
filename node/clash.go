@@ -30,6 +30,7 @@ type Proxy struct {
 	Network            string                 `yaml:"network,omitempty"`
 	Reality_opts       map[string]interface{} `yaml:"reality-opts,omitempty"`
 	Ws_opts            map[string]interface{} `yaml:"ws-opts,omitempty"`
+	Grpc_opts          map[string]interface{} `yaml:"grpc-opts,omitempty"`
 	Auth_str           string                 `yaml:"auth_str,omitempty"`
 	Auth               string                 `yaml:"auth,omitempty"`
 	Up                 int                    `yaml:"up,omitempty"`
@@ -226,9 +227,17 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 			reality_opts := map[string]interface{}{
 				"public-key": vless.Query.Pbk,
 				"short-id":   vless.Query.Sid,
+				}
+			grpc_opts := map[string]interface{}{
+				"grpc-mode":         "gun",
+				"grpc-service-name": vless.Query.ServiceName,
+			}
+			if vless.Query.Mode == "multi" {
+				grpc_opts["grpc-mode"] = "multi"
 			}
 			DeleteOpts(ws_opts)
 			DeleteOpts(reality_opts)
+			DeleteOpts(grpc_opts)
 			tls := false
 			if vless.Query.Security != "" {
 				tls = true
@@ -249,6 +258,7 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Alpn:               vless.Query.Alpn,
 				Ws_opts:            ws_opts,
 				Reality_opts:       reality_opts,
+				Grpc_opts:          grpc_opts,
 				Udp:                sqlconfig.Udp,
 				Skip_cert_verify:   sqlconfig.Cert,
 				Tls:                tls,
