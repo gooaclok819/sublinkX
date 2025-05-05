@@ -40,8 +40,8 @@ surge support protocol:ss trojan vmess hy2 tuic
 
 ## [Project Preview]
 
-! [1712594176714](webs/src/assets/1.png)
-! [1712594176714](webs/src/assets/2.png)
+![1712594176714](webs/src/assets/1.png)
+![1712594176714](webs/src/assets/2.png)
 
 ## [Updated Description]
 
@@ -51,7 +51,7 @@ Fix menu update function not updating menu version
 
 ## [Installation instructions]
 ### linux method:
-``
+```
 curl -s -H “Cache-Control: no-cache” -H “Pragma: no-cache” https://raw.githubusercontent.com/gooaclok819/sublinkX/main/install.sh | sudo bash
 ```
 
@@ -66,13 +66,13 @@ Create a directory where you want it to be located, such as mkdir sublinkx.
 Then cd into the directory and enter the following command to mount the data.
 
 All you need to back up is the db and templates.
-``
+```
 docker run --name sublinkx -p 8000:8000 \
 -v $PWD/db:/app/db \
 -v $PWD/template:/app/template \
 -v $PWD/logs:/app/logs \
 -d jaaksi/sublinkx
-\ -v $PWD/template:/app/template
+```
 
 To support the development of my project, I plan to apply for a free VPS offered by VTEXS. My project currently involves Docker image support for multiple My project currently involves Docker image support for multiple architectures (arm64 and amd64), as well as automation for building and pushing. Therefore, I am requesting a 4-core, 8GB RAM Ubuntu VPS with root access.
 
@@ -85,6 +85,5 @@ VTEXS Account: gooaclok819@gmail.com
 Feel free to adjust any details as needed!
 
 ## Stargazers over time
-[Stargazers over time] [Stargazers over time] [Stargazers over time](https://starchart.cc/gooaclok819/sublinkX.svg?variant=adaptive)](https://starchart.cc/gooaclok819/sublinkX)
+[![Stargazers over time](https://starchart.cc/gooaclok819/sublinkX.svg?variant=adaptive)](https://starchart.cc/gooaclok819/sublinkX)
 
-Translated with DeepL.com (free version)
