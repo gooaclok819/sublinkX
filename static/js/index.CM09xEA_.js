@@ -1,1 +1,0 @@
-import{bd as e}from"./index.9PHSMUIB.js";function t(t){const a=new FormData;return a.append("file",t),e({url:"/api/v1/files",method:"post",data:a,headers:{"Content-Type":"multipart/form-data"}})}function a(t){return e({url:"/api/v1/files",method:"delete",params:{filePath:t}})}export{a as d,t as u};
