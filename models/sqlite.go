@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"log"
 	"os"
 
@@ -30,13 +31,13 @@ func InitSqlite() {
 		log.Println("数据库已经初始化，无需重复初始化")
 		return
 	}
-	err = db.AutoMigrate(&User{}, &Subcription{}, &Node{}, &SubLogs{})
+	err = db.AutoMigrate(&User{}, &Subcription{}, &Node{}, &SubLogs{}, &SubscriptionNodes{})
 	if err != nil {
 		log.Println("数据表迁移失败")
 	}
 	// 初始化用户数据
 	err = db.First(&User{}).Error
-	if err == gorm.ErrRecordNotFound {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		admin := &User{
 			Username: "admin",
 			Password: "123456",

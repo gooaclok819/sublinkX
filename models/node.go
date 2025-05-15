@@ -34,5 +34,13 @@ func (node *Node) List() ([]Node, error) {
 
 // 删除节点
 func (node *Node) Del() error {
+	// 删除节点排序信息
+	sn := &SubscriptionNodes{}
+	err := sn.DeleteNodeSortByNodeID(node.ID)
+	if err != nil {
+		return err
+	}
+
+	// 删除节点
 	return DB.Delete(node).Error
 }

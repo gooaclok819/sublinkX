@@ -1,10 +1,12 @@
 <script setup lang='ts'>
-import { ref,onMounted  } from 'vue'
-import {getSubs,AddSub,DelSub,UpdateSub} from "@/api/subcription/subs"
+import { ref, onMounted } from "vue";
+import {getSubs,AddSub,DelSub,UpdateSub,UpdateSubSort} from "@/api/subcription/subs"
 import {getTemp} from "@/api/subcription/temp"
 import {getNodes} from "@/api/subcription/node"
 import QrcodeVue from 'qrcode.vue'
 import md5 from 'md5'
+import draggable from 'vuedraggable';
+
 interface Sub {
   ID: number;
   Name: string;
@@ -18,6 +20,7 @@ interface Node {
   Name: string;
   Link: string;
   CreateDate: string;
+  sort?: number; // 添加 sort 字段
 }
 interface Config {
   clash: string;
@@ -46,6 +49,8 @@ const dialogVisible = ref(false)
 const table = ref()
 const NodesList = ref<Node[]>([])
 const value1 = ref<string[]>([])
+const sortSubID = ref()
+const sortValue = ref<Node[]>([])
 const checkList = ref<string[]>([]) // 配置列表
 const iplogsdialog = ref(false)
 const IplogsList = ref<SubLogs[]>([])
@@ -68,7 +73,6 @@ onMounted(async() => {
     const {data} = await getNodes();
     NodesList.value = data
 })
-
 
 const addSubs = async ()=>{
     const config = JSON.stringify({
@@ -103,7 +107,7 @@ const addSubs = async ()=>{
 const multipleSelection = ref<Sub[]>([])
 const handleSelectionChange = (val: Sub[]) => {
   multipleSelection.value = val
-  
+
 }
 const selectAll = () => {
   tableData.value.forEach(row => {
@@ -118,7 +122,7 @@ const handleIplogs = (row: any) => {
       IplogsList.value = item.SubLogs
     }
   })
-  
+
   })
 }
 
@@ -135,6 +139,8 @@ const handleAddSub = ()=>{
   Surge.value = './template/surge.conf'
   dialogVisible.value = true
   value1.value = []
+  sortSubID.value = null; // 新增页面没有 subId
+  sortValue.value = []; // 清空排序数据
 }
 const handleEdit = (row:any) => {
   for (let i = 0; i < tableData.value.length; i++) {
@@ -160,9 +166,24 @@ const handleEdit = (row:any) => {
       Surge.value = config.surge
       dialogVisible.value = true
       value1.value = tableData.value[i].Nodes.map((item) => item.Name)
+      sortSubID.value = tableData.value[i].ID
+      sortValue.value = tableData.value[i].Nodes;
+      sortValue.value.forEach((node, index) => {
+        node.sort = index + 1; // 初始化 sort 值为当前顺序
+      });
     }
   }
 }
+
+// 关闭对话框时清空数据
+const handleEditDialogClose = () => {
+  dialogVisible.value = false;
+  sortSubID.value = null; // 清空订阅 ID
+  sortValue.value = []; // 清空排序数据
+  value1.value = []; // 清空已选节点
+};
+
+
 const handleDel = (row:any) => {
   ElMessageBox.confirm(
     `你是否要删除 ${row.Name} ?`,
@@ -181,7 +202,6 @@ const handleDel = (row:any) => {
         type: 'success',
         message: '删除成功',
       })
-      
     })
 }
 
@@ -208,10 +228,7 @@ const selectDel = () => {
         type: 'success',
         message: '删除成功',
       })
-      
-      
     })
-
 }
 // 分页显示
 const currentPage = ref(1);
@@ -278,13 +295,44 @@ const Qrdialog = ref(false)
 const QrTitle = ref('')
 const handleQrcode = (url:string,title:string)=>{
   Qrdialog.value = true
-  qrcode.value = url 
+  qrcode.value = url
   QrTitle.value = title
 }
 const OpenUrl = (url:string) => {
   window.open(url)
 }
 const clientradio = ref('1')
+
+// 处理节点选择
+const handleNodeSelection = () => {
+  sortValue.value = NodesList.value.filter(node => value1.value.includes(node.Name));
+};
+
+const onDragEnd = () => {
+  sortValue.value.forEach((node, index) => {
+    node.sort = index + 1; // 更新排序值
+  });
+};
+
+// 保存排序方法
+const saveSortOrder = async () => {
+  try {
+    const nodesJson = JSON.stringify(sortValue.value.map((node) => ({
+      nodeID: node.ID,
+      sort: node.sort,
+    })));
+    await UpdateSubSort({
+      subId: sortSubID.value,
+      nodes: nodesJson,
+    });
+    ElMessage.success('排序更新成功');
+  } catch (error) {
+    console.error('Error updating nodes sort:', error);
+    ElMessage.error('排序更新失败');
+  }
+  getsubs()
+};
+
 </script>
 
 <template>
@@ -311,7 +359,7 @@ const clientradio = ref('1')
         </el-col>
         </el-row>
     </el-dialog>
-    
+
     <el-dialog v-model="iplogsdialog" title="访问记录" width="80%" draggable>
   <template #footer>
     <div class="dialog-footer">
@@ -329,7 +377,7 @@ const clientradio = ref('1')
     :title="SubTitle"
   >
   <el-input v-model="Subname" placeholder="请输入订阅名称" />
-  
+
   <el-row >
   <el-tag type="primary">clash模版选择</el-tag>
   <el-radio-group v-model="clientradio" class="ml-4">
@@ -367,6 +415,7 @@ const clientradio = ref('1')
       multiple
       placeholder="Select"
       style="width: 100%"
+      @change="handleNodeSelection"
     >
       <el-option
         v-for="item in NodesList"
@@ -376,9 +425,28 @@ const clientradio = ref('1')
       />
     </el-select>
   </div>
+  <!-- 添加节点排序 -->
+  <div class="m-4">
+    <p>节点排序</p>
+    <!-- 使用 vuedraggable 实现拖拽排序 -->
+    <draggable v-model="sortValue" tag="ul" item-key="ID" @end="onDragEnd">
+      <template #item="{ element, index }">
+        <li class="draggable-item">
+          <!-- 使用 el-tag 展示排序数字 -->
+          <el-tag type="info" class="sort-tag">
+            {{ index + 1 }}
+          </el-tag>
+          <!-- 节点名称 -->
+          <el-tag>{{ element.Name }}</el-tag>
+        </li>
+      </template>
+    </draggable>
+  </div>
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="dialogVisible = false">关闭</el-button>
+        <!-- 根据 subId 是否为空动态禁用按钮 -->
+        <el-button type="primary" @click="saveSortOrder" :disabled="!sortSubID">保存排序</el-button>
+        <el-button @click="handleEditDialogClose">关闭</el-button>
         <el-button type="primary" @click="addSubs">确定</el-button>
       </div>
     </template>
@@ -387,12 +455,12 @@ const clientradio = ref('1')
     <el-button type="primary" @click="handleAddSub">添加订阅</el-button>
     <div style="margin-bottom: 10px"></div>
 
-      <el-table ref="table" 
-      :data="currentTableData" 
-      style="width: 100%" 
+      <el-table ref="table"
+      :data="currentTableData"
+      style="width: 100%"
       stripe
-      @selection-change="handleSelectionChange" 
-      row-key="ID" 
+      @selection-change="handleSelectionChange"
+      row-key="ID"
       :tree-props="{children: 'Nodes'}"
       >
     <el-table-column type="selection" fixed prop="ID" label="id"  />
@@ -408,7 +476,7 @@ const clientradio = ref('1')
         </div>
         </template>
       </el-table-column>
- 
+
     <el-table-column prop="CreateDate" label="创建时间" sortable  />
     <el-table-column  label="操作" width="120">
       <template #default="scope">
