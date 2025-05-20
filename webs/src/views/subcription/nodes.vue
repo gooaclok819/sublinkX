@@ -5,6 +5,7 @@ interface Node {
   ID: number;
   Name: string;
   Link: string;
+  DialerProxyName: string;
   CreateDate: string;
 }
 const tableData = ref<Node[]>([])
@@ -12,6 +13,7 @@ const Nodelink = ref('')
 const NodeOldlink = ref('')
 const Nodename = ref('')
 const NodeOldname = ref('')
+const DialerProxyName = ref('')
 const dialogVisible = ref(false)
 const table = ref()
 const NodeTitle = ref('')
@@ -29,6 +31,7 @@ const handleAddNode = ()=>{
   Nodelink.value = ''
   Nodename.value = ''
   radio1.value = '1'
+  DialerProxyName.value = ''
   dialogVisible.value = true
 
 }
@@ -48,6 +51,7 @@ const addnodes = async ()=>{
         await AddNodes({
         link: Nodelink.value.trim(),
         name: Nodename.value.trim(),
+        dialerProxyName: DialerProxyName.value.trim(),
       })
       }
       } else {
@@ -55,6 +59,7 @@ const addnodes = async ()=>{
           await AddNodes({
             link: nodelinks[i],
             name: "",
+            dialerProxyName: DialerProxyName.value.trim(),
           })
         }
       }
@@ -65,6 +70,7 @@ const addnodes = async ()=>{
         oldlink: NodeOldlink.value.trim(),
         link: Nodelink.value.trim(),
         name: Nodename.value.trim(),
+        dialerProxyName: DialerProxyName.value.trim(),
       })
     ElMessage.success("更新成功");
    }
@@ -95,6 +101,7 @@ const handleEdit = (row:any) => {
       NodeOldname.value = Nodename.value
       Nodelink.value = tableData.value[i].Link
       NodeOldlink.value = Nodelink.value
+      DialerProxyName.value = tableData.value[i].DialerProxyName
       dialogVisible.value = true
       // value1.value = tableData.value[i].Nodes.map((item) => item.Name)
     }
@@ -219,6 +226,7 @@ const copyInfo = (row: any) => {
       <el-radio value="2" size="large">分开</el-radio>
     </el-radio-group>
   <el-input v-model="Nodename" placeholder="请输入备注"  v-if="radio1!='2'" />
+  <el-input v-model="DialerProxyName" placeholder="请输入前置代理节点名称或策略组名称(仅Clash-Meta内核可用)" />
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="dialogVisible = false">关闭</el-button>

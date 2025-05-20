@@ -1,0 +1,1 @@
+import{d as a,aD as e,aE as s,c as r,e as t}from"./index.DjVL6Sm-.js";const p=a({__name:"index",setup(a){const p=e(),n=s(),{params:d,query:o}=p,{path:u}=d;return n.replace({path:"/"+u,query:o}),(a,e)=>(t(),r("div"))}});export{p as default};

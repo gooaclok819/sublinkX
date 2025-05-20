@@ -45,6 +45,7 @@ type Proxy struct {
 	Congestion_control string                 `yaml:"congestion_control,omitempty"`
 	Udp_relay_mode     string                 `yaml:"udp_relay_mode,omitempty"`
 	Disable_sni        bool                   `yaml:"disable_sni,omitempty"`
+	Dialer_proxy       string                 `yaml:"dialer-proxy,omitempty"`
 }
 
 type ProxyGroup struct {
@@ -53,6 +54,12 @@ type ProxyGroup struct {
 type Config struct {
 	Proxies      []Proxy      `yaml:"proxies"`
 	Proxy_groups []ProxyGroup `yaml:"proxy-groups"`
+}
+
+// 代理链接的结构体
+type Urls struct {
+	Url             string
+	DialerProxyName string
 }
 
 // 删除opts中的空值
@@ -85,16 +92,16 @@ func convertToInt(value interface{}) (int, error) {
 }
 
 // EncodeClash 用于生成 Clash 配置文件
-func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
+func EncodeClash(urls []Urls, sqlconfig SqlConfig) ([]byte, error) {
 	// 传入urls，解析urls，生成proxys
 	// yamlfile 为模板文件
 	var proxys []Proxy
 
 	for _, link := range urls {
-		Scheme := strings.Split(link, "://")[0]
+		Scheme := strings.Split(link.Url, "://")[0]
 		switch {
 		case Scheme == "ss":
-			ss, err := DecodeSSURL(link)
+			ss, err := DecodeSSURL(link.Url)
 			if err != nil {
 				log.Println(err)
 				continue
@@ -112,10 +119,11 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Password:         ss.Param.Password,
 				Udp:              sqlconfig.Udp,
 				Skip_cert_verify: sqlconfig.Cert,
+				Dialer_proxy:     link.DialerProxyName,
 			}
 			proxys = append(proxys, ssproxy)
 		case Scheme == "ssr":
-			ssr, err := DecodeSSRURL(link)
+			ssr, err := DecodeSSRURL(link.Url)
 			if err != nil {
 				log.Println(err)
 			}
@@ -135,10 +143,11 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Protocol:         ssr.Protocol,
 				Udp:              sqlconfig.Udp,
 				Skip_cert_verify: sqlconfig.Cert,
+				Dialer_proxy:     link.DialerProxyName,
 			}
 			proxys = append(proxys, ssrproxy)
 		case Scheme == "trojan":
-			trojan, err := DecodeTrojanURL(link)
+			trojan, err := DecodeTrojanURL(link.Url)
 			if err != nil {
 				log.Println(err)
 				continue
@@ -168,10 +177,11 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Ws_opts:            ws_opts,
 				Udp:                sqlconfig.Udp,
 				Skip_cert_verify:   sqlconfig.Cert,
+				Dialer_proxy:       link.DialerProxyName,
 			}
 			proxys = append(proxys, trojanproxy)
 		case Scheme == "vmess":
-			vmess, err := DecodeVMESSURL(link)
+			vmess, err := DecodeVMESSURL(link.Url)
 			if err != nil {
 				log.Println(err)
 				continue
@@ -206,10 +216,11 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Ws_opts:          ws_opts,
 				Udp:              sqlconfig.Udp,
 				Skip_cert_verify: sqlconfig.Cert,
+				Dialer_proxy:     link.DialerProxyName,
 			}
 			proxys = append(proxys, vmessproxy)
 		case Scheme == "vless":
-			vless, err := DecodeVLESSURL(link)
+			vless, err := DecodeVLESSURL(link.Url)
 			if err != nil {
 				log.Println(err)
 				continue
@@ -227,7 +238,7 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 			reality_opts := map[string]interface{}{
 				"public-key": vless.Query.Pbk,
 				"short-id":   vless.Query.Sid,
-				}
+			}
 			grpc_opts := map[string]interface{}{
 				"grpc-mode":         "gun",
 				"grpc-service-name": vless.Query.ServiceName,
@@ -262,10 +273,11 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Udp:                sqlconfig.Udp,
 				Skip_cert_verify:   sqlconfig.Cert,
 				Tls:                tls,
+				Dialer_proxy:       link.DialerProxyName,
 			}
 			proxys = append(proxys, vlessproxy)
 		case Scheme == "hy" || Scheme == "hysteria":
-			hy, err := DecodeHYURL(link)
+			hy, err := DecodeHYURL(link.Url)
 			if err != nil {
 				log.Println(err)
 				continue
@@ -286,10 +298,11 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Peer:             hy.Peer,
 				Udp:              sqlconfig.Udp,
 				Skip_cert_verify: sqlconfig.Cert,
+				Dialer_proxy:     link.DialerProxyName,
 			}
 			proxys = append(proxys, hyproxy)
 		case Scheme == "hy2" || Scheme == "hysteria2":
-			hy2, err := DecodeHY2URL(link)
+			hy2, err := DecodeHY2URL(link.Url)
 			if err != nil {
 				log.Println(err)
 				continue
@@ -311,10 +324,11 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Obfs_password:    hy2.ObfsPassword,
 				Udp:              sqlconfig.Udp,
 				Skip_cert_verify: sqlconfig.Cert,
+				Dialer_proxy:     link.DialerProxyName,
 			}
 			proxys = append(proxys, hyproxy2)
 		case Scheme == "tuic":
-			tuic, err := DecodeTuicURL(link)
+			tuic, err := DecodeTuicURL(link.Url)
 			if err != nil {
 				log.Println(err)
 				continue
@@ -341,6 +355,7 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Sni:                tuic.Sni,
 				Udp:                sqlconfig.Udp,
 				Skip_cert_verify:   sqlconfig.Cert,
+				Dialer_proxy:       link.DialerProxyName,
 			}
 			proxys = append(proxys, tuicproxy)
 		}

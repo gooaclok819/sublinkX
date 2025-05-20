@@ -1,10 +1,11 @@
 package models
 
 type Node struct {
-	ID         int
-	Link       string
-	Name       string
-	CreateDate string
+	ID              int
+	Link            string
+	Name            string
+	DialerProxyName string
+	CreateDate      string
 }
 
 // Add 添加节点
@@ -14,7 +15,7 @@ func (node *Node) Add() error {
 
 // 更新节点
 func (node *Node) Update() error {
-	return DB.Model(node).Updates(node).Error
+	return DB.Model(node).Select("Name", "Link", "DialerProxyName").Updates(node).Error
 }
 
 // 查找节点是否重复
