@@ -70,6 +70,7 @@ func DecodeVMESSURL(s string) (Vmess, error) {
 		log.Println(err)
 		return Vmess{}, fmt.Errorf("json格式化失败:%s", param)
 	}
+	vmess.Add = ValRetIPv6Addr(vmess.Add)
 	if vmess.Scy == "" {
 		vmess.Scy = "auto"
 	}
