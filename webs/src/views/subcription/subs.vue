@@ -122,6 +122,15 @@ const handleIplogs = (row: any) => {
   })
 }
 
+// 为树形表格提供唯一的行键，避免子节点与父节点ID冲突，错误的行键会子节点也显示可以展开
+const getRowKey = function(row: any): string {
+  if (row.Nodes) {
+    return  row.ID;
+  } else {
+    return 'node_' + row.ID;
+  }
+}
+
 const toggleSelection = () => {
   table.value.clearSelection()
 }
@@ -199,6 +208,9 @@ const selectDel = () => {
     }
   ).then( () => {
     for (let i = 0; i < multipleSelection.value.length; i++) {
+      if (!multipleSelection.value[i].Nodes){
+        continue
+      }
        DelSub({
         id: multipleSelection.value[i].ID
       })
@@ -392,7 +404,7 @@ const clientradio = ref('1')
       style="width: 100%" 
       stripe
       @selection-change="handleSelectionChange" 
-      row-key="ID" 
+      :row-key="getRowKey" 
       :tree-props="{children: 'Nodes'}"
       >
     <el-table-column type="selection" fixed prop="ID" label="id"  />
