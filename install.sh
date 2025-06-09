@@ -1,3 +1,6 @@
+当然！以下是完整的 `install.sh` 脚本，包含了所有修改和优化，确保可以从源代码编译并安装 Sublink 服务。
+
+```bash
 #!/bin/bash
 
 # 定义颜色
@@ -197,7 +200,7 @@ modify_port() {
         execute_command sed -i -E "s/(--port )[0-9]+/\1$new_port/" "$SERVICE_FILE"
     else
         # 不存在 --port 参数，在 ExecStart 后添加它
-        execute_command sed -i -E "s|(ExecStart=.+\s?)|\1run --port $new_port |" "$SERVICE_FILE"
+        execute_command sed -i -E "s|(ExecStart=.+\s?)|\1 --port $new_port |" "$SERVICE_FILE"
     fi
 
     echo -e "${YELLOW}重新加载 systemd 守护进程...${NC}"
@@ -421,12 +424,18 @@ install_sublink() {
         execute_command mkdir -p "$INSTALL_DIR"
     fi
 
-    # 克隆仓库
-    echo -e "${YELLOW}克隆 Sublink 仓库到 ${REPO_DIR}...${NC}"
-    execute_command git clone "$REPO_URL" "$REPO_DIR"
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}Git 克隆失败，请检查仓库 URL 或网络。${NC}"
-        exit 1
+    # 克隆或更新仓库
+    if [ -d "$REPO_DIR" ]; then
+        echo -e "${YELLOW}进入仓库目录并拉取最新代码...${NC}"
+        execute_command cd "$REPO_DIR"
+        execute_command git pull
+    else
+        echo -e "${YELLOW}克隆 Sublink 仓库到 ${REPO_DIR}...${NC}"
+        execute_command git clone "$REPO_URL" "$REPO_DIR"
+        if [ $? -ne 0 ]; then
+            echo -e "${RED}Git 克隆失败，请检查仓库 URL 或网络。${NC}"
+            exit 1
+        fi
     fi
 
     # 进入仓库目录
@@ -506,3 +515,4 @@ while true; do
     show_menu
     handle_menu_option
 done
+```
