@@ -10,7 +10,7 @@ INSTALL_DIR="/usr/local/bin/sublink"
 BINARY_NAME="sublink"
 SERVICE_FILE="/etc/systemd/system/sublink.service"
 
-GO_VERSION="1.22.0" # <-- 指定的 Go 版本
+GO_VERSION="1.22.0" # 指定的 Go 版本
 GO_INSTALL_PATH="/usr/local/go" # Go 安装路径
 GO_BIN_PATH="$GO_INSTALL_PATH/bin" # Go 可执行文件路径
 REPO_URL="https://github.com/gooaclok819/sublinkX.git"
@@ -42,19 +42,16 @@ execute_command() {
     return 0
 }
 
-# 获取最新的发行版标签 (此函数在编译模式下可能不再需要，因为我们直接从源编译)
+# 获取最新的发行版标签 (在从源代码编译的场景下，这可能只是一个占位符)
 get_latest_release() {
     # 在编译模式下，我们通常是基于代码库的最新 commit 或特定 tag 编译
-    # 如果你仍然想获取release tag，你可以保留此函数，但其用途可能不同
-    # 例如，你可以用git describe --tags --abbrev=0来获取最近的tag
     echo "latest_build" # 占位符，表示这是从最新代码编译的
     return 0
 }
 
-# 获取当前运行的二进制文件版本 (此函数需要根据编译模式调整)
+# 获取当前运行的二进制文件版本
 get_current_binary_version() {
     if [ -f "$INSTALL_DIR/$BINARY_NAME" ]; then
-        # 如果你的Go程序支持 --version 参数并能输出有意义的版本信息
         version_output=$(execute_command "$INSTALL_DIR/$BINARY_NAME" "--version")
         if [ $? -eq 0 ]; then
             echo "$version_output"
@@ -80,7 +77,7 @@ get_binary_file_name() {
     return 0
 }
 
-# --- 新增：安装 Go 编译器 ---
+# --- 安装 Go 编译器 ---
 install_go() {
     echo -e "${YELLOW}正在安装 Go ${GO_VERSION}...${NC}"
 
@@ -131,7 +128,6 @@ install_go() {
     if ! grep -q "export PATH=.*${GO_BIN_PATH}" /etc/profile; then
         echo -e "${YELLOW}配置 Go 环境变量...${NC}"
         echo "export PATH=\$PATH:${GO_BIN_PATH}" | sudo tee -a /etc/profile
-        # 对于root用户，GOPATH通常不需要设置在/root下，但为了通用性可以保留
         echo "export GOPATH=\$HOME/go" | sudo tee -a /etc/profile # 建议设置GOPATH
         echo "export PATH=\$PATH:\$GOPATH/bin" | sudo tee -a /etc/profile # 将GOPATH/bin添加到PATH
     fi
@@ -144,84 +140,80 @@ install_go() {
     return 0
 }
 
-# --- 菜单功能函数 (保持不变) ---
-# ... (start_service, stop_service, view_status, view_run_dir, modify_port, reset_account, uninstall_service 保持不变) ...
+# --- 菜单功能函数 ---
 
 # 启动服务
 start_service() {
-    echo -e "${GREEN}正在启动服务...${NC}"
-    execute_command systemctl start sublink
-    execute_command systemctl daemon-reload
-    echo -e "${GREEN}服务已启动。${NC}"
+    echo -e "${GREEN}正在启动服务...${NC}"
+    execute_command systemctl start sublink
+    execute_command systemctl daemon-reload
+    echo -e "${GREEN}服务已启动。${NC}"
 }
 
 # 停止服务
 stop_service() {
-    echo -e "${YELLOW}正在停止服务...${NC}"
-    execute_command systemctl stop sublink
-    execute_command systemctl daemon-reload
-    echo -e "${YELLOW}服务已停止。${NC}"
+    echo -e "${YELLOW}正在停止服务...${NC}"
+    execute_command systemctl stop sublink
+    execute_command systemctl daemon-reload
+    echo -e "${YELLOW}服务已停止。${NC}"
 }
 
 # 查看服务状态
 view_status() {
-    echo -e "${YELLOW}正在查看服务状态...${NC}"
-    execute_command systemctl status sublink
-    echo -e "${NC}按任意键继续...${NC}"
-    read -n 1 -s
+    echo -e "${YELLOW}正在查看服务状态...${NC}"
+    execute_command systemctl status sublink
+    echo -e "${NC}按任意键继续...${NC}"
+    read -n 1 -s
 }
 
 # 查看运行目录
 view_run_dir() {
-    echo -e "${GREEN}运行目录: ${INSTALL_DIR}${NC}"
-    echo -e "${YELLOW}需要备份的目录为db,template目录为模版文件可备份可不备份。${NC}"
-    echo -e "${NC}按任意键继续...${NC}"
-    read -n 1 -s
+    echo -e "${GREEN}运行目录: ${INSTALL_DIR}${NC}"
+    echo -e "${YELLOW}需要备份的目录为db,template目录为模版文件可备份可不备份。${NC}"
+    echo -e "${NC}按任意键继续...${NC}"
+    read -n 1 -s
 }
 
 # 修改端口
 modify_port() {
-    read -p "$(echo -e "${YELLOW}请输入新的端口号: ${NC}")" new_port
+    read -p "$(echo -e "${YELLOW}请输入新的端口号: ${NC}")" new_port
 
-    if ! [[ "<span class="math-inline">new\_port" \=\~ ^\[0\-9\]\+</span> ]]; then
-        echo -e "${RED}无效的端口号，请输入数字。${NC}"
-        return
-    fi
+    if ! [[ "$new_port" =~ ^[0-9]+$ ]]; then
+        echo -e "${RED}无效的端口号，请输入数字。${NC}"
+        return
+    fi
 
-    echo -e "${YELLOW}新的端口号: $new_port${NC}"
+    echo -e "${YELLOW}新的端口号: $new_port${NC}"
 
-    if [ ! -f "$SERVICE_FILE" ]; then
-        echo -e "${RED}服务文件不存在: $SERVICE_FILE。请先运行安装程序。${NC}"
-        return
-    fi
+    if [ ! -f "$SERVICE_FILE" ]; then
+        echo -e "${RED}服务文件不存在: $SERVICE_FILE。请先运行安装程序。${NC}"
+        return
+    fi
 
-    # 替换或添加 ExecStart 行中的 --port 参数
-    # 查找 ExecStart 行，如果已经有 --port 参数，则替换它；否则，添加它
-    if grep -q "ExecStart=.* --port [0-9]\+" "$SERVICE_FILE"; then
-        # 已经存在 --port 参数，替换它
-        execute_command sed -i -E "s/(--port )[0-9]+/\1$new_port/" "$SERVICE_FILE"
-    else
-        # 不存在 --port 参数，在 ExecStart 后添加它
-        execute_command sed -i -E "s|(ExecStart=.+\s?)|\1run --port $new_port |" "$SERVICE_FILE"
-    fi
+    # 替换或添加 ExecStart 行中的 --port 参数
+    # 查找 ExecStart 行，如果已经有 --port 参数，则替换它；否则，添加它
+    if grep -q "ExecStart=.* --port [0-9]\+" "$SERVICE_FILE"; then
+        # 已经存在 --port 参数，替换它
+        execute_command sed -i -E "s/(--port )[0-9]+/\1$new_port/" "$SERVICE_FILE"
+    else
+        # 不存在 --port 参数，在 ExecStart 后添加它
+        execute_command sed -i -E "s|(ExecStart=.+\s?)|\1run --port $new_port |" "$SERVICE_FILE"
+    fi
 
-    echo -e "${YELLOW}重新加载 systemd 守护进程...${NC}"
-    execute_command systemctl daemon-reload
-    echo -e "${YELLOW}重启 Sublink 服务...${NC}"
-    execute_command systemctl restart sublink
+    echo -e "${YELLOW}重新加载 systemd 守护进程...${NC}"
+    execute_command systemctl daemon-reload
+    echo -e "${YELLOW}重启 Sublink 服务...${NC}"
+    execute_command systemctl restart sublink
 
-    echo -e "${GREEN}端口修改完成，服务已重启。${NC}"
-    echo -e "${NC}按任意键继续...${NC}"
-    read -n 1 -s
+    echo -e "${GREEN}端口修改完成，服务已重启。${NC}"
+    echo -e "${NC}按任意键继续...${NC}"
+    read -n 1 -s
 }
 
-# 更新服务 (修改为从源代码编译更新)
+# 更新服务 (从源代码编译更新)
 update_service() {
     echo -e "${GREEN}正在检查并更新 Sublink 服务 (从源代码编译)...${NC}"
 
-    # 在这里，latest_release的含义不再是GitHub Release，而是指最新代码版本
-    # 你可以根据需要修改get_latest_release函数来获取Git commit hash等
-    # 或者直接假设我们将编译最新的master/main分支
     local latest_version="latest_code" # 编译最新代码
 
     current_version=$(get_current_binary_version)
@@ -282,130 +274,128 @@ update_service() {
     return 0
 }
 
-
 # 重置账号密码
 reset_account() {
-    read -p "$(echo -e "${YELLOW}请输入新的账号: ${NC}")" new_username
-    read -p "$(echo -e "${YELLOW}请输入新的密码: ${NC}")" new_password
+    read -p "$(echo -e "${YELLOW}请输入新的账号: ${NC}")" new_username
+    read -p "$(echo -e "${YELLOW}请输入新的密码: ${NC}")" new_password
 
-    if [ -z "$new_username" ] || [ -z "$new_password" ]; then
-        echo -e "${RED}账号和密码不能为空。${NC}"
-        echo -e "${NC}按任意键继续...${NC}"
-        return
-    fi
+    if [ -z "$new_username" ] || [ -z "$new_password" ]; then
+        echo -e "${RED}账号和密码不能为空。${NC}"
+        echo -e "${NC}按任意键继续...${NC}"
+        return
+    fi
 
-    echo -e "${YELLOW}正在重置账号密码...${NC}"
-    # 调用 Go 程序的 setting 命令
-    execute_command "$INSTALL_DIR/$BINARY_NAME" setting --username "$new_username" --password "$new_password"
-    
-    echo -e "${YELLOW}重启 Sublink 服务以应用更改...${NC}"
-    execute_command systemctl restart sublink
+    echo -e "${YELLOW}正在重置账号密码...${NC}"
+    # 调用 Go 程序的 setting 命令
+    execute_command "$INSTALL_DIR/$BINARY_NAME" setting --username "$new_username" --password "$new_password"
+    
+    echo -e "${YELLOW}重启 Sublink 服务以应用更改...${NC}"
+    execute_command systemctl restart sublink
 
-    echo -e "${GREEN}账号密码重置成功。${NC}"
-    echo -e "${NC}按任意键继续...${NC}"
-    read -n 1 -s
+    echo -e "${GREEN}账号密码重置成功。${NC}"
+    echo -e "${NC}按任意键继续...${NC}"
+    read -n 1 -s
 }
 
 # 卸载安装
 uninstall_service() {
-    read -p "$(echo -e "${YELLOW}你是否要卸载 Sublink 服务? (y/n): ${NC}")" confirm_uninstall
-    if [ ! "$confirm_uninstall" = "y" ]; then
-        echo -e "${NC}取消卸载。${NC}"
-        return
-    fi
+    read -p "$(echo -e "${YELLOW}你是否要卸载 Sublink 服务? (y/n): ${NC}")" confirm_uninstall
+    if [ ! "$confirm_uninstall" = "y" ]; then
+        echo -e "${NC}取消卸载。${NC}"
+        return
+    fi
 
-    echo -e "${YELLOW}正在卸载 Sublink 服务...${NC}"
+    echo -e "${YELLOW}正在卸载 Sublink 服务...${NC}"
 
-    # 停止服务之前检查服务是否存在
-    if systemctl is-active --quiet sublink; then
-        echo -e "${YELLOW}停止服务...${NC}"
-        execute_command systemctl stop sublink
-    fi
-    if systemctl is-enabled --quiet sublink; then
-        echo -e "${YELLOW}禁用服务...${NC}"
-        execute_command systemctl disable sublink
-    fi
+    # 停止服务之前检查服务是否存在
+    if systemctl is-active --quiet sublink; then
+        echo -e "${YELLOW}停止服务...${NC}"
+        execute_command systemctl stop sublink
+    fi
+    if systemctl is-enabled --quiet sublink; then
+        echo -e "${YELLOW}禁用服务...${NC}"
+        execute_command systemctl disable sublink
+    fi
 
-    read -p "$(echo -e "${YELLOW}是否删除 systemd 服务文件 (包含端口设置)? (y/n): ${NC}")" is_del_systemd
-    if [ "$is_del_systemd" = "y" ]; then
-        echo -e "${YELLOW}删除 systemd 服务文件...${NC}"
-        execute_command rm "$SERVICE_FILE"
-        execute_command systemctl daemon-reload # 重新加载以清除服务
-    fi
+    read -p "$(echo -e "${YELLOW}是否删除 systemd 服务文件 (包含端口设置)? (y/n): ${NC}")" is_del_systemd
+    if [ "$is_del_systemd" = "y" ]; then
+        echo -e "${YELLOW}删除 systemd 服务文件...${NC}"
+        execute_command rm "$SERVICE_FILE"
+        execute_command systemctl daemon-reload # 重新加载以清除服务
+    fi
 
-    echo -e "${YELLOW}删除相关文件和目录...${NC}"
-    execute_command rm -rf "$INSTALL_DIR/$BINARY_NAME" # 删除二进制文件
-    execute_command rm -f "/usr/bin/sublink_installer.sh" # 删除自身脚本
+    echo -e "${YELLOW}删除相关文件和目录...${NC}"
+    execute_command rm -rf "$INSTALL_DIR/$BINARY_NAME" # 删除二进制文件
+    execute_command rm -f "/usr/bin/sublink_installer.sh" # 删除自身脚本
 
-    read -p "$(echo -e "${YELLOW}是否删除模板文件和数据库? (y/n): ${NC}")" is_delete_data
-    if [ "$is_delete_data" = "y" ]; then
-        echo -e "${YELLOW}删除数据目录...${NC}"
-        execute_command rm -rf "$INSTALL_DIR/db"
-        echo -e "${YELLOW}删除模板目录...${NC}"
-        execute_command rm -rf "$INSTALL_DIR/template"
-        echo -e "${YELLOW}删除日志目录...${NC}"
-        execute_command rm -rf "$INSTALL_DIR/logs"
-    fi
+    read -p "$(echo -e "${YELLOW}是否删除模板文件和数据库? (y/n): ${NC}")" is_delete_data
+    if [ "$is_delete_data" = "y" ]; then
+        echo -e "${YELLOW}删除数据目录...${NC}"
+        execute_command rm -rf "$INSTALL_DIR/db"
+        echo -e "${YELLOW}删除模板目录...${NC}"
+        execute_command rm -rf "$INSTALL_DIR/template"
+        echo -e "${YELLOW}删除日志目录...${NC}"
+        execute_command rm -rf "$INSTALL_DIR/logs"
+    fi
 
-    echo -e "${GREEN}卸载完成。${NC}"
-    echo -e "${NC}按任意键继续...${NC}"
-    read -n 1 -s
-    exit 0 # 卸载后直接退出
+    echo -e "${GREEN}卸载完成。${NC}"
+    echo -e "${NC}按任意键继续...${NC}"
+    read -n 1 -s
+    exit 0 # 卸载后直接退出
 }
-
 
 # --- 主菜单逻辑 ---
 
 show_menu() {
-    clear
-    current_version=$(get_current_binary_version)
-    latest_release=$(get_latest_release) # 在此模式下，这可能只是一个占位符
-    if [ -z "$latest_release" ]; then
-        latest_release="无法获取"
-    fi
+    clear
+    current_version=$(get_current_binary_version)
+    latest_release=$(get_latest_release) # 在此模式下，这可能只是一个占位符
+    if [ -z "$latest_release" ]; then
+        latest_release="无法获取"
+    fi
 
-    # 获取服务状态
-    service_status=$(systemctl is-active sublink 2>/dev/null)
-    if [ "$service_status" = "active" ]; then
-        display_status="${GREEN}已运行${NC}"
-    else
-        display_status="${RED}未运行${NC}"
-    fi
+    # 获取服务状态
+    service_status=$(systemctl is-active sublink 2>/dev/null)
+    if [ "$service_status" = "active" ]; then
+        display_status="${GREEN}已运行${NC}"
+    else
+        display_status="${RED}未运行${NC}"
+    fi
 
-    echo -e "${YELLOW}--- Sublink 管理菜单 ---${NC}"
-    echo -e "最新版本: ${GREEN}${latest_release}${NC}"
-    echo -e "当前版本: ${GREEN}${current_version}${NC}"
-    echo -e "当前运行状态: ${display_status}"
-    echo -e "${GREEN}1. 启动服务${NC}"
-    echo -e "${GREEN}2. 停止服务${NC}"
-    echo -e "${GREEN}3. 卸载安装${NC}"
-    echo -e "${GREEN}4. 查看服务状态${NC}"
-    echo -e "${GREEN}5. 查看运行目录${NC}"
-    echo -e "${GREEN}6. 修改端口${NC}"
-    echo -e "${GREEN}7. 更新${NC}"
-    echo -e "${GREEN}8. 重置账号密码${NC}"
-    echo -e "${GREEN}0. 退出${NC}"
-    echo -n -e "${YELLOW}请选择一个选项: ${NC}"
+    echo -e "${YELLOW}--- Sublink 管理菜单 ---${NC}"
+    echo -e "最新版本: ${GREEN}${latest_release}${NC}"
+    echo -e "当前版本: ${GREEN}${current_version}${NC}"
+    echo -e "当前运行状态: ${display_status}"
+    echo -e "${GREEN}1. 启动服务${NC}"
+    echo -e "${GREEN}2. 停止服务${NC}"
+    echo -e "${GREEN}3. 卸载安装${NC}"
+    echo -e "${GREEN}4. 查看服务状态${NC}"
+    echo -e "${GREEN}5. 查看运行目录${NC}"
+    echo -e "${GREEN}6. 修改端口${NC}"
+    echo -e "${GREEN}7. 更新${NC}"
+    echo -e "${GREEN}8. 重置账号密码${NC}"
+    echo -e "${GREEN}0. 退出${NC}"
+    echo -n -e "${YELLOW}请选择一个选项: ${NC}"
 }
 
 handle_menu_option() {
-    read option
+    read option
 
-    case "$option" in
-        1) start_service ;;
-        2) stop_service ;;
-        3) uninstall_service ;;
-        4) view_status ;;
-        5) view_run_dir ;;
-        6) modify_port ;;
-        7) update_service ;;
-        8) reset_account ;;
-        0) echo -e "${GREEN}退出。${NC}"; exit 0 ;;
-        *) echo -e "${RED}无效的选项，请重新选择。${NC}"; sleep 1 ;;
-    esac
+    case "$option" in
+        1) start_service ;;
+        2) stop_service ;;
+        3) uninstall_service ;;
+        4) view_status ;;
+        5) view_run_dir ;;
+        6) modify_port ;;
+        7) update_service ;;
+        8) reset_account ;;
+        0) echo -e "${GREEN}退出。${NC}"; exit 0 ;;
+        *) echo -e "${RED}无效的选项，请重新选择。${NC}"; sleep 1 ;;
+    esac
 }
 
-# --- 安装逻辑 (修改为从源代码编译安装) ---
+# --- 安装逻辑 (从源代码编译安装) ---
 
 install_sublink() {
     check_root
