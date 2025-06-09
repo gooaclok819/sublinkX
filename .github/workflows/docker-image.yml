@@ -12,7 +12,7 @@ on:
       - main # 或 master
 
 env:
-  DOCKER_REPO: gooaclok819/sublinkx # 您的 Docker Hub 仓库名称
+  DOCKER_REPO: jaaksi/sublinkx # 您的 Docker Hub 仓库名称
 
 jobs:
   build_and_push:
