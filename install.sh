@@ -183,7 +183,7 @@ view_run_dir() {
 modify_port() {
     read -p "$(echo -e "${YELLOW}请输入新的端口号: ${NC}")" new_port
 
-    if ! [[ "<span class="math-inline">new\_port" \=\~ ^\[0\-9\]\+</span> ]]; then
+    if ! [[ "<span class="math-inline">new\_port" \=\~ ^\[0\-9\]\+</span> ]]; then
         echo -e "${RED}无效的端口号，请输入数字。${NC}"
         return
     fi
