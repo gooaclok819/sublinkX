@@ -1,515 +1,378 @@
 #!/bin/bash
 
-# 定义颜色
+# 颜色设置
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-INSTALL_DIR="/usr/local/bin/sublink"
-BINARY_NAME="sublink"
-SERVICE_FILE="/etc/systemd/system/sublink.service"
-
-GO_VERSION="1.22.0" # 指定的 Go 版本
-GO_INSTALL_PATH="/usr/local/go" # Go 安装路径
-GO_BIN_PATH="$GO_INSTALL_PATH/bin" # Go 可执行文件路径
-REPO_URL="https://github.com/gooaclok819/sublinkX.git"
-REPO_DIR="/tmp/sublinkX_repo"
-GO_MAIN_PACKAGE_PATH="./" # 你的 main 包在仓库中的相对路径，通常是 "./" 或者 "./cmd/sublink"
-
-# --- 辅助函数 ---
-
 # 检查用户是否为root
-check_root() {
-    if [ "$(id -u)" != "0" ]; then
-        echo -e "${RED}该脚本必须以root身份运行。${NC}"
-        exit 1
+if [ "$(id -u)" != "0" ]; then
+    echo -e "${RED}该脚本必须以root身份运行。${NC}"
+    exit 1
+fi
+
+# 定义安装路径和Go版本
+INSTALL_APP_DIR="/usr/local/sublink"       # Sublink 应用程序的实际安装目录 (包含二进制文件)
+INSTALL_CMD_PATH="/usr/local/bin/sublink"  # Sublink 快捷命令的路径 (菜单脚本)
+REPO_URL="https://github.com/gooaclok819/sublinkX.git"
+GO_VERSION="1.22.0"
+GO_TAR_GZ="go${GO_VERSION}.linux-amd64.tar.gz"
+GO_DOWNLOAD_URL="https://go.dev/dl/${GO_TAR_GZ}"
+
+echo -e "${YELLOW}--- 开始 Sublink 自动化安装与菜单部署脚本 ---${NC}"
+
+---
+
+## 清理旧的安装和缓存
+
+echo -e "${YELLOW}清理旧的Sublink安装目录和Go缓存...${NC}"
+
+# 清理主应用程序目录
+if [ -d "$INSTALL_APP_DIR" ]; then
+    echo -e "${GREEN}删除旧的主安装目录：$INSTALL_APP_DIR${NC}"
+    rm -rf "$INSTALL_APP_DIR"
+fi
+
+# 清理快捷命令路径，可能是文件也可能是目录
+if [ -e "$INSTALL_CMD_PATH" ]; then # -e 检查文件或目录是否存在
+    if [ -f "$INSTALL_CMD_PATH" ]; then # -f 检查是否是文件
+        echo -e "${GREEN}删除旧的快捷命令文件：$INSTALL_CMD_PATH${NC}"
+        rm -f "$INSTALL_CMD_PATH"
+    elif [ -d "$INSTALL_CMD_PATH" ]; then # -d 检查是否是目录
+        echo -e "${GREEN}删除旧的快捷命令目录：$INSTALL_CMD_PATH${NC}"
+        rm -rf "$INSTALL_CMD_PATH"
     fi
-}
+fi
 
-# 执行命令并检查错误
-execute_command() {
-    local cmd="$1"
-    shift
-    echo -e "${YELLOW}执行: $cmd $@${NC}"
-    output=$("$cmd" "$@" 2>&1)
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}错误: 命令 '$cmd $@' 执行失败。${NC}"
-        echo -e "${RED}输出: ${output}${NC}"
-        return 1
-    fi
-    echo "$output"
-    return 0
-}
+# 清理Go模块缓存 (使用 || true 避免在Go未安装时报错)
+go clean -modcache || true
+echo -e "${GREEN}已清理Go模块缓存（如果存在）${NC}"
 
-# 获取最新的发行版标签 (在从源代码编译的场景下，这可能只是一个占位符)
-get_latest_release() {
-    # 在编译模式下，我们通常是基于代码库的最新 commit 或特定 tag 编译
-    echo "latest_build" # 占位符，表示这是从最新代码编译的
-    return 0
-}
+---
 
-# 获取当前运行的二进制文件版本
-get_current_binary_version() {
-    if [ -f "$INSTALL_DIR/$BINARY_NAME" ]; then
-        version_output=$(execute_command "$INSTALL_DIR/$BINARY_NAME" "--version")
-        if [ $? -eq 0 ]; then
-            echo "$version_output"
-        else
-            echo "未知"
-        fi
+## 安装或更新 Go 语言环境
+
+echo -e "${YELLOW}安装或更新 Go ${GO_VERSION}...${NC}"
+
+# 检查Go是否已安装并且版本符合要求
+if command -v go &> /dev/null; then
+    current_go_version=$(go version | awk '{print $3}' | sed 's/go//')
+    if [ "$current_go_version" = "$GO_VERSION" ]; then
+        echo -e "${GREEN}Go ${GO_VERSION} 已安装且版本正确。${NC}"
     else
-        echo "未安装"
+        echo -e "${YELLOW}检测到Go版本 ${current_go_version}，正在安装 Go ${GO_VERSION}...${NC}"
+        # 移除旧的Go安装
+        rm -rf /usr/local/go
+        # 下载并安装指定Go版本
+        wget -q --show-progress "$GO_DOWNLOAD_URL" -O "/tmp/$GO_TAR_GZ"
+        tar -C /usr/local -xzf "/tmp/$GO_TAR_GZ"
+        rm "/tmp/$GO_TAR_GZ"
+        echo -e "${GREEN}Go ${GO_VERSION} 安装完成。${NC}"
     fi
-}
-
-# 根据机器类型获取二进制文件名 (此函数在编译模式下不再需要，因为我们直接编译出 sublink)
-get_binary_file_name() {
-    machine_type=$(uname -m)
-    if [ "$machine_type" = "x86_64" ]; then
-        echo "sublink_amd64"
-    elif [ "$machine_type" = "aarch64" ]; then
-        echo "sublink_arm64"
-    else
-        echo ""
-        return 1
-    fi
-    return 0
-}
-
-# --- 安装 Go 编译器 ---
-install_go() {
-    echo -e "${YELLOW}正在安装 Go ${GO_VERSION}...${NC}"
-
-    # 检查是否已安装正确的 Go 版本
-    if command -v go &> /dev/null; then
-        current_go_version=$(go version | awk '{print $3}' | sed 's/go//')
-        if [[ "$current_go_version" == "$GO_VERSION"* ]]; then
-            echo -e "${GREEN}Go ${GO_VERSION} 已安装。${NC}"
-            return 0
-        fi
-    fi
-
-    # 移除旧的 Go 安装 (如果存在)
-    if [ -d "$GO_INSTALL_PATH" ]; then
-        echo -e "${YELLOW}移除旧的 Go 安装...${NC}"
-        execute_command sudo rm -rf "$GO_INSTALL_PATH"
-    fi
-
-    # 确定架构
-    local arch=$(uname -m)
-    local go_arch=""
-    if [ "$arch" = "x86_64" ]; then
-        go_arch="amd64"
-    elif [ "$arch" = "aarch64" ]; then
-        go_arch="arm64"
-    else
-        echo -e "${RED}不支持的架构: $arch，无法安装 Go。${NC}"
-        return 1
-    fi
-
-    local go_tar_file="go${GO_VERSION}.linux-${go_arch}.tar.gz"
-    local go_download_url="https://go.dev/dl/$go_tar_file"
-    local temp_go_download_path="/tmp/$go_tar_file"
-
-    echo -e "${YELLOW}下载 Go ${GO_VERSION} for ${go_arch}...${NC}"
-    execute_command curl -L -o "$temp_go_download_path" "$go_download_url"
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}下载 Go 失败，请检查网络或 URL。${NC}"
-        return 1
-    fi
-
-    echo -e "${YELLOW}解压 Go 到 ${GO_INSTALL_PATH}...${NC}"
-    execute_command sudo tar -C /usr/local -xzf "$temp_go_download_path"
-    execute_command rm "$temp_go_download_path" # 清理临时文件
-
-    # 配置环境变量 (仅为当前会话和未来会话)
-    # 确保 /usr/local/go/bin 在 PATH 中
-    if ! grep -q "export PATH=.*${GO_BIN_PATH}" /etc/profile; then
-        echo -e "${YELLOW}配置 Go 环境变量...${NC}"
-        echo "export PATH=\$PATH:${GO_BIN_PATH}" | sudo tee -a /etc/profile
-        echo "export GOPATH=\$HOME/go" | sudo tee -a /etc/profile # 建议设置GOPATH
-        echo "export PATH=\$PATH:\$GOPATH/bin" | sudo tee -a /etc/profile # 将GOPATH/bin添加到PATH
-    fi
-    
-    # 立即激活新的环境变量
-    source /etc/profile >/dev/null 2>&1 || true # 尝试加载，忽略可能出现的错误
-
+else
+    echo -e "${YELLOW}未检测到Go环境，正在安装 Go ${GO_VERSION}...${NC}"
+    wget -q --show-progress "$GO_DOWNLOAD_URL" -O "/tmp/$GO_TAR_GZ"
+    tar -C /usr/local -xzf "/tmp/$GO_TAR_GZ"
+    rm "/tmp/$GO_TAR_GZ"
     echo -e "${GREEN}Go ${GO_VERSION} 安装完成。${NC}"
-    go version # 再次确认版本
-    return 0
-}
+fi
 
-# --- 菜单功能函数 ---
+# 配置Go环境变量
+export PATH=$PATH:/usr/local/go/bin
+# 永久添加到 /etc/profile (系统范围)
+if ! grep -q "/usr/local/go/bin" /etc/profile; then
+    echo "export PATH=\$PATH:/usr/local/go/bin" >> /etc/profile
+fi
+# 永久添加到 ~/.bashrc (当前用户)
+if ! grep -q "/usr/local/go/bin" ~/.bashrc; then
+    echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.bashrc
+fi
+source /etc/profile # 立即生效环境变量
+echo -e "${GREEN}Go环境变量已配置。${NC}"
+go version
 
-# 启动服务
-start_service() {
-    echo -e "${GREEN}正在启动服务...${NC}"
-    execute_command systemctl start sublink
-    execute_command systemctl daemon-reload
-    echo -e "${GREEN}服务已启动。${NC}"
-}
+---
 
-# 停止服务
-stop_service() {
-    echo -e "${YELLOW}正在停止服务...${NC}"
-    execute_command systemctl stop sublink
-    execute_command systemctl daemon-reload
-    echo -e "${YELLOW}服务已停止。${NC}"
-}
+## 克隆并构建 Sublink
 
-# 查看服务状态
-view_status() {
-    echo -e "${YELLOW}正在查看服务状态...${NC}"
-    execute_command systemctl status sublink
-    echo -e "${NC}按任意键继续...${NC}"
-    read -n 1 -s
-}
+echo -e "${YELLOW}克隆 sublinkX 仓库并进行构建...${NC}"
+mkdir -p "$INSTALL_APP_DIR"
+if ! git clone "$REPO_URL" "$INSTALL_APP_DIR"; then
+    echo -e "${RED}克隆仓库失败。请检查网络连接或仓库URL。${NC}"
+    exit 1
+fi
 
-# 查看运行目录
-view_run_dir() {
-    echo -e "${GREEN}运行目录: ${INSTALL_DIR}${NC}"
-    echo -e "${YELLOW}需要备份的目录为db,template目录为模版文件可备份可不备份。${NC}"
-    echo -e "${NC}按任意键继续...${NC}"
-    read -n 1 -s
-}
+cd "$INSTALL_APP_DIR" || { echo -e "${RED}无法进入安装目录：$INSTALL_APP_DIR${NC}"; exit 1; }
 
-# 修改端口
-modify_port() {
-    read -p "$(echo -e "${YELLOW}请输入新的端口号: ${NC}")" new_port
+echo -e "${YELLOW}初始化Go模块并构建Sublink...${NC}"
+go mod tidy
+if ! go build -o sublink; then
+    echo -e "${RED}Sublink 构建失败。请检查依赖或代码问题。${NC}"
+    exit 1
+fi
+echo -e "${GREEN}Sublink 构建成功。可执行文件位于：$INSTALL_APP_DIR/sublink${NC}"
 
-    if ! [[ "$new_port" =~ ^[0-9]+$ ]]; then
-        echo -e "${RED}无效的端口号，请输入数字。${NC}"
-        return
-    fi
+---
 
-    echo -e "${YELLOW}新的端口号: $new_port${NC}"
+## 创建 Systemd 服务
 
-    if [ ! -f "$SERVICE_FILE" ]; then
-        echo -e "${RED}服务文件不存在: $SERVICE_FILE。请先运行安装程序。${NC}"
-        return
-    fi
-
-    # 替换或添加 ExecStart 行中的 --port 参数
-    # 查找 ExecStart 行，如果已经有 --port 参数，则替换它；否则，添加它
-    if grep -q "ExecStart=.* --port [0-9]\+" "$SERVICE_FILE"; then
-        # 已经存在 --port 参数，替换它
-        execute_command sed -i -E "s/(--port )[0-9]+/\1$new_port/" "$SERVICE_FILE"
-    else
-        # 不存在 --port 参数，在 ExecStart 后添加它
-        execute_command sed -i -E "s|(ExecStart=.+\s?)|\1 --port $new_port |" "$SERVICE_FILE"
-    fi
-
-    echo -e "${YELLOW}重新加载 systemd 守护进程...${NC}"
-    execute_command systemctl daemon-reload
-    echo -e "${YELLOW}重启 Sublink 服务...${NC}"
-    execute_command systemctl restart sublink
-
-    echo -e "${GREEN}端口修改完成，服务已重启。${NC}"
-    echo -e "${NC}按任意键继续...${NC}"
-    read -n 1 -s
-}
-
-# 更新服务 (从源代码编译更新)
-update_service() {
-    echo -e "${GREEN}正在检查并更新 Sublink 服务 (从源代码编译)...${NC}"
-
-    local latest_version="latest_code" # 编译最新代码
-
-    current_version=$(get_current_binary_version)
-    echo -e "${GREEN}当前版本: $current_version${NC}"
-    echo -e "${GREEN}目标版本: $latest_version${NC}" # 这里只是个标记
-
-    # 停止服务
-    echo -e "${YELLOW}停止 Sublink 服务...${NC}"
-    execute_command systemctl stop sublink || true # 允许停止失败
-
-    # 克隆或更新仓库
-    if [ -d "$REPO_DIR" ]; then
-        echo -e "${YELLOW}进入仓库目录并拉取最新代码...${NC}"
-        execute_command cd "$REPO_DIR"
-        execute_command git pull
-    else
-        echo -e "${YELLOW}克隆 Sublink 仓库到 ${REPO_DIR}...${NC}"
-        execute_command git clone "$REPO_URL" "$REPO_DIR"
-        execute_command cd "$REPO_DIR"
-    fi
-
-    # 清理 Go 模块缓存 (重要，防止旧问题)
-    echo -e "${YELLOW}执行 go clean -modcache...${NC}"
-    execute_command "$GO_BIN_PATH/go" clean -modcache
-
-    # 执行 go mod tidy
-    echo -e "${YELLOW}执行 go mod tidy...${NC}"
-    execute_command "$GO_BIN_PATH/go" mod tidy
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}go mod tidy 失败，请检查 Go 模块。${NC}"
-        echo -e "${NC}按任意键继续...${NC}"
-        read -n 1 -s
-        return 1
-    fi
-
-    # 编译
-    echo -e "${YELLOW}编译 Sublink 二进制文件...${NC}"
-    execute_command "$GO_BIN_PATH/go" build -o "$INSTALL_DIR/$BINARY_NAME" "$GO_MAIN_PACKAGE_PATH"
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}Go 程序编译失败。${NC}"
-        echo -e "${NC}按任意键继续...${NC}"
-        read -n 1 -s
-        return 1
-    fi
-
-    # 重新加载 systemd 守护进程
-    echo -e "${YELLOW}重新加载 systemd 守护进程...${NC}"
-    execute_command systemctl daemon-reload
-
-    # 启动并启用 Sublink 服务
-    echo -e "${YELLOW}启动并启用 Sublink 服务...${NC}"
-    execute_command systemctl start sublink
-    execute_command systemctl enable sublink
-
-    echo -e "${GREEN}Sublink 服务更新完成。${NC}"
-    echo -e "${NC}按任意键继续...${NC}"
-    read -n 1 -s
-    return 0
-}
-
-# 重置账号密码
-reset_account() {
-    read -p "$(echo -e "${YELLOW}请输入新的账号: ${NC}")" new_username
-    read -p "$(echo -e "${YELLOW}请输入新的密码: ${NC}")" new_password
-
-    if [ -z "$new_username" ] || [ -z "$new_password" ]; then
-        echo -e "${RED}账号和密码不能为空。${NC}"
-        echo -e "${NC}按任意键继续...${NC}"
-        return
-    fi
-
-    echo -e "${YELLOW}正在重置账号密码...${NC}"
-    # 调用 Go 程序的 setting 命令
-    execute_command "$INSTALL_DIR/$BINARY_NAME" setting --username "$new_username" --password "$new_password"
-    
-    echo -e "${YELLOW}重启 Sublink 服务以应用更改...${NC}"
-    execute_command systemctl restart sublink
-
-    echo -e "${GREEN}账号密码重置成功。${NC}"
-    echo -e "${NC}按任意键继续...${NC}"
-    read -n 1 -s
-}
-
-# 卸载安装
-uninstall_service() {
-    read -p "$(echo -e "${YELLOW}你是否要卸载 Sublink 服务? (y/n): ${NC}")" confirm_uninstall
-    if [ ! "$confirm_uninstall" = "y" ]; then
-        echo -e "${NC}取消卸载。${NC}"
-        return
-    fi
-
-    echo -e "${YELLOW}正在卸载 Sublink 服务...${NC}"
-
-    # 停止服务之前检查服务是否存在
-    if systemctl is-active --quiet sublink; then
-        echo -e "${YELLOW}停止服务...${NC}"
-        execute_command systemctl stop sublink
-    fi
-    if systemctl is-enabled --quiet sublink; then
-        echo -e "${YELLOW}禁用服务...${NC}"
-        execute_command systemctl disable sublink
-    fi
-
-    read -p "$(echo -e "${YELLOW}是否删除 systemd 服务文件 (包含端口设置)? (y/n): ${NC}")" is_del_systemd
-    if [ "$is_del_systemd" = "y" ]; then
-        echo -e "${YELLOW}删除 systemd 服务文件...${NC}"
-        execute_command rm "$SERVICE_FILE"
-        execute_command systemctl daemon-reload # 重新加载以清除服务
-    fi
-
-    echo -e "${YELLOW}删除相关文件和目录...${NC}"
-    execute_command rm -rf "$INSTALL_DIR/$BINARY_NAME" # 删除二进制文件
-    execute_command rm -f "/usr/bin/sublink_installer.sh" # 删除自身脚本
-
-    read -p "$(echo -e "${YELLOW}是否删除模板文件和数据库? (y/n): ${NC}")" is_delete_data
-    if [ "$is_delete_data" = "y" ]; then
-        echo -e "${YELLOW}删除数据目录...${NC}"
-        execute_command rm -rf "$INSTALL_DIR/db"
-        echo -e "${YELLOW}删除模板目录...${NC}"
-        execute_command rm -rf "$INSTALL_DIR/template"
-        echo -e "${YELLOW}删除日志目录...${NC}"
-        execute_command rm -rf "$INSTALL_DIR/logs"
-    fi
-
-    echo -e "${GREEN}卸载完成。${NC}"
-    echo -e "${NC}按任意键继续...${NC}"
-    read -n 1 -s
-    exit 0 # 卸载后直接退出
-}
-
-# --- 主菜单逻辑 ---
-
-show_menu() {
-    clear
-    current_version=$(get_current_binary_version)
-    latest_release=$(get_latest_release) # 在此模式下，这可能只是一个占位符
-    if [ -z "$latest_release" ]; then
-        latest_release="无法获取"
-    fi
-
-    # 获取服务状态
-    service_status=$(systemctl is-active sublink 2>/dev/null)
-    if [ "$service_status" = "active" ]; then
-        display_status="${GREEN}已运行${NC}"
-    else
-        display_status="${RED}未运行${NC}"
-    fi
-
-    echo -e "${YELLOW}--- Sublink 管理菜单 ---${NC}"
-    echo -e "最新版本: ${GREEN}${latest_release}${NC}"
-    echo -e "当前版本: ${GREEN}${current_version}${NC}"
-    echo -e "当前运行状态: ${display_status}"
-    echo -e "${GREEN}1. 启动服务${NC}"
-    echo -e "${GREEN}2. 停止服务${NC}"
-    echo -e "${GREEN}3. 卸载安装${NC}"
-    echo -e "${GREEN}4. 查看服务状态${NC}"
-    echo -e "${GREEN}5. 查看运行目录${NC}"
-    echo -e "${GREEN}6. 修改端口${NC}"
-    echo -e "${GREEN}7. 更新${NC}"
-    echo -e "${GREEN}8. 重置账号密码${NC}"
-    echo -e "${GREEN}0. 退出${NC}"
-    echo -n -e "${YELLOW}请选择一个选项: ${NC}"
-}
-
-handle_menu_option() {
-    read option
-
-    case "$option" in
-        1) start_service ;;
-        2) stop_service ;;
-        3) uninstall_service ;;
-        4) view_status ;;
-        5) view_run_dir ;;
-        6) modify_port ;;
-        7) update_service ;;
-        8) reset_account ;;
-        0) echo -e "${GREEN}退出。${NC}"; exit 0 ;;
-        *) echo -e "${RED}无效的选项，请重新选择。${NC}"; sleep 1 ;;
-    esac
-}
-
-# --- 安装逻辑 (从源代码编译安装) ---
-
-install_sublink() {
-    check_root
-
-    echo -e "${YELLOW}--- 正在安装 Sublink 服务 (从源代码编译) ---${NC}"
-
-    # 安装 Go 编译器
-    install_go
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}Go 安装失败，无法继续安装 Sublink。${NC}"
-        exit 1
-    fi
-
-    # 确保 Git 已安装
-    if ! command -v git &> /dev/null; then
-        echo -e "${RED}Git 未安装，请先安装 Git (sudo apt install git)。${NC}"
-        exit 1
-    fi
-
-    # 创建程序目录
-    if [ ! -d "$INSTALL_DIR" ]; then
-        echo -e "${YELLOW}创建安装目录: $INSTALL_DIR${NC}"
-        execute_command mkdir -p "$INSTALL_DIR"
-    fi
-
-    # 克隆或更新仓库
-    if [ -d "$REPO_DIR" ]; then
-        echo -e "${YELLOW}进入仓库目录并拉取最新代码...${NC}"
-        execute_command cd "$REPO_DIR"
-        execute_command git pull
-    else
-        echo -e "${YELLOW}克隆 Sublink 仓库到 ${REPO_DIR}...${NC}"
-        execute_command git clone "$REPO_URL" "$REPO_DIR"
-        if [ $? -ne 0 ]; then
-            echo -e "${RED}Git 克隆失败，请检查仓库 URL 或网络。${NC}"
-            exit 1
-        fi
-    fi
-
-    # 进入仓库目录
-    execute_command cd "$REPO_DIR"
-
-    # 清理 Go 模块缓存 (重要，防止旧问题)
-    echo -e "${YELLOW}执行 go clean -modcache...${NC}"
-    execute_command "$GO_BIN_PATH/go" clean -modcache
-
-    # 执行 go mod tidy
-    echo -e "${YELLOW}执行 go mod tidy...${NC}"
-    execute_command "$GO_BIN_PATH/go" mod tidy
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}go mod tidy 失败，请检查 Go 模块。${NC}"
-        exit 1
-    fi
-
-    # 编译
-    echo -e "${YELLOW}编译 Sublink 二进制文件...${NC}"
-    execute_command "$GO_BIN_PATH/go" build -o "$INSTALL_DIR/$BINARY_NAME" "$GO_MAIN_PACKAGE_PATH"
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}Go 程序编译失败。${NC}"
-        exit 1
-    fi
-
-    # 创建 systemctl 服务文件
-    echo -e "${YELLOW}创建 systemd 服务文件: $SERVICE_FILE${NC}"
-    cat << EOF | tee "$SERVICE_FILE"
+echo -e "${YELLOW}创建 systemctl 服务...${NC}"
+# 使用 here-document 正确创建 systemd 服务文件
+cat <<EOF | tee /etc/systemd/system/sublink.service
 [Unit]
 Description=Sublink Service
 After=network.target
 
 [Service]
-ExecStart=$INSTALL_DIR/$BINARY_NAME run --port 8000
-WorkingDirectory=$INSTALL_DIR
+ExecStart=$INSTALL_APP_DIR/sublink
+WorkingDirectory=$INSTALL_APP_DIR
 Restart=always
-User=root
-Group=root
-# AmbientCapabilities=CAP_NET_BIND_SERVICE # 如果ExecStart使用非root用户，可以考虑添加
+# 确保Go的可执行文件路径在服务启动时可用
+Environment="PATH=/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
+# 重新加载systemd守护进程
+systemctl daemon-reload
+
+# 停止、启动并启用服务
+systemctl stop sublink &> /dev/null || true # 尝试停止，如果服务不存在则不报错
+systemctl start sublink
+systemctl enable sublink
+
+echo -e "${GREEN}Sublink 服务已启动并已设置为开机启动。${NC}"
+echo -e "${GREEN}默认账号 ${YELLOW}admin${NC}，密码 ${YELLOW}123456${NC}，默认端口 ${YELLOW}8000${NC}"
+
+---
+
+## 创建 Sublink 菜单命令脚本
+
+echo -e "${YELLOW}创建 sublink 菜单命令脚本...${NC}"
+
+# 写入菜单脚本到 /usr/local/bin/sublink
+# 使用 'EOF' (带单引号) 来防止变量展开和内部语法问题
+cat << 'EOF' | tee "$INSTALL_CMD_PATH"
+#!/bin/bash
+
+# 颜色设置
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# 定义应用程序主目录 (与安装脚本中的 INSTALL_APP_DIR 保持一致)
+APP_BASE_DIR="/usr/local/sublink"
+
+# 定义更新函数
+Up() {
+    echo -e "${YELLOW}正在更新 Sublink...${NC}"
+    
+    # 停止服务
+    systemctl stop sublink
+
+    # 进入应用目录
+    cd "$APP_BASE_DIR" || { echo -e "${RED}无法进入应用目录：$APP_BASE_DIR${NC}"; return 1; }
+
+    # 拉取最新代码
+    git pull origin main || { echo -e "${RED}拉取最新代码失败。${NC}"; return 1; }
+
+    # 重新构建
+    go mod tidy
+    go build -o sublink || { echo -e "${RED}更新后构建失败。${NC}"; return 1; }
+
     # 重新加载systemd守护进程
-    echo -e "${YELLOW}重新加载 systemd 守护进程...${NC}"
-    execute_command systemctl daemon-reload
+    systemctl daemon-reload
 
-    # 启动并启用服务
-    echo -e "${YELLOW}启动并启用 Sublink 服务...${NC}"
-    execute_command systemctl start sublink
-    execute_command systemctl enable sublink
-
-    # 将此脚本自身复制到 /usr/bin，以便可以全局调用菜单
-    echo -e "${YELLOW}将脚本自身复制到 /usr/bin/sublink...${NC}"
-    execute_command cp "$0" "/usr/bin/sublink"
-    execute_command chmod +x "/usr/bin/sublink"
-
-    echo -e "${GREEN}--- 安装完成 ---${NC}"
-    echo -e "${GREEN}默认账号admin, 密码123456 (如果数据库是新的)。${NC}"
-    echo -e "${GREEN}默认端口8000。${NC}"
-    echo -e "${GREEN}服务已启动并已设置为开机启动。${NC}"
-    echo -e "${GREEN}现在输入 'sublink' 可以呼出菜单进行管理。${NC}"
-    echo -e "${NC}按任意键进入菜单...${NC}"
-    read -n 1 -s
+    # 启动服务
+    systemctl start sublink
+    echo -e "${GREEN}Sublink 更新完成并已重新启动。${NC}"
 }
 
-# --- 脚本入口点 ---
+# 定义菜单函数
+Select() {
+    while true; do
+        clear # 清屏以保持菜单整洁
+        echo -e "${BLUE}--- Sublink 管理菜单 ---${NC}"
+        
+        # 获取最新的发行版标签
+        latest_release=$(curl --silent "https://api.github.com/repos/gooaclok819/sublinkX/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' || echo "获取失败")
+        
+        # 尝试获取当前版本（如果 Sublink 有一个查看版本号的命令）
+        current_version="未知或待实现" # 默认为未知
+        if [ -f "$APP_BASE_DIR/sublink" ]; then
+            # 如果你的 sublink 二进制文件有 --version 或类似的命令，可以修改这里
+            # 例如：current_version=$("$APP_BASE_DIR/sublink" --version | head -n 1)
+            : # No-op
+        fi
 
-# 如果没有安装 Go 程序，则执行安装
-if [ ! -f "$INSTALL_DIR/$BINARY_NAME" ] || [ ! -f "$SERVICE_FILE" ]; then
-    install_sublink
-fi
 
-# 循环显示菜单
-while true; do
-    show_menu
-    handle_menu_option
-done
-```
+        # 获取服务状态
+        status=$(systemctl is-active sublink)
+
+        echo -e "${BLUE}--------------------------------${NC}"
+        echo -e "最新版本: ${GREEN}$latest_release${NC}"
+        echo -e "当前版本: ${GREEN}$current_version${NC}" # 这里需要根据实际情况获取
+        if [ "$status" = "active" ]; then
+            echo -e "当前运行状态: ${GREEN}已运行${NC}"
+        else
+            echo -e "当前运行状态: ${RED}未运行${NC}"
+        fi
+        echo -e "${BLUE}--------------------------------${NC}"
+        echo "1. 启动服务"
+        echo "2. 停止服务"
+        echo "3. 卸载安装"
+        echo "4. 查看服务状态"
+        echo "5. 查看运行目录"
+        echo "6. 修改端口"
+        echo "7. 更新 (拉取最新代码并重新构建)" # 修正此行，确保括号在 heredoc 内被正确处理
+        echo "0. 退出"
+        echo -e "${BLUE}--------------------------------${NC}"
+        echo -n "请选择一个选项: "
+        read option
+
+        case $option in
+            1)
+                echo -e "${YELLOW}正在启动 Sublink 服务...${NC}"
+                systemctl start sublink
+                systemctl daemon-reload
+                echo -e "${GREEN}服务启动命令已发出。${NC}"
+                sleep 2 # 等待服务启动
+                ;;
+            2)
+                echo -e "${YELLOW}正在停止 Sublink 服务...${NC}"
+                systemctl stop sublink
+                systemctl daemon-reload
+                echo -e "${GREEN}服务停止命令已发出。${NC}"
+                sleep 2 # 等待服务停止
+                ;;
+            3)
+                echo -e "${RED}警告：您选择了卸载安装。这将删除Sublink程序和服务。${NC}"
+                read -p "确定要继续吗? (y/N): " confirm_uninstall
+                if [[ "$confirm_uninstall" =~ ^[Yy]$ ]]; then
+                    # 停止服务之前检查服务是否存在
+                    if systemctl is-active --quiet sublink; then
+                        echo -e "${YELLOW}停止 Sublink 服务...${NC}"
+                        systemctl stop sublink
+                    fi
+                    if systemctl is-enabled --quiet sublink; then
+                        echo -e "${YELLOW}禁用 Sublink 服务...${NC}"
+                        systemctl disable sublink
+                    fi
+                    
+                    # 删除服务文件
+                    if [ -f /etc/systemd/system/sublink.service ]; then
+                        echo -e "${YELLOW}删除 systemd 服务文件...${NC}"
+                        rm /etc/systemd/system/sublink.service
+                        systemctl daemon-reload
+                    fi
+                    
+                    # 删除快捷命令文件
+                    if [ -f "$INSTALL_CMD_PATH" ]; then
+                        echo -e "${YELLOW}删除快捷命令文件：$INSTALL_CMD_PATH${NC}"
+                        rm "$INSTALL_CMD_PATH"
+                    fi
+
+                    read -p "是否保留数据 (db, logs, template目录)? (y/n): " isDeleteData
+                    if [[ "$isDeleteData" =~ ^[Nn]$ ]]; then # 如果选择 'n' (不保留)
+                        echo -e "${YELLOW}删除 Sublink 数据目录...${NC}"
+                        if [ -d "$APP_BASE_DIR/db" ]; then rm -rf "$APP_BASE_DIR/db"; fi
+                        if [ -d "$APP_BASE_DIR/template" ]; then rm -rf "$APP_BASE_DIR/template"; fi
+                        if [ -d "$APP_BASE_DIR/logs" ]; then rm -rf "$APP_BASE_DIR/logs"; fi
+                    else # 默认保留，或者用户输入 'y'
+                        echo -e "${GREEN}数据目录将被保留。${NC}"
+                    fi
+
+                    # 删除主应用程序目录
+                    if [ -d "$APP_BASE_DIR" ]; then
+                        echo -e "${YELLOW}删除主应用程序目录：$APP_BASE_DIR${NC}"
+                        rm -rf "$APP_BASE_DIR"
+                    fi
+                    
+                    echo -e "${GREEN}Sublink 卸载完成。${NC}"
+                    exit 0 # 卸载完成后退出脚本
+                else
+                    echo -e "${GREEN}卸载操作已取消。${NC}"
+                fi
+                ;;
+            4)
+                echo -e "${YELLOW}正在查看 Sublink 服务状态...${NC}"
+                systemctl status sublink
+                read -p "按任意键继续..."
+                ;;
+            5)
+                echo -e "${BLUE}Sublink 运行目录: ${GREEN}$APP_BASE_DIR${NC}"
+                echo -e "${YELLOW}需要备份的目录通常为 ${GREEN}db${NC}。${GREEN}template${NC} 目录为模板文件，可选择备份。${NC}"
+                echo -e "${YELLOW}当前目录已切换到：${GREEN}$APP_BASE_DIR${NC}"
+                cd "$APP_BASE_DIR" || echo -e "${RED}切换目录失败。${NC}"
+                read -p "按任意键继续..."
+                ;;
+            6)
+                SERVICE_FILE="/etc/systemd/system/sublink.service"
+                read -p "请输入新的端口号 (例如: 8000): " Port
+                # 检查输入是否为有效数字
+                if ! [[ "$Port" =~ ^[0-9]+$ ]] || [ "$Port" -lt 1 ] || [ "$Port" -gt 65535 ]; then
+                    echo -e "${RED}无效的端口号。请输入1到65535之间的数字。${NC}"
+                    read -p "按任意键继续..."
+                    continue
+                fi
+                echo -e "新的端口号: ${GREEN}$Port${NC}"
+                
+                # 检查服务文件是否存在
+                if [ ! -f "$SERVICE_FILE" ]; then
+                    echo -e "${RED}服务文件不存在: $SERVICE_FILE。无法修改端口。${NC}"
+                    read -p "按任意键继续..."
+                    continue
+                fi
+
+                # 暂停服务
+                systemctl stop sublink
+                echo -e "${YELLOW}服务已暂停，正在修改端口配置...${NC}"
+                
+                # 构建新的 ExecStart 参数
+                # 先移除旧的 -port 参数，然后添加新的
+                sed -i -E "s/ -port [0-9]+//g" "$SERVICE_FILE" # 移除所有旧的 -port 参数
+                sudo sed -i "/^ExecStart=/ s|\$| -port $Port|" "$SERVICE_FILE" # 在行尾添加新的 -port 参数
+                
+                echo -e "${GREEN}端口已修改为 $Port。${NC}"
+
+                # 重新加载 systemd 守护进程
+                sudo systemctl daemon-reload
+                # 重启 sublink 服务
+                sudo systemctl restart sublink
+                echo -e "${GREEN}服务已重启。${NC}"
+                read -p "按任意键继续..."
+                ;;
+            7)
+                Up # 调用更新函数
+                read -p "按任意键继续..."
+                ;;
+            0)
+                echo -e "${BLUE}退出 Sublink 管理菜单。${NC}"
+                exit 0
+                ;;
+            *)
+                echo -e "${RED}无效的选项，请重新选择。${NC}"
+                sleep 1
+                ;;
+        esac
+    done
+}
+
+# 在脚本的最后调用菜单函数
+Select
+EOF
+
+# 设置菜单脚本为可执行
+chmod +x "$INSTALL_CMD_PATH"
+echo -e "${GREEN}Sublink 菜单命令脚本已创建并设置为可执行：${INSTALL_CMD_PATH}${NC}"
+
+echo -e "${GREEN}--- Sublink 安装与菜单部署完成！---${NC}"
+echo -e "${YELLOW}请注意：为了确保 PATH 环境变量在当前会话中完全生效，您可能需要：${NC}"
+echo -e "${YELLOW}1. 运行 'source ~/.bashrc' 或 'source /etc/profile'${NC}"
+echo -e "${YELLOW}2. 或者，最简单和可靠的方法是重新登录您的SSH会话或打开一个新的终端。${NC}"
+echo -e "${YELLOW}重新登录后，输入 ${GREEN}sublink${NC} 即可呼出菜单。${NC}"
