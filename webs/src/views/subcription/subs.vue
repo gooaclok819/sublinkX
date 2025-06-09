@@ -5,6 +5,8 @@ import {getTemp} from "@/api/subcription/temp"
 import {getNodes} from "@/api/subcription/node"
 import QrcodeVue from 'qrcode.vue'
 import md5 from 'md5'
+import { VueDraggable } from 'vue-draggable-plus'
+
 interface Sub {
   ID: number;
   Name: string;
@@ -136,6 +138,7 @@ const handleAddSub = ()=>{
   dialogVisible.value = true
   value1.value = []
 }
+
 const handleEdit = (row:any) => {
   for (let i = 0; i < tableData.value.length; i++) {
     if (tableData.value[i].ID === row.ID) {
@@ -285,6 +288,17 @@ const OpenUrl = (url:string) => {
   window.open(url)
 }
 const clientradio = ref('1')
+
+// 注册拖拽函数
+const toggleSelect = (name: string) => {
+  const index = value1.value.indexOf(name)
+  if (index === -1) {
+    value1.value.push(name)
+  } else {
+    value1.value.splice(index, 1)
+  }
+}
+
 </script>
 
 <template>
@@ -327,6 +341,7 @@ const clientradio = ref('1')
     <el-dialog
     v-model="dialogVisible"
     :title="SubTitle"
+    width="80%"
   >
   <el-input v-model="Subname" placeholder="请输入订阅名称" />
   
@@ -374,7 +389,18 @@ const clientradio = ref('1')
         :label="item.Name"
         :value="item.Name"
       />
+        <div style="margin-top: 20px">
+    <p>已选节点（可拖拽排序）</p>
+    <VueDraggable v-model="value1" :animation="150" ghost-class="ghost">
+      <div v-for="(nodeName, index) in value1" :key="nodeName" class="draggable-item">
+        <span class="row-number">{{ index + 1 }}.</span> {{ nodeName }}
+      </div>
+    </VueDraggable>
+  </div>
     </el-select>
+
+
+
   </div>
     <template #footer>
       <div class="dialog-footer">
@@ -453,5 +479,29 @@ const clientradio = ref('1')
 .el-tag{
   margin: 5px;
 }
+/**拖拽样式 */
+.draggable-item {
+  padding: 8px 10px;
+  margin-bottom: 5px;
+  background-color: #f0f2f5;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  cursor: grab;
+}
 
+.draggable-item:hover {
+  background-color: #e6e8eb;
+}
+
+.ghost {
+  opacity: 0.5;
+  background: #c8ebfb;
+}
+
+.row-number {
+  margin-right: 10px;
+  font-weight: bold;
+}
 </style>

@@ -14,11 +14,11 @@ import (
 
 func NodeUpdadte(c *gin.Context) {
 	var node models.Node
-	name := c.PostForm("name")
+	NewName := c.PostForm("name")
 	oldname := c.PostForm("oldname")
 	oldlink := c.PostForm("oldlink")
 	link := c.PostForm("link")
-	if name == "" || link == "" {
+	if NewName == "" || link == "" {
 		c.JSON(400, gin.H{
 			"msg": "节点名称 or 备注不能为空",
 		})
@@ -34,7 +34,7 @@ func NodeUpdadte(c *gin.Context) {
 		})
 		return
 	}
-	node.Name = name
+	node.Name = NewName
 	node.Link = link
 	err = node.Update()
 	if err != nil {

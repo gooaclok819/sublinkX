@@ -13,12 +13,14 @@ import (
 
 // 获取token
 func GetToken(username string) (string, error) {
+	// 过期时间天
+	ExpireDays := models.ReadConfig().ExpireDays
 	c := &middlewares.JwtClaims{
 		Username: username,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * 24 * 14).Unix(), // 设置14天过期
-			IssuedAt:  time.Now().Unix(),                          // 签发时间
-			Subject:   username,                                   // 用户
+			ExpiresAt: time.Now().Add(time.Hour * 24 * time.Duration(ExpireDays)).Unix(), // 设置过期时间
+			IssuedAt:  time.Now().Unix(),                                                 // 签发时间
+			Subject:   username,                                                          // 用户
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
@@ -72,7 +74,7 @@ func UserLogin(c *gin.Context) {
 	// 生成token
 	token, err := GetToken(username)
 	if err != nil {
-		log.Println("获取token失败")
+		log.Println("获取token失败", err)
 		c.JSON(400, gin.H{
 			"msg": "获取token失败",
 		})

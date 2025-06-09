@@ -227,7 +227,7 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 			reality_opts := map[string]interface{}{
 				"public-key": vless.Query.Pbk,
 				"short-id":   vless.Query.Sid,
-				}
+			}
 			grpc_opts := map[string]interface{}{
 				"grpc-mode":         "gun",
 				"grpc-service-name": vless.Query.ServiceName,

@@ -35,7 +35,12 @@ function resetPassword(row: { [key: string]: any }) {
     }
   )
     .then(() => {
-      updateUserPassword(username.value.trim(), password.value.trim()).then(() => {
+      updateUserPassword({
+        username:username.value.trim(),
+        password:password.value.trim()
+      
+      }
+       ).then(() => {
       ElMessage.success(t('userset.message.xx4') + password.value);
       window.location.reload();
     });
@@ -65,6 +70,7 @@ function resetPassword(row: { [key: string]: any }) {
         <el-input
         type="password"
     v-model="password"
+    show-password
     :placeholder="$t('userset.newPassword')"
   />
       </el-col>

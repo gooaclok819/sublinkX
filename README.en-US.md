@@ -45,9 +45,16 @@ surge support protocol:ss trojan vmess hy2 tuic
 
 ## [Updated Description]
 
-Add specified client
+####Backend Update
 
-Fix menu update function not updating menu version
+1. Enhanced authentication keys are random characters
+2. Added db/config.yaml configuration file 
+   Support custom keys (default random) Key expiration time (default 14 days) Port (default 8000)
+
+####Front-end update
+
+1. Fixed user reset password truncated issue
+2. Add subscription nodes at the front end Support drag sorting
 
 ## [Installation instructions]
 ### linux method:

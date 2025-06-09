@@ -26,6 +26,7 @@ var embeddedFiles embed.FS
 //go:embed template
 var Template embed.FS
 
+// 版本号
 var version string
 
 func Templateinit() {
@@ -69,10 +70,13 @@ func Templateinit() {
 }
 
 func main() {
-	var port int
+	// 初始化配置
+	models.ConfigInit()
+	config := models.ReadConfig() // 读取配置文件
+	var port = config.Port        // 读取端口号
 	// 获取版本号
 	var Isversion bool
-	version = "1.8"
+	version = "1.9"
 	flag.BoolVar(&Isversion, "version", false, "显示版本号")
 	flag.Parse()
 	if Isversion {
@@ -85,7 +89,6 @@ func main() {
 	args := os.Args
 	// 如果长度小于2则没有接收到任何参数
 	if len(args) < 2 {
-		port = 8000
 		Run(port)
 		return
 	}
@@ -104,6 +107,9 @@ func main() {
 		return
 	case "run":
 		settingCmd.Parse(args[2:])
+		models.SetConfig(models.Config{
+			Port: port,
+		}) // 设置端口
 		Run(port)
 	default:
 		return

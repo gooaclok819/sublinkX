@@ -110,7 +110,7 @@ func GetV2ray(c *gin.Context) {
 		c.Writer.WriteString("找不到这个订阅:" + SunName)
 		return
 	}
-	err = sub.GetSub()
+	err = sub.Find()
 	if err != nil {
 		c.Writer.WriteString("读取错误")
 		return
@@ -156,7 +156,7 @@ func GetClash(c *gin.Context) {
 		c.Writer.WriteString("找不到这个订阅:" + SunName)
 		return
 	}
-	err = sub.GetSub()
+	err = sub.Find()
 	if err != nil {
 		c.Writer.WriteString("读取错误")
 		return
@@ -215,7 +215,7 @@ func GetSurge(c *gin.Context) {
 		c.Writer.WriteString("找不到这个订阅:" + SunName)
 		return
 	}
-	err = sub.GetSub()
+	err = sub.Find()
 	if err != nil {
 		c.Writer.WriteString("读取错误")
 		return

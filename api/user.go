@@ -96,8 +96,8 @@ func UserPages(c *gin.Context) {
 // 更新用户信息
 
 func UserSet(c *gin.Context) {
-	NewUsername := c.Param("username")
-	NewPassword := c.Param("password")
+	NewUsername := c.PostForm("username")
+	NewPassword := c.PostForm("password")
 	log.Println(NewUsername, NewPassword)
 	if NewUsername == "" || NewPassword == "" {
 		c.JSON(400, gin.H{
