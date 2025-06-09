@@ -181,40 +181,41 @@ view_run_dir() {
 
 # 修改端口
 modify_port() {
-    read -p "$(echo -e "${YELLOW}请输入新的端口号: ${NC}")" new_port
+    read -p "$(echo -e "${YELLOW}请输入新的端口号: ${NC}")" new_port
 
-    if ! [[ "$new_port" =~ ^[0-9]+$ ]]; then
-        echo -e "${RED}无效的端口号，请输入数字。${NC}"
-        return
-    fi
+    # Pay close attention to this line and its indentation.
+    # Delete and re-type it if necessary.
+    if ! [[ "$new_port" =~ ^[0-9]+$ ]]; then
+        echo -e "${RED}无效的端口号，请输入数字。${NC}"
+        return
+    fi
 
-    echo -e "${YELLOW}新的端口号: $new_port${NC}"
+    echo -e "${YELLOW}新的端口号: $new_port${NC}"
 
-    if [ ! -f "$SERVICE_FILE" ]; then
-        echo -e "${RED}服务文件不存在: $SERVICE_FILE。请先运行安装程序。${NC}"
-        return
-    fi
+    if [ ! -f "$SERVICE_FILE" ]; then
+        echo -e "${RED}服务文件不存在: $SERVICE_FILE。请先运行安装程序。${NC}"
+        return
+    fi
 
-    # 替换或添加 ExecStart 行中的 --port 参数
-    # 查找 ExecStart 行，如果已经有 --port 参数，则替换它；否则，添加它
-    if grep -q "ExecStart=.* --port [0-9]\+" "$SERVICE_FILE"; then
-        # 已经存在 --port 参数，替换它
-        execute_command sed -i -E "s/(--port )[0-9]+/\1$new_port/" "$SERVICE_FILE"
-    else
-        # 不存在 --port 参数，在 ExecStart 后添加它
-        execute_command sed -i -E "s|(ExecStart=.+\s?)|\1run --port $new_port |" "$SERVICE_FILE"
-    fi
+    # 替换或添加 ExecStart 行中的 --port 参数
+    # 查找 ExecStart 行，如果已经有 --port 参数，则替换它；否则，添加它
+    if grep -q "ExecStart=.* --port [0-9]\+" "$SERVICE_FILE"; then
+        # 已经存在 --port 参数，替换它
+        execute_command sed -i -E "s/(--port )[0-9]+/\1$new_port/" "$SERVICE_FILE"
+    else
+        # 不存在 --port 参数，在 ExecStart 后添加它
+        execute_command sed -i -E "s|(ExecStart=.+\s?)|\1run --port $new_port |" "$SERVICE_FILE"
+    fi
 
-    echo -e "${YELLOW}重新加载 systemd 守护进程...${NC}"
-    execute_command systemctl daemon-reload
-    echo -e "${YELLOW}重启 Sublink 服务...${NC}"
-    execute_command systemctl restart sublink
+    echo -e "${YELLOW}重新加载 systemd 守护进程...${NC}"
+    execute_command systemctl daemon-reload
+    echo -e "${YELLOW}重启 Sublink 服务...${NC}"
+    execute_command systemctl restart sublink
 
-    echo -e "${GREEN}端口修改完成，服务已重启。${NC}"
-    echo -e "${NC}按任意键继续...${NC}"
-    read -n 1 -s
+    echo -e "${GREEN}端口修改完成，服务已重启。${NC}"
+    echo -e "${NC}按任意键继续...${NC}"
+    read -n 1 -s
 }
-
 # 更新服务 (修改为从源代码编译更新)
 update_service() {
     echo -e "${GREEN}正在检查并更新 Sublink 服务 (从源代码编译)...${NC}"
