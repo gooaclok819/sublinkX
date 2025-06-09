@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"math/rand"
 )
 
@@ -16,6 +15,5 @@ func RandString(number int) string {
 		randomString[i] = str[randomIndex]
 	}
 	Secret := string(randomString)
-	fmt.Println("Secret:", Secret)
 	return Secret
 }
