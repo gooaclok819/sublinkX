@@ -44,18 +44,17 @@ surge支持协议:ss trojan vmess hy2 tuic
 ![1712594176714](webs/src/assets/1.png)
 ![1712594176714](webs/src/assets/2.png)
 
-## [更新说明]
+## [1.9.1更新说明]
 
 #### 后端更新
 
-1. 增强身份验证密钥为随机字符
-2. 新增db/config.yaml配置文件 
-   支持自定义密钥(默认随机) 密钥过期时间(默认14天) 端口(默认8000)
+1. 修复template防止被漏洞攻击
+2. 修复记录IP无效不显示 
+   
 
 #### 前端更新
 
-1. 修复用户重设密码被截断问题
-2. 前端添加订阅节点支持拖拽排序
+1. 调整拖拽位置
 
 
 
@@ -95,5 +94,4 @@ Feel free to adjust any details as needed!
 
 ## Stargazers over time
 [![Stargazers over time](https://starchart.cc/gooaclok819/sublinkX.svg?variant=adaptive)](https://starchart.cc/gooaclok819/sublinkX)
-
 

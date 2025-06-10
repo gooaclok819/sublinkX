@@ -2,8 +2,8 @@ package models
 
 import (
 	// 用于将配置解析为结构体
+	"log"
 	"strings" // 用于处理逗号分隔的字符串
-	"time"    // 用于 CreateDate，推荐使用 time.Time
 )
 
 // Subcription 结构体
@@ -14,7 +14,7 @@ type Subcription struct {
 	NodeOrder  string    `gorm:"type:text"`
 	Nodes      []Node    `gorm:"many2many:subcription_nodes;"`
 	SubLogs    []SubLogs `gorm:"foreignKey:SubcriptionID;"`
-	CreateDate time.Time
+	CreateDate string
 }
 
 // Config 结构体，用于解析 Subcription.Config 字段的 JSON 内容
@@ -42,6 +42,7 @@ func (sub *Subcription) Add() error {
 		return err
 	}
 	// 然后建立多对多关系
+
 	return DB.Model(sub).Association("Nodes").Append(sub.Nodes)
 }
 
@@ -75,6 +76,7 @@ func (sub *Subcription) Update() error {
 
 	// 更新多对多关系: Replace 会清除旧关联并建立新关联
 	// 确保 sub.Nodes 包含了新的排序后的节点对象
+	log.Println("Updating subscription nodes:", sub.SubLogs)
 	return DB.Model(&existingSub).Association("Nodes").Replace(sub.Nodes)
 }
 

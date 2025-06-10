@@ -86,8 +86,7 @@ func SubAdd(c *gin.Context) {
 	sub.Config = configString // <--- 这里直接赋值字符串
 
 	sub.Name = name
-	sub.CreateDate = time.Now()
-
+	sub.CreateDate = time.Now().Format("2006-01-02 15:04:05")
 	err := sub.Add()
 	if err != nil {
 		c.JSON(400, gin.H{
@@ -147,7 +146,7 @@ func SubUpdate(c *gin.Context) {
 	// 3. 更新 Subcription 字段
 	sub.Config = configString // <--- 这里直接赋值字符串
 	sub.Name = name
-	sub.CreateDate = time.Now()
+	sub.CreateDate = time.Now().Format("2006-01-02 15:04:05")
 	sub.Nodes = newSelectedNodes
 	sub.NodeOrder = nodesString
 

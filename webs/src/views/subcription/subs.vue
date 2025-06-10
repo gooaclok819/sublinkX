@@ -112,6 +112,7 @@ const selectAll = () => {
             table.value.toggleRowSelection(row, true)
         })
 }
+// IP记录
 const handleIplogs = (row: any) => {
   iplogsdialog.value = true
   nextTick(() => {
@@ -313,7 +314,7 @@ const toggleSelect = (name: string) => {
       <el-button @click="OpenUrl(qrcode)">打开</el-button>
     </el-dialog>
 
-    <el-dialog v-model="ClientDiaLog" title="客户端(点击二维码获取地址)" style="text-align: center" >
+    <el-dialog v-model="ClientDiaLog" title="客户端(点击二维码获取地址)" style="text-align: center" width="80%">
       <el-row>
         <el-col>
         <el-tag type="success" size="large">自动识别</el-tag>
@@ -390,15 +391,15 @@ const toggleSelect = (name: string) => {
         :value="item.Name"
       />
         <div style="margin-top: 20px">
+
+  </div>
+    </el-select>
     <p>已选节点（可拖拽排序）</p>
     <VueDraggable v-model="value1" :animation="150" ghost-class="ghost">
       <div v-for="(nodeName, index) in value1" :key="nodeName" class="draggable-item">
         <span class="row-number">{{ index + 1 }}.</span> {{ nodeName }}
       </div>
     </VueDraggable>
-  </div>
-    </el-select>
-
 
 
   </div>
