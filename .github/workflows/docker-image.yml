@@ -57,7 +57,7 @@ jobs:
         with:
           context: . # Dockerfile 所在的上下文路径
           file: ./Dockerfile # Dockerfile 的路径
-          platforms: linux/amd64,linux/arm64 # 指定要构建的平台
+          platforms: linux/amd64,linux/arm64,linux/arm/v7 # **新增支持 armv7**
           push: ${{ github.event_name != 'pull_request' }} # PR 不进行 push
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
