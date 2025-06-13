@@ -1,37 +1,26 @@
-name: Docker Image CI
+name: Build and Push Multi-Platform Docker Image
 
 on:
   push:
     branches:
-      - main # 或 master，取决于您的主分支名称
+      - main
     tags:
-      - 'v*.*.*' # 当打上 vX.Y.Z 格式的标签时触发
-
-  pull_request:
-    branches:
-      - main # 或 master
-
-env:
-  DOCKER_REPO: jaaksi/sublinkx # 您的 Docker Hub 仓库名称
+      - 'v*'  # 只匹配以 v 开头的标签，如 v1.0.0
 
 jobs:
-  build_and_push:
+  build-and-push:
     runs-on: ubuntu-latest
+
     permissions:
       contents: read
       packages: write
-      # 如果您想推送到 GitHub Packages，需要 package: write 权限
-      # 如果只推送到 Docker Hub，可以移除 packages: write
 
     steps:
-      - name: Checkout repository
+      - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3 # 用于支持多架构构建
-
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3 # 设置 Docker Buildx 环境
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -39,27 +28,17 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.DOCKER_REPO }} # 指定 Docker 仓库
-          tags: |
-            type=schedule
-            type=ref,event=branch
-            type=semver,pattern={{version}} # 例如：v1.0.0 -> 1.0.0
-            type=semver,pattern={{major}} # 例如：v1.0.0 -> 1
-            type=semver,pattern={{major}}.{{minor}} # 例如：v1.0.0 -> 1.0
-            type=sha,format=long # Git commit SHA 作为标签
+      - name: Extract tag name (if present)
+        id: extract_tag
+        run: |
+          echo "GIT_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
-      - name: Build and push Docker image
+      - name: Build and Push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: . # Dockerfile 所在的上下文路径
-          file: ./Dockerfile # Dockerfile 的路径
-          platforms: linux/amd64,linux/arm64,linux/arm/v7 # **新增支持 armv7**
-          push: ${{ github.event_name != 'pull_request' }} # PR 不进行 push
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha # 启用 GitHub Actions 缓存
-          cache-to: type=gha,mode=max
+          context: .
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          push: true
+          tags: |
+            jaaksi/sublinkx:latest
+            jaaksi/sublinkx:${{ env.GIT_TAG }}
