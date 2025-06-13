@@ -47,14 +47,15 @@ surge support protocol:ss trojan vmess hy2 tuic
 
 ####Backend Update
 
-1. Enhanced authentication keys are random characters
-2. Added db/config.yaml configuration file 
-   Support custom keys (default random) Key expiration time (default 14 days) Port (default 8000)
+1. Fix and refactor a large number of Node templates and the underlying code for new groupings
+
+2. Add grouping functionality to nodes
+
+3. Fix bug that subscription resolution is empty or etc
 
 ####Front-end update
 
-1. Fixed user reset password truncated issue
-2. Add subscription nodes at the front end Support drag sorting
+1. Refactor front-end node page to add grouping function (temporarily only some simple functions)
 
 ## [Installation instructions]
 ### linux method:
