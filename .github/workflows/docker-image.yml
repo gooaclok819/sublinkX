@@ -1,23 +1,29 @@
-name: Build and Push Multi-Platform Docker Image
+name: Docker Image CI
 
 on:
   push:
     branches:
-      - main
+      - main # 或者你的主分支名称，比如 master
     tags:
-      - 'v*'  # 只匹配以 v 开头的标签，如 v1.0.0
+      - 'v*.*.*' # 匹配类似 v1.0.0 的tag，用于发布稳定版本
+  pull_request:
+    branches:
+      - main # 或者你的主分支名称
+
+env:
+  DOCKER_REPO: jaaksi/sublinkx
 
 jobs:
-  build-and-push:
+  build_and_push:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      packages: write
-
     steps:
-      - name: Checkout source
+      - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all # 启用对所有支持平台（包括ARM）的构建支持
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -28,17 +34,26 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Extract tag name (if present)
-        id: extract_tag
-        run: |
-          echo "GIT_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+      - name: Determine image tags
+        id: docker_meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKER_REPO }}
+          tags: |
+            type=raw,value=latest,enable={{branch == 'main'}}
+            type=ref,event=branch
+            type=semver,pattern=v{{version}}
 
-      - name: Build and Push Docker image
+      - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: |
+            linux/amd64
+            linux/arm/v7
+            linux/arm64
           push: true
-          tags: |
-            jaaksi/sublinkx:latest
-            jaaksi/sublinkx:${{ env.GIT_TAG }}
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
