@@ -30,8 +30,11 @@ jobs:
 
       - name: Extract tag name (if present)
         id: extract_tag
-        run: |
-          echo "GIT_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+        shell: bash
+        run: echo "GIT_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Debug GIT_TAG
+        run: echo "Tag is $GIT_TAG"
 
       - name: Build and Push Docker image
         uses: docker/build-push-action@v5
