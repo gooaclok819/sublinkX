@@ -4,6 +4,7 @@ package api
 
 import (
 	// 导入 json 包，用于解析 config 字符串
+
 	"log"
 	"strconv"
 	"strings"
@@ -49,12 +50,11 @@ func SubGet(c *gin.Context) {
 
 // 添加订阅
 func SubAdd(c *gin.Context) {
-	var sub models.Subcription
 	name := c.PostForm("name")
-	configString := c.PostForm("config") // 这里的 configString 是前端传来的 JSON 字符串
-	nodesString := c.PostForm("nodes")
+	configs := c.PostForm("config") // 这里的 configString 是前端传来的 JSON 字符串
+	nodes := c.PostForm("nodes")
 
-	if name == "" || nodesString == "" {
+	if name == "" || nodes == "" {
 		c.JSON(400, gin.H{
 			"msg": "订阅名称或节点不能为空",
 		})
@@ -62,31 +62,36 @@ func SubAdd(c *gin.Context) {
 	}
 
 	// 1. 根据 nodesString 字符串，构建 models.Node 数组
-	var selectedNodes []models.Node
-	for _, nodeName := range strings.Split(nodesString, ",") {
-		trimmedName := strings.TrimSpace(nodeName)
-		if trimmedName == "" {
+	var NodesData []models.Node
+
+	for _, nodeName := range strings.Split(nodes, ",") {
+		if strings.TrimSpace(nodeName) == "" {
 			continue
 		}
-		var node models.Node
-		node.Name = trimmedName
-		err := node.Find()
-		if err != nil {
-			log.Printf("Warning: Node with name '%s' not found for subscription '%s'. Skipping.", trimmedName, name)
-			continue
+		FirstNode := models.Node{
+			Name: nodeName,
 		}
-		selectedNodes = append(selectedNodes, node)
+
+		// 查出node的数据
+		result := models.DB.Model(models.Node{}).Where("name = ?", FirstNode.Name).First(&FirstNode)
+		if result.Error != nil {
+			log.Println(result.Error)
+			c.JSON(400, gin.H{
+				"msg": result.Error,
+			})
+			return
+		}
+		// 插入nodes
+		NodesData = append(NodesData, FirstNode)
 	}
-	sub.Nodes = selectedNodes
+	sub := models.Subcription{
+		Name:       name,
+		Config:     configs, // 这里直接赋值字符串
+		NodeOrder:  nodes,   // 这里直接赋值字符串
+		CreateDate: time.Now().Format("2006-01-02 15:04:05"),
+		Nodes:      NodesData, // 这里直接赋值 nodes 数组
 
-	// 2. 将前端传来的原始排序字符串赋值给 NodeOrder 字段
-	sub.NodeOrder = nodesString
-
-	// 3. 将前端传来的 config JSON 字符串直接赋值给 sub.Config
-	sub.Config = configString // <--- 这里直接赋值字符串
-
-	sub.Name = name
-	sub.CreateDate = time.Now().Format("2006-01-02 15:04:05")
+	}
 	err := sub.Add()
 	if err != nil {
 		c.JSON(400, gin.H{
@@ -103,55 +108,54 @@ func SubAdd(c *gin.Context) {
 
 // 更新订阅
 func SubUpdate(c *gin.Context) {
-	var sub models.Subcription
-	name := c.PostForm("name")
-	oldname := c.PostForm("oldname")
-	configString := c.PostForm("config") // 这里的 configString 是前端传来的 JSON 字符串
-	nodesString := c.PostForm("nodes")
+	NewName := c.PostForm("name")
+	OldName := c.PostForm("oldname")
+	configs := c.PostForm("config") // 这里的 configString 是前端传来的 JSON 字符串
+	nodes := c.PostForm("nodes")
 
-	if name == "" || nodesString == "" {
+	if NewName == "" || nodes == "" {
 		c.JSON(400, gin.H{
 			"msg": "订阅名称或节点不能为空",
 		})
 		return
 	}
 
-	// 1. 查找要更新的旧订阅
-	sub.Name = oldname
-	err := sub.Find()
-	if err != nil {
-		c.JSON(400, gin.H{
-			"msg": "查找旧订阅失败: " + err.Error(),
-		})
-		return
-	}
+	// 1. 根据 nodesString 字符串，构建 models.Node 数组
+	var NodesData []models.Node
 
-	// 2. 根据 nodesString 字符串，构建新的 models.Node 数组
-	var newSelectedNodes []models.Node
-	for _, nodeName := range strings.Split(nodesString, ",") {
-		trimmedName := strings.TrimSpace(nodeName)
-		if trimmedName == "" {
+	for _, nodeName := range strings.Split(nodes, ",") {
+		if strings.TrimSpace(nodeName) == "" {
 			continue
 		}
-		var node models.Node
-		node.Name = trimmedName
-		err := node.Find()
-		if err != nil {
-			log.Printf("Warning: Node with name '%s' not found for subscription '%s'. Skipping.", trimmedName, name)
-			continue
+		FirstNode := models.Node{
+			Name: nodeName,
 		}
-		newSelectedNodes = append(newSelectedNodes, node)
+
+		// 查出node的数据
+		result := models.DB.Model(models.Node{}).Where("name = ?", FirstNode.Name).First(&FirstNode)
+		if result.Error != nil {
+			log.Println(result.Error)
+			c.JSON(400, gin.H{
+				"msg": result.Error,
+			})
+			return
+		}
+		// 插入nodes
+		NodesData = append(NodesData, FirstNode)
+	}
+	OldSub := models.Subcription{
+		Name: OldName,
+	}
+	NewSub := models.Subcription{
+		Name:       NewName,
+		Config:     configs, // 这里直接赋值字符串
+		NodeOrder:  nodes,   // 这里直接赋值字符串
+		CreateDate: time.Now().Format("2006-01-02 15:04:05"),
+		Nodes:      NodesData, // 这里直接赋值 nodes 数组
+
 	}
 
-	// 3. 更新 Subcription 字段
-	sub.Config = configString // <--- 这里直接赋值字符串
-	sub.Name = name
-	sub.CreateDate = time.Now().Format("2006-01-02 15:04:05")
-	sub.Nodes = newSelectedNodes
-	sub.NodeOrder = nodesString
-
-	// 4. 调用 sub.Update() 方法
-	err = sub.Update()
+	err := OldSub.Update(&NewSub)
 	if err != nil {
 		c.JSON(400, gin.H{
 			"msg": "更新订阅失败: " + err.Error(),

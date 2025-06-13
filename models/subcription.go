@@ -43,11 +43,12 @@ func (sub *Subcription) Add() error {
 	}
 	// 然后建立多对多关系
 
+	log.Println("Adding subscription nodes:", sub.Nodes)
 	return DB.Model(sub).Association("Nodes").Append(sub.Nodes)
 }
 
 // Update 更新订阅
-func (sub *Subcription) Update() error {
+func (sub *Subcription) Update(NewName *Subcription) error {
 	// 查找现有订阅
 	var existingSub Subcription
 	if err := DB.Where("id = ? or name = ?", sub.ID, sub.Name).First(&existingSub).Error; err != nil {
@@ -55,13 +56,13 @@ func (sub *Subcription) Update() error {
 	}
 
 	// 更新非多对多字段，包括 NodeOrder
-	existingSub.Name = sub.Name // 新名称
-	existingSub.Config = sub.Config
+	existingSub.Name = NewName.Name // 新名称
+	existingSub.Config = NewName.Config
 
 	// 更新 NodeOrder 字段
-	if len(sub.Nodes) > 0 {
-		names := make([]string, len(sub.Nodes))
-		for i, node := range sub.Nodes {
+	if len(NewName.Nodes) > 0 {
+		names := make([]string, len(NewName.Nodes))
+		for i, node := range NewName.Nodes {
 			names[i] = node.Name
 		}
 		existingSub.NodeOrder = strings.Join(names, ",")
@@ -76,8 +77,8 @@ func (sub *Subcription) Update() error {
 
 	// 更新多对多关系: Replace 会清除旧关联并建立新关联
 	// 确保 sub.Nodes 包含了新的排序后的节点对象
-	log.Println("Updating subscription nodes:", sub.SubLogs)
-	return DB.Model(&existingSub).Association("Nodes").Replace(sub.Nodes)
+	log.Println("Updating subscription nodes:", NewName.SubLogs)
+	return DB.Model(&existingSub).Association("Nodes").Replace(NewName.Nodes)
 }
 
 // Find 查找订阅 (通常用于获取单个订阅的详细信息，包括其关联节点和日志)
@@ -86,12 +87,12 @@ func (sub *Subcription) Find() error {
 	if err := DB.Preload("Nodes").Preload("SubLogs").Where("id = ? or name = ?", sub.ID, sub.Name).First(sub).Error; err != nil {
 		return err
 	}
-
 	// 根据 NodeOrder 字段重新排序 Nodes
 	if sub.NodeOrder != "" && len(sub.Nodes) > 0 {
 		orderedNames := strings.Split(sub.NodeOrder, ",")
 		nodeMap := make(map[string]Node)
 		for _, node := range sub.Nodes {
+			log.Println("node:", node)
 			nodeMap[node.Name] = node
 		}
 
@@ -104,6 +105,7 @@ func (sub *Subcription) Find() error {
 		}
 		sub.Nodes = reorderedNodes
 	}
+
 	return nil
 }
 

@@ -156,13 +156,15 @@ func GetClash(c *gin.Context) {
 		c.Writer.WriteString("找不到这个订阅:" + SunName)
 		return
 	}
-	err = sub.Find()
-	if err != nil {
-		c.Writer.WriteString("读取错误")
-		return
-	}
+	// err = sub.Find()
+
 	urls := []string{}
+
+	models.DB.Model(sub).Preload("Nodes").Find(&sub)
+	log.Println("订阅名:", sub.Nodes)
 	for _, v := range sub.Nodes {
+		log.Println("节点信息:", v)
+		log.Println("节点链接:", v.Link)
 		switch {
 		// 如果包含多条节点
 		case strings.Contains(v.Link, ","):
@@ -186,7 +188,7 @@ func GetClash(c *gin.Context) {
 			urls = append(urls, v.Link)
 		}
 	}
-
+	log.Println("urls", urls)
 	var configs node.SqlConfig
 	err = json.Unmarshal([]byte(sub.Config), &configs)
 	if err != nil {

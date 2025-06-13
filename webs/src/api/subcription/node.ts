@@ -33,3 +33,30 @@ export function DelNode(data: any){
     params: data,
   });
 }
+// 获取全部分组
+export function GetGroup(){
+  return request({
+    url: "/api/v1/nodes/group/get",
+    method: "get",
+  });
+}
+// 设置关联分组
+export function SetGroup(data: any){
+  return request({
+    url: "/api/v1/nodes/group/set",
+    method: "post",
+    data,
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+}
+// 删除分组
+
+export function DelGroup(data: any){
+  return request({
+    url: "/api/v1/nodes/group/delete",
+    method: "delete",
+    params: data,
+  });
+}

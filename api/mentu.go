@@ -93,6 +93,20 @@ func GetMenus(c *gin.Context) {
 						KeepAlive: true,
 					},
 				},
+				// //测试开始
+				// {
+				// 	Path:      "nodesdemo",
+				// 	Component: "subcription/nodesdemo",
+				// 	Name:      "Nodesdemo",
+				// 	Meta: Meta{
+				// 		Title:     "nodelist",
+				// 		Icon:      "publish",
+				// 		Hidden:    false,
+				// 		Roles:     []string{"ADMIN"},
+				// 		KeepAlive: true,
+				// 	},
+				// },
+				// //测试结束
 				{
 					Path:      "template",
 					Component: "subcription/template",

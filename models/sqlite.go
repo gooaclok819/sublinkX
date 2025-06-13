@@ -30,7 +30,7 @@ func InitSqlite() {
 		log.Println("数据库已经初始化，无需重复初始化")
 		return
 	}
-	err = db.AutoMigrate(&User{}, &Subcription{}, &Node{}, &SubLogs{})
+	err = db.AutoMigrate(&User{}, &Subcription{}, &SubLogs{}, &GroupNode{}, &Node{})
 	if err != nil {
 		log.Println("数据表迁移失败")
 	}
