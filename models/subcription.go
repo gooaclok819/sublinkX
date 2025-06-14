@@ -4,17 +4,19 @@ import (
 	// 用于将配置解析为结构体
 	"log"
 	"strings" // 用于处理逗号分隔的字符串
+
+	"gorm.io/gorm"
 )
 
 // Subcription 结构体
 type Subcription struct {
-	ID         int       `gorm:"primaryKey"`
-	Name       string    `gorm:"uniqueIndex"`
-	Config     string    `gorm:"type:text"` // Config 存储为 JSON 字符串
-	NodeOrder  string    `gorm:"type:text"`
-	Nodes      []Node    `gorm:"many2many:subcription_nodes;"`
-	SubLogs    []SubLogs `gorm:"foreignKey:SubcriptionID;"`
-	CreateDate string
+	gorm.Model
+	ID        int
+	Name      string
+	Config    string    `gorm:"type:text"` // Config 存储为 JSON 字符串
+	NodeOrder string    `gorm:"type:text"`
+	Nodes     []Node    `gorm:"many2many:subcription_nodes;"`
+	SubLogs   []SubLogs `gorm:"foreignKey:SubcriptionID;"`
 }
 
 // Config 结构体，用于解析 Subcription.Config 字段的 JSON 内容
@@ -43,7 +45,7 @@ func (sub *Subcription) Add() error {
 	}
 	// 然后建立多对多关系
 
-	log.Println("Adding subscription nodes:", sub.Nodes)
+	// log.Println("Adding subscription nodes:", sub.Nodes)
 	return DB.Model(sub).Association("Nodes").Append(sub.Nodes)
 }
 

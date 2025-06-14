@@ -87,9 +87,17 @@ func NodeUpdadte(c *gin.Context) {
 	// var node models.Node
 	NewName := c.PostForm("name")
 	Newlink := c.PostForm("link")
-	oldname := c.PostForm("oldname")
-	oldlink := c.PostForm("oldlink")
+	id := c.PostForm("id")
+	group := c.PostForm("group")        // 分组
+	groups := strings.Split(group, ",") // 分组列表
+	index, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"msg": "id 不能为空或者格式不正确",
+		})
+		return
 
+	}
 	if NewName == "" || Newlink == "" {
 		c.JSON(400, gin.H{
 			"msg": "节点名称 or 备注不能为空",
@@ -97,20 +105,37 @@ func NodeUpdadte(c *gin.Context) {
 		return
 	}
 	OldNode := &models.Node{
-		Name: oldname,
-		Link: oldlink,
+		ID: index,
 	}
 	NewNode := &models.Node{
 		Name: NewName,
 		Link: Newlink,
 	}
-	err := OldNode.UpdateNode(NewNode)
+	var gns []models.GroupNode
+	if groups != nil || len(groups) > 0 {
+		for _, g := range groups {
+			TempGn := models.GroupNode{
+				Name: strings.TrimSpace(g), // 去除分组名称两端空格
+			}
+			gns = append(gns, TempGn) // 生成分组列表
+		}
+
+	}
+	err = OldNode.UpdateGroup(gns) // 更新分组
 	if err != nil {
 		c.JSON(400, gin.H{
 			"msg": fmt.Sprintf("更新失败: %s", err.Error()),
 		})
 		return
 	}
+	err = OldNode.UpdateNode(NewNode)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"msg": fmt.Sprintf("更新失败: %s", err.Error()),
+		})
+		return
+	}
+
 	c.JSON(200, gin.H{
 		"code": "00000",
 		"msg":  "更新成功",
@@ -227,7 +252,6 @@ func NodeAdd(c *gin.Context) {
 		Name: name,
 		Link: link,
 	}
-	log.Println(link)
 	if link == "" && !strings.Contains(link, "://") {
 		c.JSON(400, gin.H{
 			"msg": "link不能为空或者格式不正确,请检查链接是否包含协议头,例如 http:// 或 https://",
@@ -258,11 +282,8 @@ func NodeAdd(c *gin.Context) {
 	if strings.TrimSpace(group) != "" { // 去除空格后判断分组是否为空
 		groups := strings.Split(group, ",") // 允许多个分组用逗号分隔
 		if groups != nil || len(groups) > 0 {
-			var gn models.GroupNode
 			for _, g := range groups {
-				// gn = models.GroupNode{Name: g}
-				// result := models.DB.Where("name = ?", g).First(&gn)
-				gn.Name = g
+				gn := &models.GroupNode{Name: g}
 				err = gn.Add()
 				if err != nil {
 					// 分组不存在

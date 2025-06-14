@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 	"sublink/models" // 导入 models 包
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -85,11 +84,10 @@ func SubAdd(c *gin.Context) {
 		NodesData = append(NodesData, FirstNode)
 	}
 	sub := models.Subcription{
-		Name:       name,
-		Config:     configs, // 这里直接赋值字符串
-		NodeOrder:  nodes,   // 这里直接赋值字符串
-		CreateDate: time.Now().Format("2006-01-02 15:04:05"),
-		Nodes:      NodesData, // 这里直接赋值 nodes 数组
+		Name:      name,
+		Config:    configs,   // 这里直接赋值字符串
+		NodeOrder: nodes,     // 这里直接赋值字符串
+		Nodes:     NodesData, // 这里直接赋值 nodes 数组
 
 	}
 	err := sub.Add()
@@ -147,11 +145,10 @@ func SubUpdate(c *gin.Context) {
 		Name: OldName,
 	}
 	NewSub := models.Subcription{
-		Name:       NewName,
-		Config:     configs, // 这里直接赋值字符串
-		NodeOrder:  nodes,   // 这里直接赋值字符串
-		CreateDate: time.Now().Format("2006-01-02 15:04:05"),
-		Nodes:      NodesData, // 这里直接赋值 nodes 数组
+		Name:      NewName,
+		Config:    configs,   // 这里直接赋值字符串
+		NodeOrder: nodes,     // 这里直接赋值字符串
+		Nodes:     NodesData, // 这里直接赋值 nodes 数组
 
 	}
 

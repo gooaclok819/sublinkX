@@ -1,0 +1,1 @@
+import{c as e,e as t,$ as r}from"./index.BQLDJCDE.js";import{E as s}from"./el-alert.CPS8c0dm.js";import{_ as o}from"./_plugin-vue_export-helper.BCo6x5W8.js";import"./index.CclK_oo-.js";const n={style:{padding:"30px"}};const i=o({},[["render",function(o,i){const a=s;return t(),e("div",n,[r(a,{closable:!1,title:"菜单三级-2",type:"warning"})])}]]);export{i as default};

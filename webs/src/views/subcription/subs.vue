@@ -436,7 +436,7 @@ const toggleSelect = (name: string) => {
         </template>
       </el-table-column>
  
-    <el-table-column prop="CreateDate" label="创建时间" sortable  />
+    <el-table-column prop="CreatedAt" label="创建时间" sortable  />
     <el-table-column  label="操作" width="120">
       <template #default="scope">
         <div v-if="scope.row.Nodes">

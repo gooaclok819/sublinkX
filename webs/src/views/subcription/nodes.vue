@@ -1,6 +1,8 @@
 <script setup lang='ts'>
 import { ref,onMounted,nextTick  } from 'vue'
 import {getNodes,AddNodes,DelNode,UpdateNode,GetGroup,SetGroup} from "@/api/subcription/node"
+import type { ElTable } from 'element-plus'
+
 interface GroupNode {
   ID: number;
   Name: string;
@@ -15,6 +17,7 @@ interface Node {
   
 }
 interface NodeInfo {
+    ID?: number // 编辑时需要传入ID
     Title?:string 
     Name?: string
     Link: string
@@ -24,11 +27,17 @@ onMounted(async() => {  // 页面开始执行函数
    getnodes()
    GetGroups()
 })
+const dialogMode = ref<'add' | 'edit'>('add');
+
 // --- 表格选择与操作相关数据 ---
 const multipleSelection = ref<Node[]>([]); // Stores selected table items
+const multipleTable = ref<InstanceType<typeof ElTable> | null>(null)
+
+
 const tableRefs = ref<{ [key: string]: any }>({}); // Stores references to each el-table
 // --- 表格选择与操作相关数据结束 ---
-const NodeLinkInput = ref("")
+// const NodeNewLinkInput = ref("")
+// const NodeNewNameInput = ref("")
 const NodeGroupInput = ref("")
 const tableData = ref<Node[]>([])
 // 分组列表临时存放数据
@@ -54,16 +63,23 @@ const RadioGroup = ref("1"); // 分组单选框
 // 将所有输入的值清空
 function ClearInput() {
   SelectionNode.value = ''; // 清空选中的节点
-  NodeLinkInput.value = ''; // 清空节点链接输入框
+  NodeForm.value = { // 清空节点链接输入框
+    Title: '',
+    Name: '',
+    Link: '',
+    GroupName: [],
+  }
   NodeGroupInput.value = ''; // 清空创建分组输入框
   SelectionNodeGroups.value = []; // 清空选中的分组
   nodelistShow.value = false; // 隐藏节点列表
   Nodedialog.value = false; // 关闭节点添加弹窗
   Groupdialog.value = false; // 关闭分组绑定弹窗
+  
 }
 async function getnodes() {
   const {data} = await getNodes();
   if (data.length > 0) tableDataTemp.value = tableData.value = data
+  allNodes.value = []; // 清空 allNodes 数组
   data.forEach((item:any) => {
       allNodes.value.push(item.Name); // 将所有节点添加到 allNodes 中
   });
@@ -79,13 +95,10 @@ async function GetGroups() {
   // console.log("单选框",RadioGroup.value);
   
 }
-onMounted(() => {
-    // allGroupNames.value.push('全部'); // 添加默认的全部分组
-    // console.log("所有分组名称:", allGroupNames.value);
-    
-});
+
 
 const handleAddNode = () => {
+  dialogMode.value = 'add';
   Nodedialog.value = true;
   NodeForm.value = {
     Title: '添加节点',
@@ -93,50 +106,94 @@ const handleAddNode = () => {
     Link: '',
     GroupName: [],
   };
-  if (allGroupNames.value.length > 0) nodelistShow.value = true; // 显示节点列表{
+  SelectionNodeGroups.value = [];
+  NodeGroupInput.value = '';
 };
-const handleAddGroup = () => {
-  Groupdialog.value = true;
+
+const handleEditNode = (row: Node) => {  
+  // NodeNewNameInput.value = row.Name; // 编辑时使用原名称
+  // NodeNewLinkInput.value = row.Link; // 编辑时使用原链接
+  dialogMode.value = 'edit';
+  Nodedialog.value = true;
   NodeForm.value = {
-    Title: '绑定分组',
-    Name: '',
-    Link: '',
+    ID: row.ID,
+    Title: '编辑节点',
+    Name: row.Name,
+    Link: row.Link,
+    GroupName: (row.GroupNodes || []).map(g => g.Name),
   };
-  // nodelistShow.value = false; // 隐藏节点列表
+  SelectionNodeGroups.value = NodeForm.value.GroupName || [];
+  SelectionNode.value = row.Name;
 };
-const AddNode = async() => {
-  // 多节点链接输入处理
-  let NodeLinkInputs = NodeLinkInput.value.trim().split(/[\n,]/); // 使用换行符或逗号分隔输入的节点链接
-  NodeLinkInputs = NodeLinkInputs.map((item) => item.trim()).filter((item) => item !== ''); // 去除空白和重复的链接
-  if (NodeLinkInput.value.trim() === '') {
+const SubmitNodeForm = async (row:any) => {
+  const isAdd = dialogMode.value === 'add';
+  let links = NodeForm.value.Link.trim().split(/[\n,]/).map(item => item.trim()).filter(item => item);
+  if (isAdd && links.length === 0) {
     ElMessage.warning('节点链接不能为空');
     return;
   }
 
   try {
-    // 多节点同步循环添加节点
-    for(const link of NodeLinkInputs) {
-      if (link) {
-          const newNode = {
-          link: link.trim(), // 节点链接
-          group: SelectionNodeGroups.value.join(','), // 选中的分组
-          };
-          await AddNodes(newNode).then(() => {
-          ElMessage.success('节点添加成功');
-          Nodedialog.value = false; // 关闭弹窗
-          });
+    if (isAdd) {
+      for (const link of links) {
+        await AddNodes({
+          link,
+          group: RadioGroup.value === '1' ? SelectionNodeGroups.value.join(',') : NodeGroupInput.value,
+        });
       }
+      ElMessage.success('节点添加成功');
+    } else {
+      await UpdateNode({
+        id:NodeForm.value.ID,
+        name: NodeForm.value.Name, // 新名称
+        link: NodeForm.value.Link, // 新链接
+        group: RadioGroup.value === '1' ? SelectionNodeGroups.value.join(',') : NodeGroupInput.value,
+      });
+      ElMessage.success('节点更新成功');
     }
-    // getnodes(); // 刷新节点列表
-    // GetGroups(); // 刷新分组列表
-  } catch (error) {
-    console.error('添加节点失败:', error);
-    // ElMessage.error('添加节点失败，请稍后再试');
+
+
+  } catch (err) {
+    ElMessage.error(`${isAdd ? '添加' : '更新'}失败`);
   }
-  getnodes(); // 刷新节点列表
-  GetGroups(); // 刷新分组列表
-  ClearInput(); // 清空所有输入
-}
+  getnodes();
+  GetGroups();
+  ClearInput();
+};
+
+// const AddNode = async() => {
+//   // 多节点链接输入处理
+//   let NodeLinkInputs = NodeNewLinkInput.value.trim().split(/[\n,]/); // 使用换行符或逗号分隔输入的节点链接
+//   NodeLinkInputs = NodeLinkInputs.map((item) => item.trim()).filter((item) => item !== ''); // 去除空白和重复的链接
+//   if (NodeNewLinkInput.value.trim() === '') {
+//     ElMessage.warning('节点链接不能为空');
+//     return;
+//   }
+
+//   try {
+//     // 多节点同步循环添加节点
+//     for(const link of NodeLinkInputs) {
+//       if (link) {
+//           const newNode = {
+//           link: link.trim(), // 节点链接
+//           group: SelectionNodeGroups.value.join(','), // 选中的分组
+//           };
+//           await AddNodes(newNode).then(() => {
+//           ElMessage.success('节点添加成功');
+//           Nodedialog.value = false; // 关闭弹窗
+//           });
+//       }
+//     }
+//     // getnodes(); // 刷新节点列表
+//     // GetGroups(); // 刷新分组列表
+//   } catch (error) {
+//     console.error('添加节点失败:', error);
+//     // ElMessage.error('添加节点失败，请稍后再试');
+//   }
+//   getnodes(); // 刷新节点列表
+//   GetGroups(); // 刷新分组列表
+//   ClearInput(); // 清空所有输入
+// }
 const AddGroup = async() => {
   console.log(SelectionNode.value);
 
@@ -240,22 +297,26 @@ const handleDel = async (row: Node) => {
     );
     await DelNode({ id: row.ID });
     ElMessage.success('删除成功');
-    await getnodes();
   } catch (error) {
     if (error !== 'cancel') {
       console.error("删除失败:", error);
       ElMessage.error('删除失败！');
     }
   }
+  // 刷新节点列表
+  await GetGroups(); // 刷新分组列表
+  await getnodes(); // 刷新节点列表
+  ClearInput(); // 清空所有输入
 };
 const selectDel = async () => {
-  if (tableData.value.length === 0) {
+  
+  if (multipleSelection.value.length === 0) {
     ElMessage.warning('请选择要删除的节点！');
     return;
   }
   try {
     await ElMessageBox.confirm(
-      `你是否要删除选中的 ${tableData.value.length} 条节点 ?`,
+      `你是否要删除选中的 ${multipleSelection.value.length} 条节点 ?`,
       '提示',
       {
         confirmButtonText: '确定',
@@ -263,26 +324,47 @@ const selectDel = async () => {
         type: 'warning',
       }
     );
-    for (const item of tableData.value) {
+
+    const IDs: number[] = []
+
+    for (const item of multipleSelection.value) {
       await DelNode({ id: item.ID });
+       IDs.push(item.ID); // 收集所有已删除的节点ID
     }
     ElMessage.success('批量删除成功');
-    await getnodes();
-    tableData.value = [];
+    // 从 tableData 中删除已删除的节点
+    tableData.value = tableData.value.filter(item => !IDs.includes(item.ID));
+; 
+
   } catch (error) {
     if (error !== 'cancel') {
       console.error("批量删除失败:", error);
       ElMessage.error('批量删除失败！');
     }
   }
+    // 刷新节点列表
+  await GetGroups(); // 刷新分组列表
+  await getnodes();
 };
 // 全选
 const selectAll = () => {
   nextTick(() => {
-    // const tableData = getCurrentTableRef();
-    // if (tableData) {
-    //   tableData.toggleAllSelection();
-    // }
+const table = multipleTable.value
+  if (table) {
+      // 否则全选
+      tableData.value.forEach(row => {
+        table.toggleRowSelection(row, true)
+      })
+  }
+  });
+};
+// 取消全选 
+const selectClear = () => {
+  nextTick(() => {
+    const table = multipleTable.value;
+    if (table) {
+      table.clearSelection();
+    }
   });
 };
 // --- 表格选择操作 (保持不变) ---
@@ -292,9 +374,6 @@ const setTableRef = (el: any, name: string) => {
   } else {
     delete tableRefs.value[name];
   }
-};
-const getCurrentTableRef = () => {
-  return tableRefs.value[activeName.value];
 };
 //批量复制
 const selectCopy = async () => {
@@ -330,93 +409,71 @@ watch(activeName, (newVal) => {
 
 <template>
   <div>
-    <!-- 添加节点弹窗开始 -->
-        <el-dialog v-model="Nodedialog" :title="NodeForm.Title" width="80%">
-      <el-input
-        v-model="NodeLinkInput"
-        placeholder="请输入节点多行使用回车或逗号分开,支持base64格式的url订阅"
-        type="textarea"
-        style="margin-bottom: 10px"
-        :autosize="{ minRows: 2, maxRows: 10 }"
-      />
-      
+ <el-dialog v-model="Nodedialog" :title="NodeForm.Title" width="80%">
+  <el-input
+    v-model="NodeForm.Link"
+    placeholder="请输入节点链接，支持多行使用回车或逗号分开"
+    type="textarea"
+    style="margin-bottom: 10px"
+    :autosize="{ minRows: 2, maxRows: 10 }"
+    v-if="dialogMode === 'add'"
+  />
 
+<el-input
+  v-model="NodeForm.Name"
+  placeholder="节点名称（编辑时）"
+  style="margin-bottom: 10px"
+  v-if="dialogMode === 'edit'"
+/>
+  <el-input
+    v-model="NodeForm.Link"
+    placeholder="请输入节点链接，支持多行使用回车或逗号分开"
+    type="textarea"
+    style="margin-bottom: 10px"
+    :autosize="{ minRows: 2, maxRows: 10 }"
+    v-if="dialogMode === 'edit'"
+  />
 
-    <!-- 节点操作开始 -->
-      <el-button type="primary" @click="AddNode">添加</el-button>
-      <el-button @click="Nodedialog = false">取消</el-button>  
-    <!-- 节点操作结束 -->
-  </el-dialog>
-  <!-- 添加节点弹窗结束 -->
+  <!-- 分组部分 -->
+  <el-radio v-model="RadioGroup" label="1" v-if="allGroupNames.length > 0">选择已有分组</el-radio>
+  <el-radio v-model="RadioGroup" label="2">创建新分组</el-radio>
 
- <!-- 绑定分组弹窗开始 -->
-        <el-dialog v-model="Groupdialog" :title="NodeForm.Title" width="80%" >
-            <!-- 已有节点选择开始 -->
-         <el-select v-model="SelectionNode" placeholder="选择已有节点" v-if="allNodes.length>0" class="default" @change="handleShownodeGroupList">
-    <el-option
-      v-for="item in allNodes"
-      :key="item"
-      :label="item"
-      :value="item">
-    </el-option>
-  </el-select>
-   <!-- 已有节点选择结束 -->
-    <el-radio v-model="RadioGroup" label="1" v-if="allGroupNames.length>0">选择已有分组</el-radio>
-  <el-radio v-model="RadioGroup" label="2">创建并绑定分组</el-radio>
-          <!-- 已有分组选择开始 -->
-           <div  v-if="allGroupNames.length>0 && RadioGroup == '1'" >
-         <el-select v-model="SelectionNodeGroups" multiple placeholder="选择已有分组" class="default">
-    <el-option
-      v-for="item in allGroupNames"
-      :key="item"
-      :label="item"
-      :value="item">
-    </el-option>
-  </el-select>
+  <div v-if="RadioGroup === '1' && allGroupNames.length > 0">
+    <el-select v-model="SelectionNodeGroups" multiple placeholder="选择已有分组" class="default">
+      <el-option v-for="item in allGroupNames" :key="item" :label="item" :value="item" />
+    </el-select>
   </div>
-  <!-- 已有分组结束 -->
-  <!-- 创建分组开始 -->
-  <el-row v-if=" RadioGroup == '2'">
-    <el-col :span="12">
-    <el-input
-        v-model="NodeGroupInput"
-        placeholder="输入要创建的分组名"
-        class="default"
-      />
-    </el-col>
 
-  </el-row>
-<!-- 创建分组结束 -->
+  <el-input v-if="RadioGroup === '2'" v-model="NodeGroupInput" placeholder="输入要创建的分组名" class="default" />
 
-      
-    <!-- 分组操作开始 -->
-    
-      <el-button type="primary" @click="AddGroup">绑定或创建分组</el-button>
-      <el-button @click="Groupdialog = false">取消</el-button>  
-     
-    <!-- 分组操作结束 -->
-  </el-dialog>
-  <!-- 绑定分组弹窗结束 -->
+  <el-button type="primary" @click="SubmitNodeForm">{{ dialogMode === 'add' ? '添加' : '更新' }}</el-button>
+  <el-button @click="Nodedialog = false">取消</el-button>
+</el-dialog>
+
 
   <!-- 显示表格数据 -->
   <el-card>
     <el-tabs v-model="activeName" >
-      <el-tab-pane label="全部" name="全部" />
+      <el-tab-pane :label="`全部(${allNodes.length})`" name="全部" />
       <el-tab-pane :label="item" :name="item" v-for="item in allGroupNames" :key="item" />
     </el-tabs>
       <el-button type="primary" @click="handleAddNode">添加节点</el-button>
-      <el-button type="success" @click="handleAddGroup">绑定分组</el-button>
       <div style="margin-bottom: 10px"></div>
       <el-table
+      ref="multipleTable"
     :data="tableData"
     tooltip-effect="dark"
+    stripe
     style="width: 100%"
+    row-key="ID" 
+    :tree-props="{children: 'Nodes'}"
     @selection-change="handleSelectionChange"
     >
-    <el-table-column
+        <el-table-column
       type="selection"
-     >
+      width="55">
     </el-table-column>
+
     <el-table-column
       type="index"
       >
@@ -424,17 +481,27 @@ watch(activeName, (newVal) => {
     <el-table-column
       prop="Name"
       label="节点名"
+      sortable
       >
+    <template #default="{row}">
+      <el-tag effect="plain" >{{row.Name}}</el-tag>
+        </template>
     </el-table-column>
     <el-table-column
       prop="Link"
       label="链接"
-      show-overflow-tooltip>
+      :show-overflow-tooltip="true"
+      >
+          <template #default="{row}">
+      <el-tag effect="plain" type="success" >{{row.Link}}</el-tag>
+        </template>
     </el-table-column>
+    
         <el-table-column
       prop="CreatedAt"
       label="创建时间"
       :formatter="Timeformatter"
+      sortable
       show-overflow-tooltip>
     </el-table-column>
             <el-table-column
@@ -442,16 +509,19 @@ watch(activeName, (newVal) => {
       :formatter="Groupformatter"
       show-overflow-tooltip>
     </el-table-column>
-                <el-table-column fixed="right" label="操作" width="120">
+                <el-table-column  label="操作" width="120">
               <template #default="scope">
+                <el-button link type="primary" size="small" @click="handleEditNode(scope.row)">编辑</el-button>
                 <el-button link type="primary" size="small" @click="copyInfo(scope.row)">复制</el-button>
                 <el-button link type="primary" size="small" @click="handleDel(scope.row)">删除</el-button>
               </template>
             </el-table-column>
   </el-table>
    <div style="margin-top: 20px" />
-      <el-button type="primary" @click="selectCopy">批量复制</el-button>
-      <el-button type="danger" @click="selectDel">批量删除</el-button>
+   <el-button type="info" @click="selectAll">全选</el-button>
+   <el-button type="warning" @click="selectClear">取消选中</el-button>
+      <el-button type="primary" @click="selectCopy">复制选中</el-button>
+      <el-button type="danger" @click="selectDel">删除选中</el-button>
       <div style="margin-top: 20px" />
   </el-card>
   <!-- 显示表格数据结束 -->
