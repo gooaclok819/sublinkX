@@ -18,6 +18,17 @@ type Tuic struct {
 	Sni                string
 	Udp_relay_mode     string
 	Disable_sni        int
+	Allow_insecure     int
+}
+
+// tuicQuery reads a query param, tolerating different generators' key casing.
+func tuicQuery(u *url.URL, keys ...string) string {
+	for _, k := range keys {
+		if v := u.Query().Get(k); v != "" {
+			return v
+		}
+	}
+	return ""
 }
 
 // Tuic 解码
@@ -36,15 +47,16 @@ func DecodeTuicURL(s string) (Tuic, error) {
 	// password = Base64Decode2(password)
 	server := u.Hostname()
 	port, _ := strconv.Atoi(u.Port())
-	Congestioncontrol := u.Query().Get("Congestion_control")
+	Congestioncontrol := tuicQuery(u, "congestion_control", "Congestion_control")
 	alpns := u.Query().Get("alpn")
 	alpn := strings.Split(alpns, ",")
 	if alpns == "" {
 		alpn = nil
 	}
 	sni := u.Query().Get("sni")
-	Udprelay_mode := u.Query().Get("Udp_relay_mode")
-	Disablesni, _ := strconv.Atoi(u.Query().Get("Disable_sni"))
+	Udprelay_mode := tuicQuery(u, "udp_relay_mode", "Udp_relay_mode")
+	Disablesni, _ := strconv.Atoi(tuicQuery(u, "disable_sni", "Disable_sni"))
+	allowInsecure, _ := strconv.Atoi(tuicQuery(u, "allow_insecure", "insecure"))
 	name := u.Fragment
 	// 如果没有设置 Name，则使用 Host:Port 作为 Fragment
 	if name == "" {
@@ -73,5 +85,6 @@ func DecodeTuicURL(s string) (Tuic, error) {
 		Sni:                sni,
 		Udp_relay_mode:     Udprelay_mode,
 		Disable_sni:        Disablesni,
+		Allow_insecure:     allowInsecure,
 	}, nil
 }

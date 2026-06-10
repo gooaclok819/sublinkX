@@ -21,6 +21,7 @@ type HY2 struct {
 	Sni          string
 	Obfs         string
 	ObfsPassword string
+	Ports        string
 }
 
 // 开发者测试 CallHy 调用
@@ -93,6 +94,7 @@ func DecodeHY2URL(s string) (HY2, error) {
 	sni := u.Query().Get("sni")
 	obfs := u.Query().Get("obfs")
 	obfsPassword := u.Query().Get("obfs-password")
+	mport := u.Query().Get("mport")
 	name := u.Fragment
 	// 如果没有设置 Name，则使用 Host:Port 作为 Fragment
 	if name == "" {
@@ -125,5 +127,6 @@ func DecodeHY2URL(s string) (HY2, error) {
 		Sni:          sni,
 		Obfs:         obfs,
 		ObfsPassword: obfsPassword,
+		Ports:        mport,
 	}, nil
 }

@@ -17,6 +17,7 @@ type Proxy struct {
 	Type               string                 `yaml:"type,omitempty"`
 	Server             string                 `yaml:"server,omitempty"`
 	Port               int                    `yaml:"port,omitempty"`
+	Ports              string                 `yaml:"ports,omitempty"`
 	Cipher             string                 `yaml:"cipher,omitempty"`
 	Password           string                 `yaml:"password,omitempty"`
 	Client_fingerprint string                 `yaml:"client-fingerprint,omitempty"`
@@ -42,9 +43,9 @@ type Proxy struct {
 	Protocol           string                 `yaml:"protocol,omitempty"`
 	Uuid               string                 `yaml:"uuid,omitempty"`
 	Peer               string                 `yaml:"peer,omitempty"`
-	Congestion_control string                 `yaml:"congestion_control,omitempty"`
-	Udp_relay_mode     string                 `yaml:"udp_relay_mode,omitempty"`
-	Disable_sni        bool                   `yaml:"disable_sni,omitempty"`
+	Congestion_control string                 `yaml:"congestion-controller,omitempty"`
+	Udp_relay_mode     string                 `yaml:"udp-relay-mode,omitempty"`
+	Disable_sni        bool                   `yaml:"disable-sni,omitempty"`
 }
 
 type ProxyGroup struct {
@@ -194,18 +195,20 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 			port, _ := convertToInt(vmess.Port)
 			aid, _ := convertToInt(vmess.Aid)
 			vmessproxy := Proxy{
-				Name:             vmess.Ps,
-				Type:             "vmess",
-				Server:           vmess.Add,
-				Port:             port,
-				Cipher:           vmess.Scy,
-				Uuid:             vmess.Id,
-				AlterId:          strconv.Itoa(aid),
-				Network:          vmess.Net,
-				Tls:              tls,
-				Ws_opts:          ws_opts,
-				Udp:              sqlconfig.Udp,
-				Skip_cert_verify: sqlconfig.Cert,
+				Name:               vmess.Ps,
+				Type:               "vmess",
+				Server:             vmess.Add,
+				Port:               port,
+				Cipher:             vmess.Scy,
+				Uuid:               vmess.Id,
+				AlterId:            strconv.Itoa(aid),
+				Network:            vmess.Net,
+				Tls:                tls,
+				Servername:         vmess.Sni,
+				Client_fingerprint: vmess.Fp,
+				Ws_opts:            ws_opts,
+				Udp:                sqlconfig.Udp,
+				Skip_cert_verify:   sqlconfig.Cert,
 			}
 			proxys = append(proxys, vmessproxy)
 		case Scheme == "vless":
@@ -310,7 +313,11 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Password:         hy2.Password,
 				Obfs_password:    hy2.ObfsPassword,
 				Udp:              sqlconfig.Udp,
-				Skip_cert_verify: sqlconfig.Cert,
+				Skip_cert_verify: sqlconfig.Cert || hy2.Insecure == 1,
+			}
+			// port hopping: emit ports when mport is a range/list
+			if hy2.Ports != "" && hy2.Ports != strconv.Itoa(hy2.Port) {
+				hyproxy2.Ports = hy2.Ports
 			}
 			proxys = append(proxys, hyproxy2)
 		case Scheme == "tuic":
@@ -340,7 +347,7 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Disable_sni:        disable_sni,
 				Sni:                tuic.Sni,
 				Udp:                sqlconfig.Udp,
-				Skip_cert_verify:   sqlconfig.Cert,
+				Skip_cert_verify:   sqlconfig.Cert || tuic.Allow_insecure == 1,
 			}
 			proxys = append(proxys, tuicproxy)
 		}
