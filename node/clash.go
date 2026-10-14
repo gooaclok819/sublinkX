@@ -31,6 +31,7 @@ type Proxy struct {
 	Reality_opts       map[string]interface{} `yaml:"reality-opts,omitempty"`
 	Ws_opts            map[string]interface{} `yaml:"ws-opts,omitempty"`
 	Grpc_opts          map[string]interface{} `yaml:"grpc-opts,omitempty"`
+	Xhttp_opts         map[string]interface{} `yaml:"xhttp-opts,omitempty"`
 	Auth_str           string                 `yaml:"auth_str,omitempty"`
 	Auth               string                 `yaml:"auth,omitempty"`
 	Up                 int                    `yaml:"up,omitempty"`
@@ -154,6 +155,26 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				},
 			}
 			DeleteOpts(ws_opts)
+			xhttp_opts := map[string]interface{}{
+				"path": trojan.Query.Path,
+				"host": trojan.Query.Host,
+			}
+			grpc_opts := map[string]interface{}{
+				"grpc-mode":         "gun",
+				"grpc-service-name": trojan.Query.Path,
+			}
+			// 传输层参数按 type 分流，避免给 xhttp/grpc 节点塞上 ws-opts
+			var wsSel, grpcSel, xhttpSel map[string]interface{}
+			switch strings.ToLower(trojan.Query.Type) {
+			case "ws", "websocket":
+				wsSel = ws_opts
+			case "grpc":
+				grpcSel = grpc_opts
+			case "xhttp", "splithttp":
+				xhttpSel = xhttp_opts
+			}
+			DeleteOpts(xhttp_opts)
+			DeleteOpts(grpc_opts)
 			trojanproxy := Proxy{
 				Name:               trojan.Name,
 				Type:               "trojan",
@@ -165,7 +186,9 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Network:            trojan.Query.Type,
 				Flow:               trojan.Query.Flow,
 				Alpn:               trojan.Query.Alpn,
-				Ws_opts:            ws_opts,
+				Ws_opts:            wsSel,
+				Grpc_opts:          grpcSel,
+				Xhttp_opts:         xhttpSel,
 				Udp:                sqlconfig.Udp,
 				Skip_cert_verify:   sqlconfig.Cert,
 			}
@@ -187,6 +210,30 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				},
 			}
 			DeleteOpts(ws_opts)
+			xhttp_opts := map[string]interface{}{
+				"path": vmess.Path,
+				"host": vmess.Host,
+			}
+			// vmess 链接没有 serviceName 字段（grpc 的 service name 走 path）
+			grpc_opts := map[string]interface{}{
+				"grpc-mode":         "gun",
+				"grpc-service-name": vmess.Path,
+			}
+			if strings.ToLower(vmess.Type) == "multi" {
+				grpc_opts["grpc-mode"] = "multi"
+			}
+			// 传输层参数按 net 分流，避免给 xhttp/grpc 节点塞上 ws-opts
+			var wsSel, grpcSel, xhttpSel map[string]interface{}
+			switch strings.ToLower(vmess.Net) {
+			case "ws", "websocket":
+				wsSel = ws_opts
+			case "grpc":
+				grpcSel = grpc_opts
+			case "xhttp", "splithttp":
+				xhttpSel = xhttp_opts
+			}
+			DeleteOpts(xhttp_opts)
+			DeleteOpts(grpc_opts)
 			tls := false
 			if vmess.Tls != "none" && vmess.Tls != "" {
 				tls = true
@@ -203,7 +250,9 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				AlterId:          strconv.Itoa(aid),
 				Network:          vmess.Net,
 				Tls:              tls,
-				Ws_opts:          ws_opts,
+				Ws_opts:          wsSel,
+				Grpc_opts:        grpcSel,
+				Xhttp_opts:       xhttpSel,
 				Udp:              sqlconfig.Udp,
 				Skip_cert_verify: sqlconfig.Cert,
 			}
@@ -235,9 +284,26 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 			if vless.Query.Mode == "multi" {
 				grpc_opts["grpc-mode"] = "multi"
 			}
+			xhttp_opts := map[string]interface{}{
+				"path": vless.Query.Path,
+				"host": vless.Query.Host,
+				"mode": vless.Query.Mode,
+			}
+			// 传输层参数按 network 分流：老代码把 ws-opts / grpc-opts 无条件写进所有 vless 节点，
+			// 结果 xhttp 节点被写成 ws-opts + 多余的 grpc-opts，mihomo 读不懂而连不上。
+			var wsSel, grpcSel, xhttpSel map[string]interface{}
+			switch strings.ToLower(vless.Query.Type) {
+			case "ws", "websocket":
+				wsSel = ws_opts
+			case "grpc":
+				grpcSel = grpc_opts
+			case "xhttp", "splithttp":
+				xhttpSel = xhttp_opts
+			}
 			DeleteOpts(ws_opts)
 			DeleteOpts(reality_opts)
 			DeleteOpts(grpc_opts)
+			DeleteOpts(xhttp_opts)
 			tls := false
 			if vless.Query.Security != "" {
 				tls = true
@@ -256,9 +322,10 @@ func EncodeClash(urls []string, sqlconfig SqlConfig) ([]byte, error) {
 				Network:            vless.Query.Type,
 				Flow:               vless.Query.Flow,
 				Alpn:               vless.Query.Alpn,
-				Ws_opts:            ws_opts,
+				Ws_opts:            wsSel,
 				Reality_opts:       reality_opts,
-				Grpc_opts:          grpc_opts,
+				Grpc_opts:          grpcSel,
+				Xhttp_opts:         xhttpSel,
 				Udp:                sqlconfig.Udp,
 				Skip_cert_verify:   sqlconfig.Cert,
 				Tls:                tls,
